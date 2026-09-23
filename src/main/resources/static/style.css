@@ -1,0 +1,437 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+
+/* ========================= */
+/* CABEÇALHO */
+/* ========================= */
+
+header {
+    background: #111827;
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 32px;
+}
+
+header p {
+    margin-top: 10px;
+    margin-bottom: 0;
+    color: #d1d5db;
+}
+
+
+/* ========================= */
+/* CONTEÚDO PRINCIPAL */
+/* ========================= */
+
+main {
+    width: 92%;
+    max-width: 1000px;
+    margin: 30px auto;
+}
+
+
+/* ========================= */
+/* CARDS */
+/* ========================= */
+
+.card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 25px;
+
+    border-radius: 12px;
+
+    box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+    margin-top: 0;
+}
+
+
+/* ========================= */
+/* FORMULÁRIOS */
+/* ========================= */
+
+label {
+    display: block;
+
+    margin-top: 16px;
+    margin-bottom: 6px;
+
+    font-weight: bold;
+
+    color: #374151;
+}
+
+input,
+textarea,
+select {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 7px;
+
+    font-size: 15px;
+
+    background: white;
+
+    transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+
+    outline: none;
+
+    border-color: #2563eb;
+
+    box-shadow:
+            0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+
+/* ========================= */
+/* BOTÕES */
+/* ========================= */
+
+button {
+
+    border: none;
+
+    border-radius: 7px;
+
+    padding: 11px 18px;
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    background: #2563eb;
+
+    color: white;
+
+    transition:
+            background 0.2s,
+            transform 0.1s;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+
+/* ========================= */
+/* ELEMENTOS OCULTOS */
+/* ========================= */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* ========================= */
+/* TOPO DAS SEÇÕES */
+/* ========================= */
+
+.topo {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+.topo h2 {
+    margin: 0;
+}
+
+.topo p {
+    margin: 5px 0 0;
+}
+
+
+/* ========================= */
+/* FORMULÁRIO DE PRODUTO */
+/* ========================= */
+
+.acoes-formulario {
+
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    margin-top: 20px;
+}
+
+.acoes-formulario button {
+    margin: 0;
+}
+
+
+/* ========================= */
+/* LISTA DE PRODUTOS */
+/* ========================= */
+
+#produtos {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(260px, 1fr));
+
+    gap: 16px;
+
+    margin-top: 20px;
+}
+
+.produto {
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 10px;
+
+    padding: 18px;
+
+    background: #fafafa;
+
+    transition:
+            transform 0.15s,
+            box-shadow 0.15s;
+}
+
+.produto:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.produto h3 {
+
+    margin-top: 0;
+
+    margin-bottom: 14px;
+
+    color: #111827;
+}
+
+.produto p {
+
+    margin: 7px 0;
+
+    line-height: 1.4;
+}
+
+
+/* ========================= */
+/* BOTÕES EDITAR / EXCLUIR */
+/* ========================= */
+
+.acoes {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 15px;
+
+    flex-wrap: wrap;
+}
+
+.acoes button {
+    margin: 0;
+}
+
+.acoes button:last-child {
+    background: #dc2626;
+}
+
+.acoes button:last-child:hover {
+    background: #b91c1c;
+}
+
+
+/* ========================= */
+/* MOVIMENTAÇÃO */
+/* ========================= */
+
+#movimentacao-mensagem {
+
+    margin-top: 15px;
+
+    font-weight: bold;
+}
+
+
+/* ========================= */
+/* HISTÓRICO */
+/* ========================= */
+
+#historico-movimentacoes {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+.movimentacao {
+
+    padding: 16px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 10px;
+
+    background: #f9fafb;
+
+    border-left: 4px solid #193a88;
+}
+
+.movimentacao h3 {
+
+    margin-top: 0;
+
+    margin-bottom: 10px;
+
+    color: #111827;
+}
+
+.movimentacao p {
+
+    margin: 5px 0;
+
+    line-height: 1.4;
+}
+
+
+
+#login-mensagem,
+#produto-mensagem,
+#movimentacao-mensagem {
+
+    margin-top: 15px;
+
+    min-height: 20px;
+
+    font-weight: bold;
+}
+
+
+#login-section {
+
+    max-width: 500px;
+
+    margin: 50px auto;
+}
+
+#login-section button {
+
+    width: 100%;
+
+    margin-top: 20px;
+}
+
+
+select {
+    cursor: pointer;
+}
+
+
+@media (max-width: 700px) {
+
+    header h1 {
+        font-size: 26px;
+    }
+
+    main {
+        width: 95%;
+    }
+
+    .card {
+        padding: 18px;
+    }
+
+    .topo {
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .topo button {
+        width: 100%;
+    }
+
+    .acoes-formulario {
+
+        flex-direction: column;
+    }
+
+    .acoes-formulario button {
+        width: 100%;
+    }
+
+    .acoes {
+
+        flex-direction: column;
+    }
+
+    .acoes button {
+        width: 100%;
+    }
+
+    #produtos {
+
+        grid-template-columns: 1fr;
+    }
+}

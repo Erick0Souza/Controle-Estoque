@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Controle de Estoque</title>
+
+    <link
+            rel="stylesheet"
+            href="/style.css"
+    >
+</head>
+
+<body>
+
+<header>
+
+    <h1>Controle de Estoque</h1>
+
+    <p>
+        Sistema para gerenciamento de produtos,
+        categorias e movimentações
+    </p>
+
+</header>
+
+
+<main>
+
+    <!-- ===================================== -->
+    <!-- LOGIN -->
+    <!-- ===================================== -->
+
+    <section
+            id="login-section"
+            class="card"
+    >
+
+        <h2>Entrar</h2>
+
+
+        <label for="email">
+            Email
+        </label>
+
+        <input
+                type="email"
+                id="email"
+                placeholder="Digite seu email"
+                autocomplete="email"
+        >
+
+
+        <label for="senha">
+            Senha
+        </label>
+
+        <input
+                type="password"
+                id="senha"
+                placeholder="Digite sua senha"
+                autocomplete="current-password"
+        >
+
+
+        <button
+                type="button"
+                onclick="login()"
+        >
+            Entrar
+        </button>
+
+
+        <p id="login-mensagem"></p>
+
+    </section>
+
+
+    <!-- ===================================== -->
+    <!-- SISTEMA -->
+    <!-- ===================================== -->
+
+    <section
+            id="sistema"
+            class="hidden"
+    >
+
+
+        <!-- ===================================== -->
+        <!-- TOPO -->
+        <!-- ===================================== -->
+
+        <div class="topo">
+
+            <div>
+
+                <h2>
+                    Gerenciamento de Estoque
+                </h2>
+
+                <p>
+                    Usuário:
+                    <strong id="usuario-logado"></strong>
+                </p>
+
+            </div>
+
+
+            <button
+                    type="button"
+                    onclick="logout()"
+            >
+                Sair
+            </button>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- CADASTRO / EDIÇÃO DE PRODUTO -->
+        <!-- ===================================== -->
+
+        <section class="card">
+
+            <h2 id="titulo-formulario">
+                Novo Produto
+            </h2>
+
+
+            <input
+                    type="hidden"
+                    id="produtoIdEdicao"
+            >
+
+
+            <label for="nome">
+                Nome
+            </label>
+
+            <input
+                    type="text"
+                    id="nome"
+                    placeholder="Nome do produto"
+            >
+
+
+            <label for="preco">
+                Preço
+            </label>
+
+            <input
+                    type="number"
+                    id="preco"
+                    step="0.01"
+                    min="0"
+                    placeholder="Ex: 199.90"
+            >
+
+
+            <label for="quantidade">
+                Quantidade
+            </label>
+
+            <input
+                    type="number"
+                    id="quantidade"
+                    min="0"
+                    placeholder="Ex: 10"
+            >
+
+
+            <label for="categoriaId">
+                Categoria
+            </label>
+
+            <select id="categoriaId">
+
+                <option value="">
+                    Selecione uma categoria
+                </option>
+
+            </select>
+
+
+            <label for="descricao">
+                Descrição
+            </label>
+
+            <textarea
+                    id="descricao"
+                    maxlength="500"
+                    placeholder="Descrição do produto"
+            ></textarea>
+
+
+            <div class="acoes-formulario">
+
+                <button
+                        type="button"
+                        id="botaoSalvar"
+                        onclick="salvarProduto()"
+                >
+                    Cadastrar
+                </button>
+
+
+                <button
+                        type="button"
+                        id="botaoCancelar"
+                        class="hidden"
+                        onclick="cancelarEdicao()"
+                >
+                    Cancelar edição
+                </button>
+
+            </div>
+
+
+            <p id="produto-mensagem"></p>
+
+        </section>
+
+
+        <!-- ===================================== -->
+        <!-- LISTA DE PRODUTOS -->
+        <!-- ===================================== -->
+
+        <section class="card">
+
+            <div class="topo">
+
+                <h2>
+                    Produtos cadastrados
+                </h2>
+
+
+                <button
+                        type="button"
+                        onclick="carregarProdutos()"
+                >
+                    Atualizar
+                </button>
+
+            </div>
+
+
+            <div id="produtos">
+
+                <p>
+                    Carregando produtos...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ===================================== -->
+        <!-- MOVIMENTAÇÃO DE ESTOQUE -->
+        <!-- ===================================== -->
+
+        <section class="card">
+
+            <h2>
+                Movimentação de Estoque
+            </h2>
+
+
+            <label for="movimentacaoProdutoId">
+                Produto
+            </label>
+
+            <select id="movimentacaoProdutoId">
+
+                <option value="">
+                    Selecione um produto
+                </option>
+
+            </select>
+
+
+            <label for="movimentacaoTipo">
+                Tipo
+            </label>
+
+            <select id="movimentacaoTipo">
+
+                <option value="">
+                    Selecione o tipo
+                </option>
+
+                <option value="ENTRADA">
+                    Entrada
+                </option>
+
+                <option value="SAIDA">
+                    Saída
+                </option>
+
+            </select>
+
+
+            <label for="movimentacaoQuantidade">
+                Quantidade
+            </label>
+
+            <input
+                    type="number"
+                    id="movimentacaoQuantidade"
+                    min="1"
+                    placeholder="Quantidade"
+            >
+
+
+            <label for="movimentacaoObservacao">
+                Observação
+            </label>
+
+            <textarea
+                    id="movimentacaoObservacao"
+                    maxlength="500"
+                    placeholder="Ex: Compra do fornecedor, venda, ajuste..."
+            ></textarea>
+
+
+            <button
+                    type="button"
+                    onclick="registrarMovimentacao()"
+            >
+                Registrar movimentação
+            </button>
+
+
+            <p id="movimentacao-mensagem"></p>
+
+        </section>
+
+
+        <!-- ===================================== -->
+        <!-- HISTÓRICO DE MOVIMENTAÇÕES -->
+        <!-- ===================================== -->
+
+        <section class="card">
+
+            <div class="topo">
+
+                <h2>
+                    Histórico de Movimentações
+                </h2>
+
+
+                <button
+                        type="button"
+                        onclick="carregarHistorico()"
+                >
+                    Atualizar histórico
+                </button>
+
+            </div>
+
+
+            <div id="historico-movimentacoes">
+
+                <p>
+                    Nenhuma movimentação carregada.
+                </p>
+
+            </div>
+
+        </section>
+
+    </section>
+
+</main>
+
+
+<script src="/app.js"></script>
+
+</body>
+
+</html>

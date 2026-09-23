@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/estoque
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  jackson:
+    default-property-inclusion: non_null
+server:
+  port: 8081
+app:
+  jwt:
+    secret: "troque-esta-chave-por-uma-chave-com-mais-de-32-caracteres"
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
