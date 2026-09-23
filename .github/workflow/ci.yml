@@ -1,0 +1,43 @@
+name: CI - Testes
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  tests:
+
+    name: Testes automatizados
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Mostrar versões
+        run: |
+          java -version
+          mvn -version
+
+      - name: Executar testes
+        run: mvn -B -ntp clean test
