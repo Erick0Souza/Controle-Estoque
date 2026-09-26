@@ -28,6 +28,27 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(
+            HttpServletRequest request
+    ) {
+
+        String caminho =
+                request.getRequestURI();
+
+        return caminho.equals("/")
+                || caminho.equals("/index.html")
+                || caminho.equals("/app.js")
+                || caminho.equals("/style.css")
+                || caminho.equals("/error")
+                || caminho.startsWith("/auth/")
+                || caminho.startsWith("/swagger-ui/")
+                || caminho.startsWith("/v3/api-docs/")
+                || caminho.startsWith("/uploads/")
+                || caminho.startsWith("/css/")
+                || caminho.startsWith("/js/");
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -37,17 +58,22 @@ public class JwtFilter extends OncePerRequestFilter {
         String authorization =
                 request.getHeader("Authorization");
 
-        // Não existe token
-        if (authorization == null
-                || !authorization.startsWith("Bearer ")) {
+        if (
+                authorization == null
+                        || !authorization.startsWith("Bearer ")
+        ) {
 
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(
+                    request,
+                    response
+            );
+
             return;
         }
 
-        String token = authorization.substring(7);
+        String token =
+                authorization.substring(7);
 
-        // Token inválido ou expirado
         if (!jwtService.tokenValido(token)) {
 
             respostaNaoAutorizada(
@@ -58,27 +84,24 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Se ainda não existe autenticação
-        if (SecurityContextHolder
-                .getContext()
-                .getAuthentication() == null) {
+        if (
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        == null
+        ) {
 
             String email =
-                    jwtService.extrairEmail(token);
-
-            System.out.println(
-                    "JWT - email encontrado no token: " + email
-            );
+                    jwtService.extrairEmail(
+                            token
+                    );
 
             var usuarioOptional =
-                    userRepository.findByEmail(email);
+                    userRepository.findByEmail(
+                            email
+                    );
 
-            // Token válido, mas usuário não existe
             if (usuarioOptional.isEmpty()) {
-
-                System.out.println(
-                        "JWT - usuário não encontrado no banco"
-                );
 
                 respostaNaoAutorizada(
                         response,
@@ -88,12 +111,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            var usuario = usuarioOptional.get();
-
-            System.out.println(
-                    "JWT - usuário encontrado: "
-                            + usuario.getEmail()
-            );
+            var usuario =
+                    usuarioOptional.get();
 
             var authentication =
                     new UsernamePasswordAuthenticationToken(
@@ -109,14 +128,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
             SecurityContextHolder
                     .getContext()
-                    .setAuthentication(authentication);
-
-            System.out.println(
-                    "JWT - usuário autenticado com sucesso"
-            );
+                    .setAuthentication(
+                            authentication
+                    );
         }
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(
+                request,
+                response
+        );
     }
 
     private void respostaNaoAutorizada(
@@ -132,13 +152,15 @@ public class JwtFilter extends OncePerRequestFilter {
                 "application/json;charset=UTF-8"
         );
 
-        response.getWriter().write(
-                """
-                {
-                  "status": 401,
-                  "mensagem": "%s"
-                }
-                """.formatted(mensagem)
-        );
+        response
+                .getWriter()
+                .write(
+                        """
+                        {
+                          "status": 401,
+                          "mensagem": "%s"
+                        }
+                        """.formatted(mensagem)
+                );
     }
 }

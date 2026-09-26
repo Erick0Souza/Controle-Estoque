@@ -45,19 +45,16 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // LOGIN
                         .requestMatchers(
                                 "/auth/**"
                         ).permitAll()
 
-                        // SWAGGER
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
 
-                        // FRONT-END
                         .requestMatchers(
                                 "/",
                                 "/index.html",
@@ -67,12 +64,15 @@ public class SecurityConfig {
                                 "/style.css"
                         ).permitAll()
 
+                        .requestMatchers(
+                                "/uploads/**"
+                        ).permitAll()
+
                         .anyRequest().authenticated()
                 )
 
                 .exceptionHandling(exception -> exception
 
-                        // SEM TOKEN / SEM AUTENTICAÇÃO
                         .authenticationEntryPoint(
                                 (request, response, authException) -> {
 

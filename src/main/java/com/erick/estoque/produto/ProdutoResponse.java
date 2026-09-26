@@ -10,7 +10,8 @@ public record ProdutoResponse(
         Integer quantidade,
         Long categoriaId,
         String categoriaNome,
-        String descricao
+        String descricao,
+        String imagemUrl
 
 ) {
 }

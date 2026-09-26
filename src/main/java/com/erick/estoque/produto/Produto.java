@@ -28,6 +28,9 @@ public class Produto {
 
  private String descricao;
 
+ @Column(name = "imagem_url", length = 500)
+ private String imagemUrl;
+
  public Produto() {
  }
 
@@ -55,6 +58,10 @@ public class Produto {
   return descricao;
  }
 
+ public String getImagemUrl() {
+  return imagemUrl;
+ }
+
  public void setNome(String nome) {
   this.nome = nome;
  }
@@ -73,5 +80,9 @@ public class Produto {
 
  public void setDescricao(String descricao) {
   this.descricao = descricao;
+ }
+
+ public void setImagemUrl(String imagemUrl) {
+  this.imagemUrl = imagemUrl;
  }
 }

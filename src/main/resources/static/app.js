@@ -1,5 +1,15 @@
-function mostrarCadastro() {
+let previewObjectUrl = null;
 
+const TIPOS_IMAGEM_PERMITIDOS = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+];
+
+const TAMANHO_MAXIMO_IMAGEM = 5 * 1024 * 1024;
+
+
+function mostrarCadastro() {
     document
         .getElementById("form-login")
         .classList
@@ -17,7 +27,6 @@ function mostrarCadastro() {
 
 
 function mostrarLogin() {
-
     document
         .getElementById("form-cadastro")
         .classList
@@ -35,7 +44,6 @@ function mostrarLogin() {
 
 
 async function cadastrarUsuario() {
-
     const email =
         document
             .getElementById("cadastro-email")
@@ -55,48 +63,38 @@ async function cadastrarUsuario() {
     const mensagem =
         document.getElementById("cadastro-mensagem");
 
-
     if (!email || !senha || !confirmarSenha) {
-
         mensagem.textContent =
             "Preencha todos os campos.";
 
         return;
     }
 
-
     if (senha.length < 6) {
-
         mensagem.textContent =
             "A senha deve ter pelo menos 6 caracteres.";
 
         return;
     }
 
-
     if (senha !== confirmarSenha) {
-
         mensagem.textContent =
             "As senhas não são iguais.";
 
         return;
     }
 
-
     mensagem.textContent =
         "Criando conta...";
 
-
     try {
-
         const resposta = await fetch(
             "/auth/register",
             {
                 method: "POST",
 
                 headers: {
-                    "Content-Type":
-                        "application/json"
+                    "Content-Type": "application/json"
                 },
 
                 body: JSON.stringify({
@@ -106,18 +104,16 @@ async function cadastrarUsuario() {
             }
         );
 
-
         let dados = {};
 
         try {
-            dados = await resposta.json();
+            dados =
+                await resposta.json();
         } catch (erro) {
             dados = {};
         }
 
-
         if (!resposta.ok) {
-
             mensagem.textContent =
                 dados.mensagem ||
                 "Não foi possível criar a conta.";
@@ -125,10 +121,8 @@ async function cadastrarUsuario() {
             return;
         }
 
-
         mensagem.textContent =
             "Conta criada com sucesso!";
-
 
         document
             .getElementById("cadastro-email")
@@ -142,16 +136,13 @@ async function cadastrarUsuario() {
             .getElementById("cadastro-confirmar-senha")
             .value = "";
 
-
         document
             .getElementById("email")
             .value =
             email;
 
-
         setTimeout(
             () => {
-
                 mostrarLogin();
 
                 document
@@ -163,7 +154,6 @@ async function cadastrarUsuario() {
         );
 
     } catch (erro) {
-
         console.error(
             "Erro ao cadastrar usuário:",
             erro
@@ -176,7 +166,6 @@ async function cadastrarUsuario() {
 
 
 async function login() {
-
     const email =
         document
             .getElementById("email")
@@ -191,30 +180,24 @@ async function login() {
     const mensagem =
         document.getElementById("login-mensagem");
 
-
     if (!email || !senha) {
-
         mensagem.textContent =
             "Preencha email e senha.";
 
         return;
     }
 
-
     mensagem.textContent =
         "Entrando...";
 
-
     try {
-
         const resposta = await fetch(
             "/auth/login",
             {
                 method: "POST",
 
                 headers: {
-                    "Content-Type":
-                        "application/json"
+                    "Content-Type": "application/json"
                 },
 
                 body: JSON.stringify({
@@ -224,25 +207,22 @@ async function login() {
             }
         );
 
-
         let dados = {};
 
         try {
-            dados = await resposta.json();
+            dados =
+                await resposta.json();
         } catch (erro) {
             dados = {};
         }
 
-
         if (!resposta.ok) {
-
             mensagem.textContent =
                 dados.mensagem ||
                 "Email ou senha inválidos.";
 
             return;
         }
-
 
         sessionStorage.setItem(
             "token",
@@ -254,21 +234,15 @@ async function login() {
             email
         );
 
-
         mensagem.textContent = "";
-
 
         mostrarSistema();
 
-
         await carregarCategorias();
-
         await carregarProdutos();
-
         await carregarHistorico();
 
     } catch (erro) {
-
         console.error(
             "Erro no login:",
             erro
@@ -281,18 +255,15 @@ async function login() {
 
 
 function mostrarSistema() {
-
     document
         .getElementById("login-section")
         .classList
         .add("hidden");
 
-
     document
         .getElementById("sistema")
         .classList
         .remove("hidden");
-
 
     document
         .getElementById("usuario-logado")
@@ -302,53 +273,41 @@ function mostrarSistema() {
 
 
 function logout() {
-
     sessionStorage.removeItem("token");
-
     sessionStorage.removeItem("email");
-
 
     document
         .getElementById("sistema")
         .classList
         .add("hidden");
 
-
     document
         .getElementById("login-section")
         .classList
         .remove("hidden");
 
-
     document
         .getElementById("produtos")
         .innerHTML = "";
-
 
     document
         .getElementById("historico-movimentacoes")
         .innerHTML = "";
 
-
     limparFormularioProduto();
-
     limparFormularioMovimentacao();
-
     mostrarLogin();
 }
 
 
 async function carregarCategorias() {
-
     const token =
         sessionStorage.getItem("token");
 
     const select =
         document.getElementById("categoriaId");
 
-
     try {
-
         const resposta = await fetch(
             "/categorias",
             {
@@ -359,26 +318,23 @@ async function carregarCategorias() {
             }
         );
 
-
         if (resposta.status === 401) {
-
             logout();
-
             return;
         }
 
+        if (!resposta.ok) {
+            return;
+        }
 
         const categorias =
             await resposta.json();
 
-
         select.innerHTML =
             '<option value="">Selecione uma categoria</option>';
 
-
         categorias.forEach(
             categoria => {
-
                 const option =
                     document.createElement("option");
 
@@ -393,7 +349,6 @@ async function carregarCategorias() {
         );
 
     } catch (erro) {
-
         console.error(
             "Erro ao carregar categorias:",
             erro
@@ -403,20 +358,16 @@ async function carregarCategorias() {
 
 
 async function carregarProdutos() {
-
     const token =
         sessionStorage.getItem("token");
 
     const lista =
         document.getElementById("produtos");
 
-
     lista.innerHTML =
         "<p>Carregando produtos...</p>";
 
-
     try {
-
         const resposta = await fetch(
             "/produtos",
             {
@@ -427,34 +378,28 @@ async function carregarProdutos() {
             }
         );
 
-
         if (resposta.status === 401) {
-
             logout();
-
             return;
         }
 
-
         if (!resposta.ok) {
-
             lista.innerHTML =
                 "<p>Erro ao carregar produtos.</p>";
 
             return;
         }
 
-
         const produtos =
             await resposta.json();
 
-
         mostrarProdutos(produtos);
 
-        preencherProdutosMovimentacao(produtos);
+        preencherProdutosMovimentacao(
+            produtos
+        );
 
     } catch (erro) {
-
         console.error(
             "Erro ao carregar produtos:",
             erro
@@ -467,31 +412,69 @@ async function carregarProdutos() {
 
 
 function mostrarProdutos(produtos) {
-
     const lista =
         document.getElementById("produtos");
 
-
     lista.innerHTML = "";
 
-
-    if (!produtos || produtos.length === 0) {
-
+    if (
+        !produtos ||
+        produtos.length === 0
+    ) {
         lista.innerHTML =
             "<p>Nenhum produto cadastrado.</p>";
 
         return;
     }
 
-
     produtos.forEach(
         produto => {
-
             const card =
                 document.createElement("div");
 
             card.classList.add("produto");
 
+            if (produto.imagemUrl) {
+                const imagem =
+                    document.createElement("img");
+
+                imagem.src =
+                    produto.imagemUrl;
+
+                imagem.alt =
+                    "Imagem de " +
+                    produto.nome;
+
+                imagem.classList.add(
+                    "produto-imagem"
+                );
+
+                imagem.loading =
+                    "lazy";
+
+                imagem.onerror =
+                    () => {
+                        imagem.style.display =
+                            "none";
+
+                        const semImagem =
+                            criarPlaceholderImagem();
+
+                        card.insertBefore(
+                            semImagem,
+                            card.firstChild
+                        );
+                    };
+
+                card.appendChild(
+                    imagem
+                );
+
+            } else {
+                card.appendChild(
+                    criarPlaceholderImagem()
+                );
+            }
 
             const titulo =
                 document.createElement("h3");
@@ -499,6 +482,12 @@ function mostrarProdutos(produtos) {
             titulo.textContent =
                 produto.nome;
 
+            const identificador =
+                document.createElement("p");
+
+            identificador.textContent =
+                "ID: " +
+                produto.id;
 
             const preco =
                 document.createElement("p");
@@ -508,14 +497,12 @@ function mostrarProdutos(produtos) {
                 Number(produto.preco)
                     .toFixed(2);
 
-
             const quantidade =
                 document.createElement("p");
 
             quantidade.textContent =
                 "Quantidade: " +
                 produto.quantidade;
-
 
             const categoria =
                 document.createElement("p");
@@ -527,7 +514,6 @@ function mostrarProdutos(produtos) {
                     "Sem categoria"
                 );
 
-
             const descricao =
                 document.createElement("p");
 
@@ -538,12 +524,10 @@ function mostrarProdutos(produtos) {
                     "Sem descrição"
                 );
 
-
             const acoes =
                 document.createElement("div");
 
             acoes.classList.add("acoes");
-
 
             const botaoEditar =
                 document.createElement("button");
@@ -555,8 +539,10 @@ function mostrarProdutos(produtos) {
                 "Editar";
 
             botaoEditar.onclick =
-                () => prepararEdicao(produto);
-
+                () =>
+                    prepararEdicao(
+                        produto
+                    );
 
             const botaoExcluir =
                 document.createElement("button");
@@ -568,53 +554,84 @@ function mostrarProdutos(produtos) {
                 "Excluir";
 
             botaoExcluir.onclick =
-                () => excluirProduto(
-                    produto.id,
-                    produto.nome
-                );
+                () =>
+                    excluirProduto(
+                        produto.id,
+                        produto.nome
+                    );
 
+            acoes.appendChild(
+                botaoEditar
+            );
 
-            acoes.appendChild(botaoEditar);
+            acoes.appendChild(
+                botaoExcluir
+            );
 
-            acoes.appendChild(botaoExcluir);
+            card.appendChild(
+                titulo
+            );
 
+            card.appendChild(
+                identificador
+            );
 
-            card.appendChild(titulo);
+            card.appendChild(
+                preco
+            );
 
-            card.appendChild(preco);
+            card.appendChild(
+                quantidade
+            );
 
-            card.appendChild(quantidade);
+            card.appendChild(
+                categoria
+            );
 
-            card.appendChild(categoria);
+            card.appendChild(
+                descricao
+            );
 
-            card.appendChild(descricao);
+            card.appendChild(
+                acoes
+            );
 
-            card.appendChild(acoes);
-
-
-            lista.appendChild(card);
+            lista.appendChild(
+                card
+            );
         }
     );
+}
+
+
+function criarPlaceholderImagem() {
+    const semImagem =
+        document.createElement("div");
+
+    semImagem.classList.add(
+        "produto-sem-imagem"
+    );
+
+    semImagem.textContent =
+        "Sem imagem";
+
+    return semImagem;
 }
 
 
 function preencherProdutosMovimentacao(
     produtos
 ) {
-
     const select =
         document.getElementById(
             "movimentacaoProdutoId"
         );
 
-
     select.innerHTML =
         '<option value="">Selecione um produto</option>';
 
-
     produtos.forEach(
         produto => {
-
             const option =
                 document.createElement("option");
 
@@ -622,37 +639,40 @@ function preencherProdutosMovimentacao(
                 produto.id;
 
             option.textContent =
+                "#" +
+                produto.id +
+                " - " +
                 produto.nome +
                 " - estoque: " +
                 produto.quantidade;
 
-            select.appendChild(option);
+            select.appendChild(
+                option
+            );
         }
     );
 }
 
 
 async function salvarProduto() {
-
     const produtoId =
         document
-            .getElementById("produtoIdEdicao")
+            .getElementById(
+                "produtoIdEdicao"
+            )
             .value;
 
-
     if (produtoId) {
-
-        await editarProduto(produtoId);
-
+        await editarProduto(
+            produtoId
+        );
     } else {
-
         await criarProduto();
     }
 }
 
 
 async function criarProduto() {
-
     const token =
         sessionStorage.getItem("token");
 
@@ -683,11 +703,13 @@ async function criarProduto() {
             .value
             .trim();
 
+    const imagem =
+        obterImagemSelecionada();
+
     const mensagem =
         document.getElementById(
             "produto-mensagem"
         );
-
 
     if (
         !nome ||
@@ -695,16 +717,44 @@ async function criarProduto() {
         quantidade === "" ||
         categoriaId === ""
     ) {
-
         mensagem.textContent =
             "Preencha os campos obrigatórios.";
 
         return;
     }
 
+    if (Number(preco) < 0) {
+        mensagem.textContent =
+            "O preço não pode ser negativo.";
+
+        return;
+    }
+
+    if (Number(quantidade) < 0) {
+        mensagem.textContent =
+            "A quantidade não pode ser negativa.";
+
+        return;
+    }
+
+    if (imagem) {
+        const validacao =
+            validarImagem(
+                imagem
+            );
+
+        if (!validacao.valida) {
+            mensagem.textContent =
+                validacao.mensagem;
+
+            return;
+        }
+    }
+
+    mensagem.textContent =
+        "Cadastrando produto...";
 
     try {
-
         const resposta = await fetch(
             "/produtos",
             {
@@ -737,6 +787,10 @@ async function criarProduto() {
             }
         );
 
+        if (resposta.status === 401) {
+            logout();
+            return;
+        }
 
         let dados = {};
 
@@ -747,9 +801,7 @@ async function criarProduto() {
             dados = {};
         }
 
-
         if (!resposta.ok) {
-
             mensagem.textContent =
                 dados.mensagem ||
                 "Erro ao cadastrar produto.";
@@ -757,16 +809,41 @@ async function criarProduto() {
             return;
         }
 
+        if (imagem) {
+            mensagem.textContent =
+                "Produto criado. Enviando imagem...";
+
+            try {
+                await enviarImagemProduto(
+                    dados.id,
+                    imagem
+                );
+            } catch (erro) {
+                console.error(
+                    erro
+                );
+
+                mensagem.textContent =
+                    "Produto cadastrado, mas não foi possível enviar a imagem.";
+
+                await carregarProdutos();
+
+                return;
+            }
+        }
+
+        limparFormularioProduto();
 
         mensagem.textContent =
             "Produto cadastrado com sucesso!";
 
-
-        limparFormularioProduto();
-
         await carregarProdutos();
 
     } catch (erro) {
+        console.error(
+            "Erro ao cadastrar produto:",
+            erro
+        );
 
         mensagem.textContent =
             "Erro ao conectar com o servidor.";
@@ -775,9 +852,12 @@ async function criarProduto() {
 
 
 function prepararEdicao(produto) {
+    limparPreviewImagem();
 
     document
-        .getElementById("produtoIdEdicao")
+        .getElementById(
+            "produtoIdEdicao"
+        )
         .value =
         produto.id;
 
@@ -806,28 +886,48 @@ function prepararEdicao(produto) {
         .value =
         produto.descricao || "";
 
+    document
+        .getElementById("imagemUrlAtual")
+        .value =
+        produto.imagemUrl || "";
+
+    document
+        .getElementById("imagemProduto")
+        .value = "";
 
     document
         .getElementById("botaoSalvar")
         .textContent =
         "Salvar alterações";
 
-
     document
         .getElementById("botaoCancelar")
         .classList
         .remove("hidden");
 
-
     document
         .getElementById("titulo-formulario")
         .textContent =
         "Editar Produto";
+
+    document
+        .getElementById("produto-mensagem")
+        .textContent = "";
+
+    if (produto.imagemUrl) {
+        mostrarImagemAtual(
+            produto.imagemUrl
+        );
+    }
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
 }
 
 
 async function editarProduto(id) {
-
     const token =
         sessionStorage.getItem("token");
 
@@ -858,44 +958,194 @@ async function editarProduto(id) {
             .value
             .trim();
 
+    const imagem =
+        obterImagemSelecionada();
+
     const mensagem =
         document.getElementById(
             "produto-mensagem"
         );
 
+    if (
+        !nome ||
+        preco === "" ||
+        quantidade === "" ||
+        categoriaId === ""
+    ) {
+        mensagem.textContent =
+            "Preencha os campos obrigatórios.";
+
+        return;
+    }
+
+    if (Number(preco) < 0) {
+        mensagem.textContent =
+            "O preço não pode ser negativo.";
+
+        return;
+    }
+
+    if (Number(quantidade) < 0) {
+        mensagem.textContent =
+            "A quantidade não pode ser negativa.";
+
+        return;
+    }
+
+    if (imagem) {
+        const validacao =
+            validarImagem(
+                imagem
+            );
+
+        if (!validacao.valida) {
+            mensagem.textContent =
+                validacao.mensagem;
+
+            return;
+        }
+    }
+
+    mensagem.textContent =
+        "Salvando alterações...";
+
+    try {
+        const resposta = await fetch(
+            "/produtos/" + id,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "Authorization":
+                        "Bearer " + token
+                },
+
+                body: JSON.stringify({
+                    nome:
+                    nome,
+
+                    preco:
+                        Number(preco),
+
+                    quantidade:
+                        Number(quantidade),
+
+                    categoriaId:
+                        Number(categoriaId),
+
+                    descricao:
+                    descricao
+                })
+            }
+        );
+
+        if (resposta.status === 401) {
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (!resposta.ok) {
+            mensagem.textContent =
+                dados.mensagem ||
+                "Erro ao editar produto.";
+
+            return;
+        }
+
+        if (imagem) {
+            mensagem.textContent =
+                "Produto atualizado. Enviando imagem...";
+
+            try {
+                await enviarImagemProduto(
+                    id,
+                    imagem
+                );
+
+            } catch (erro) {
+                console.error(
+                    erro
+                );
+
+                mensagem.textContent =
+                    "Produto atualizado, mas não foi possível enviar a nova imagem.";
+
+                await carregarProdutos();
+
+                return;
+            }
+        }
+
+        cancelarEdicao();
+
+        mensagem.textContent =
+            "Produto atualizado com sucesso!";
+
+        await carregarProdutos();
+
+    } catch (erro) {
+        console.error(
+            "Erro ao editar produto:",
+            erro
+        );
+
+        mensagem.textContent =
+            "Erro ao conectar com o servidor.";
+    }
+}
+
+
+async function enviarImagemProduto(
+    produtoId,
+    arquivo
+) {
+    const token =
+        sessionStorage.getItem("token");
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "imagem",
+        arquivo
+    );
 
     const resposta = await fetch(
-        "/produtos/" + id,
+        "/produtos/" +
+        produtoId +
+        "/imagem",
         {
-            method: "PUT",
+            method: "POST",
 
             headers: {
-                "Content-Type":
-                    "application/json",
-
                 "Authorization":
                     "Bearer " + token
             },
 
-            body: JSON.stringify({
-                nome:
-                nome,
-
-                preco:
-                    Number(preco),
-
-                quantidade:
-                    Number(quantidade),
-
-                categoriaId:
-                    Number(categoriaId),
-
-                descricao:
-                descricao
-            })
+            body:
+            formData
         }
     );
 
+    if (resposta.status === 401) {
+        logout();
+
+        throw new Error(
+            "Sessão expirada"
+        );
+    }
 
     let dados = {};
 
@@ -906,49 +1156,328 @@ async function editarProduto(id) {
         dados = {};
     }
 
-
     if (!resposta.ok) {
+        throw new Error(
+            dados.mensagem ||
+            "Erro ao enviar imagem"
+        );
+    }
+
+    return dados;
+}
+
+
+async function removerImagemProduto() {
+    const inputImagem =
+        document.getElementById(
+            "imagemProduto"
+        );
+
+    const produtoId =
+        document
+            .getElementById(
+                "produtoIdEdicao"
+            )
+            .value;
+
+    const imagemUrlAtual =
+        document
+            .getElementById(
+                "imagemUrlAtual"
+            )
+            .value;
+
+    const mensagem =
+        document.getElementById(
+            "produto-mensagem"
+        );
+
+    if (
+        inputImagem.files &&
+        inputImagem.files.length > 0
+    ) {
+        inputImagem.value = "";
+
+        if (imagemUrlAtual) {
+            mostrarImagemAtual(
+                imagemUrlAtual
+            );
+        } else {
+            limparPreviewImagem();
+        }
 
         mensagem.textContent =
-            dados.mensagem ||
-            "Erro ao editar produto.";
+            "Nova imagem removida da seleção.";
 
         return;
     }
 
+    if (
+        !produtoId ||
+        !imagemUrlAtual
+    ) {
+        limparPreviewImagem();
 
-    cancelarEdicao();
+        mensagem.textContent =
+            "Nenhuma imagem para remover.";
+
+        return;
+    }
+
+    const confirmar =
+        confirm(
+            "Deseja remover a imagem atual deste produto?"
+        );
+
+    if (!confirmar) {
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem("token");
+
+    try {
+        const resposta = await fetch(
+            "/produtos/" +
+            produtoId +
+            "/imagem",
+            {
+                method: "DELETE",
+
+                headers: {
+                    "Authorization":
+                        "Bearer " + token
+                }
+            }
+        );
+
+        if (resposta.status === 401) {
+            logout();
+            return;
+        }
+
+        if (!resposta.ok) {
+            let dados = {};
+
+            try {
+                dados =
+                    await resposta.json();
+            } catch (erro) {
+                dados = {};
+            }
+
+            mensagem.textContent =
+                dados.mensagem ||
+                "Não foi possível remover a imagem.";
+
+            return;
+        }
+
+        document
+            .getElementById(
+                "imagemUrlAtual"
+            )
+            .value = "";
+
+        limparPreviewImagem();
+
+        mensagem.textContent =
+            "Imagem removida com sucesso.";
+
+        await carregarProdutos();
+
+    } catch (erro) {
+        console.error(
+            "Erro ao remover imagem:",
+            erro
+        );
+
+        mensagem.textContent =
+            "Erro ao conectar com o servidor.";
+    }
+}
 
 
-    mensagem.textContent =
-        "Produto atualizado com sucesso!";
+function obterImagemSelecionada() {
+    const input =
+        document.getElementById(
+            "imagemProduto"
+        );
+
+    if (
+        !input.files ||
+        input.files.length === 0
+    ) {
+        return null;
+    }
+
+    return input.files[0];
+}
 
 
-    await carregarProdutos();
+function validarImagem(arquivo) {
+    if (
+        !TIPOS_IMAGEM_PERMITIDOS
+            .includes(
+                arquivo.type
+            )
+    ) {
+        return {
+            valida: false,
+            mensagem:
+                "Formato inválido. Use JPG, PNG ou WEBP."
+        };
+    }
+
+    if (
+        arquivo.size >
+        TAMANHO_MAXIMO_IMAGEM
+    ) {
+        return {
+            valida: false,
+            mensagem:
+                "A imagem deve ter no máximo 5 MB."
+        };
+    }
+
+    return {
+        valida: true,
+        mensagem: ""
+    };
+}
+
+
+function mostrarPreviewArquivo(
+    arquivo
+) {
+    limparPreviewObjectUrl();
+
+    previewObjectUrl =
+        URL.createObjectURL(
+            arquivo
+        );
+
+    const container =
+        document.getElementById(
+            "previewImagemContainer"
+        );
+
+    const imagem =
+        document.getElementById(
+            "previewImagemProduto"
+        );
+
+    const botaoRemover =
+        document.getElementById(
+            "botaoRemoverImagem"
+        );
+
+    imagem.src =
+        previewObjectUrl;
+
+    container.classList.remove(
+        "hidden"
+    );
+
+    botaoRemover.classList.remove(
+        "hidden"
+    );
+}
+
+
+function mostrarImagemAtual(
+    imagemUrl
+) {
+    limparPreviewObjectUrl();
+
+    const container =
+        document.getElementById(
+            "previewImagemContainer"
+        );
+
+    const imagem =
+        document.getElementById(
+            "previewImagemProduto"
+        );
+
+    const botaoRemover =
+        document.getElementById(
+            "botaoRemoverImagem"
+        );
+
+    imagem.src =
+        imagemUrl;
+
+    container.classList.remove(
+        "hidden"
+    );
+
+    botaoRemover.classList.remove(
+        "hidden"
+    );
+}
+
+
+function limparPreviewImagem() {
+    limparPreviewObjectUrl();
+
+    const container =
+        document.getElementById(
+            "previewImagemContainer"
+        );
+
+    const imagem =
+        document.getElementById(
+            "previewImagemProduto"
+        );
+
+    const botaoRemover =
+        document.getElementById(
+            "botaoRemoverImagem"
+        );
+
+    imagem.src = "";
+
+    container.classList.add(
+        "hidden"
+    );
+
+    botaoRemover.classList.add(
+        "hidden"
+    );
+}
+
+
+function limparPreviewObjectUrl() {
+    if (previewObjectUrl) {
+        URL.revokeObjectURL(
+            previewObjectUrl
+        );
+
+        previewObjectUrl =
+            null;
+    }
 }
 
 
 function cancelarEdicao() {
-
     limparFormularioProduto();
 
-
     document
-        .getElementById("produtoIdEdicao")
+        .getElementById(
+            "produtoIdEdicao"
+        )
         .value = "";
-
 
     document
         .getElementById("botaoSalvar")
         .textContent =
         "Cadastrar";
 
-
     document
         .getElementById("botaoCancelar")
         .classList
         .add("hidden");
-
 
     document
         .getElementById("titulo-formulario")
@@ -961,52 +1490,74 @@ async function excluirProduto(
     id,
     nome
 ) {
-
     const confirmar =
         confirm(
             `Deseja realmente excluir "${nome}"?`
         );
 
-
     if (!confirmar) {
-
         return;
     }
-
 
     const token =
         sessionStorage.getItem("token");
 
+    try {
+        const resposta = await fetch(
+            "/produtos/" + id,
+            {
+                method: "DELETE",
 
-    const resposta = await fetch(
-        "/produtos/" + id,
-        {
-            method: "DELETE",
-
-            headers: {
-                "Authorization":
-                    "Bearer " + token
+                headers: {
+                    "Authorization":
+                        "Bearer " + token
+                }
             }
-        }
-    );
-
-
-    if (!resposta.ok) {
-
-        alert(
-            "Não foi possível excluir o produto."
         );
 
-        return;
+        if (resposta.status === 401) {
+            logout();
+            return;
+        }
+
+        if (!resposta.ok) {
+            alert(
+                "Não foi possível excluir o produto."
+            );
+
+            return;
+        }
+
+        const produtoEmEdicao =
+            document
+                .getElementById(
+                    "produtoIdEdicao"
+                )
+                .value;
+
+        if (
+            String(produtoEmEdicao) ===
+            String(id)
+        ) {
+            cancelarEdicao();
+        }
+
+        await carregarProdutos();
+
+    } catch (erro) {
+        console.error(
+            "Erro ao excluir produto:",
+            erro
+        );
+
+        alert(
+            "Erro ao conectar com o servidor."
+        );
     }
-
-
-    await carregarProdutos();
 }
 
 
 function limparFormularioProduto() {
-
     document
         .getElementById("nome")
         .value = "";
@@ -1026,32 +1577,53 @@ function limparFormularioProduto() {
     document
         .getElementById("descricao")
         .value = "";
+
+    document
+        .getElementById("produtoIdEdicao")
+        .value = "";
+
+    document
+        .getElementById("imagemUrlAtual")
+        .value = "";
+
+    document
+        .getElementById("imagemProduto")
+        .value = "";
+
+    limparPreviewImagem();
 }
 
 
 async function registrarMovimentacao() {
-
     const token =
         sessionStorage.getItem("token");
 
     const produtoId =
         document
-            .getElementById("movimentacaoProdutoId")
+            .getElementById(
+                "movimentacaoProdutoId"
+            )
             .value;
 
     const tipo =
         document
-            .getElementById("movimentacaoTipo")
+            .getElementById(
+                "movimentacaoTipo"
+            )
             .value;
 
     const quantidade =
         document
-            .getElementById("movimentacaoQuantidade")
+            .getElementById(
+                "movimentacaoQuantidade"
+            )
             .value;
 
     const observacao =
         document
-            .getElementById("movimentacaoObservacao")
+            .getElementById(
+                "movimentacaoObservacao"
+            )
             .value
             .trim();
 
@@ -1060,104 +1632,127 @@ async function registrarMovimentacao() {
             "movimentacao-mensagem"
         );
 
-
     if (
         !produtoId ||
         !tipo ||
         !quantidade
     ) {
-
         mensagem.textContent =
             "Preencha produto, tipo e quantidade.";
 
         return;
     }
 
-
-    const resposta = await fetch(
-        "/movimentacoes",
-        {
-            method: "POST",
-
-            headers: {
-                "Content-Type":
-                    "application/json",
-
-                "Authorization":
-                    "Bearer " + token
-            },
-
-            body: JSON.stringify({
-                produtoId:
-                    Number(produtoId),
-
-                tipo:
-                tipo,
-
-                quantidade:
-                    Number(quantidade),
-
-                observacao:
-                observacao
-            })
-        }
-    );
-
-
-    let dados = {};
-
-    try {
-        dados =
-            await resposta.json();
-    } catch (erro) {
-        dados = {};
-    }
-
-
-    if (!resposta.ok) {
-
+    if (Number(quantidade) <= 0) {
         mensagem.textContent =
-            dados.mensagem ||
-            "Erro ao registrar movimentação.";
+            "A quantidade deve ser maior que zero.";
 
         return;
     }
 
-
     mensagem.textContent =
-        "Movimentação registrada com sucesso!";
+        "Registrando movimentação...";
 
+    try {
+        const resposta = await fetch(
+            "/movimentacoes",
+            {
+                method: "POST",
 
-    limparFormularioMovimentacao();
+                headers: {
+                    "Content-Type":
+                        "application/json",
 
-    await carregarProdutos();
+                    "Authorization":
+                        "Bearer " + token
+                },
 
-    await carregarHistorico();
+                body: JSON.stringify({
+                    produtoId:
+                        Number(produtoId),
+
+                    tipo:
+                    tipo,
+
+                    quantidade:
+                        Number(quantidade),
+
+                    observacao:
+                    observacao
+                })
+            }
+        );
+
+        if (resposta.status === 401) {
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (!resposta.ok) {
+            mensagem.textContent =
+                dados.mensagem ||
+                "Erro ao registrar movimentação.";
+
+            return;
+        }
+
+        mensagem.textContent =
+            "Movimentação registrada com sucesso!";
+
+        limparFormularioMovimentacao();
+
+        await carregarProdutos();
+        await carregarHistorico();
+
+    } catch (erro) {
+        console.error(
+            "Erro ao registrar movimentação:",
+            erro
+        );
+
+        mensagem.textContent =
+            "Erro ao conectar com o servidor.";
+    }
 }
 
 
 function limparFormularioMovimentacao() {
-
     document
-        .getElementById("movimentacaoProdutoId")
+        .getElementById(
+            "movimentacaoProdutoId"
+        )
         .value = "";
 
     document
-        .getElementById("movimentacaoTipo")
+        .getElementById(
+            "movimentacaoTipo"
+        )
         .value = "";
 
     document
-        .getElementById("movimentacaoQuantidade")
+        .getElementById(
+            "movimentacaoQuantidade"
+        )
         .value = "";
 
     document
-        .getElementById("movimentacaoObservacao")
+        .getElementById(
+            "movimentacaoObservacao"
+        )
         .value = "";
 }
 
 
 async function carregarHistorico() {
-
     const token =
         sessionStorage.getItem("token");
 
@@ -1166,68 +1761,76 @@ async function carregarHistorico() {
             "historico-movimentacoes"
         );
 
+    historico.innerHTML =
+        "<p>Carregando histórico...</p>";
 
-    const resposta = await fetch(
-        "/movimentacoes",
-        {
-            headers: {
-                "Authorization":
-                    "Bearer " + token
+    try {
+        const resposta = await fetch(
+            "/movimentacoes",
+            {
+                headers: {
+                    "Authorization":
+                        "Bearer " + token
+                }
             }
+        );
+
+        if (resposta.status === 401) {
+            logout();
+            return;
         }
-    );
 
+        if (!resposta.ok) {
+            historico.innerHTML =
+                "<p>Erro ao carregar histórico.</p>";
 
-    if (!resposta.ok) {
+            return;
+        }
+
+        const movimentacoes =
+            await resposta.json();
+
+        mostrarHistorico(
+            movimentacoes
+        );
+
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar histórico:",
+            erro
+        );
 
         historico.innerHTML =
-            "<p>Erro ao carregar histórico.</p>";
-
-        return;
+            "<p>Erro ao conectar com o servidor.</p>";
     }
-
-
-    const movimentacoes =
-        await resposta.json();
-
-
-    mostrarHistorico(
-        movimentacoes
-    );
 }
 
 
 function mostrarHistorico(
     movimentacoes
 ) {
-
     const historico =
         document.getElementById(
             "historico-movimentacoes"
         );
 
-
     historico.innerHTML = "";
-
 
     if (
         !movimentacoes ||
         movimentacoes.length === 0
     ) {
-
         historico.innerHTML =
             "<p>Nenhuma movimentação registrada.</p>";
 
         return;
     }
 
-
     movimentacoes
         .slice()
         .reverse()
         .forEach(
             movimentacao => {
-
                 const item =
                     document.createElement("div");
 
@@ -1235,13 +1838,11 @@ function mostrarHistorico(
                     "movimentacao"
                 );
 
-
                 const titulo =
                     document.createElement("h3");
 
                 titulo.textContent =
                     movimentacao.produtoNome;
-
 
                 const tipo =
                     document.createElement("p");
@@ -1250,7 +1851,6 @@ function mostrarHistorico(
                     "Tipo: " +
                     movimentacao.tipo;
 
-
                 const quantidade =
                     document.createElement("p");
 
@@ -1258,14 +1858,12 @@ function mostrarHistorico(
                     "Quantidade: " +
                     movimentacao.quantidade;
 
-
                 const estoqueAtual =
                     document.createElement("p");
 
                 estoqueAtual.textContent =
                     "Estoque atual: " +
                     movimentacao.estoqueAtual;
-
 
                 const observacao =
                     document.createElement("p");
@@ -1277,13 +1875,12 @@ function mostrarHistorico(
                         "Sem observação"
                     );
 
-
                 const data =
                     document.createElement("p");
 
-
-                if (movimentacao.dataHora) {
-
+                if (
+                    movimentacao.dataHora
+                ) {
                     data.textContent =
                         "Data: " +
                         new Date(
@@ -1291,28 +1888,38 @@ function mostrarHistorico(
                         ).toLocaleString(
                             "pt-BR"
                         );
-
                 } else {
-
                     data.textContent =
                         "Data não informada";
                 }
 
+                item.appendChild(
+                    titulo
+                );
 
-                item.appendChild(titulo);
+                item.appendChild(
+                    tipo
+                );
 
-                item.appendChild(tipo);
+                item.appendChild(
+                    quantidade
+                );
 
-                item.appendChild(quantidade);
+                item.appendChild(
+                    estoqueAtual
+                );
 
-                item.appendChild(estoqueAtual);
+                item.appendChild(
+                    observacao
+                );
 
-                item.appendChild(observacao);
+                item.appendChild(
+                    data
+                );
 
-                item.appendChild(data);
-
-
-                historico.appendChild(item);
+                historico.appendChild(
+                    item
+                );
             }
         );
 }
@@ -1321,23 +1928,95 @@ function mostrarHistorico(
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
+        const inputImagem =
+            document.getElementById(
+                "imagemProduto"
+            );
+
+        if (inputImagem) {
+            inputImagem.addEventListener(
+                "change",
+                () => {
+                    const arquivo =
+                        obterImagemSelecionada();
+
+                    const mensagem =
+                        document.getElementById(
+                            "produto-mensagem"
+                        );
+
+                    if (!arquivo) {
+                        const imagemAtual =
+                            document
+                                .getElementById(
+                                    "imagemUrlAtual"
+                                )
+                                .value;
+
+                        if (imagemAtual) {
+                            mostrarImagemAtual(
+                                imagemAtual
+                            );
+                        } else {
+                            limparPreviewImagem();
+                        }
+
+                        return;
+                    }
+
+                    const validacao =
+                        validarImagem(
+                            arquivo
+                        );
+
+                    if (!validacao.valida) {
+                        inputImagem.value =
+                            "";
+
+                        mensagem.textContent =
+                            validacao.mensagem;
+
+                        const imagemAtual =
+                            document
+                                .getElementById(
+                                    "imagemUrlAtual"
+                                )
+                                .value;
+
+                        if (imagemAtual) {
+                            mostrarImagemAtual(
+                                imagemAtual
+                            );
+                        } else {
+                            limparPreviewImagem();
+                        }
+
+                        return;
+                    }
+
+                    mensagem.textContent =
+                        "";
+
+                    mostrarPreviewArquivo(
+                        arquivo
+                    );
+                }
+            );
+        }
 
         const token =
-            sessionStorage.getItem("token");
-
+            sessionStorage.getItem(
+                "token"
+            );
 
         if (token) {
-
             mostrarSistema();
 
             await carregarCategorias();
-
             await carregarProdutos();
-
             await carregarHistorico();
 
         } else {
-
             mostrarLogin();
         }
     }

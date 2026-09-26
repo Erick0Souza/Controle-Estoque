@@ -47,6 +47,10 @@ services:
     ports:
       - "${PORT:-8081}:8081"
 
+    volumes:
+      - estoque_uploads_data:/app/uploads
+
 
 volumes:
   estoque_postgres_data:
+  estoque_uploads_data:
