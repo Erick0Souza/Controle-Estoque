@@ -435,3 +435,36 @@ select {
         grid-template-columns: 1fr;
     }
 }
+
+.trocar-formulario {
+    margin-top: 25px;
+    padding-top: 20px;
+
+    border-top: 1px solid #e5e7eb;
+
+    text-align: center;
+}
+
+.trocar-formulario p {
+    margin-bottom: 10px;
+
+    color: #6b7280;
+}
+
+.botao-secundario {
+    width: 100%;
+
+    background: #4b5563;
+}
+
+.botao-secundario:hover {
+    background: #374151;
+}
+
+#cadastro-mensagem {
+    margin-top: 15px;
+
+    min-height: 20px;
+
+    font-weight: bold;
+}

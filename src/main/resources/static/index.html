@@ -33,10 +33,6 @@
 
 <main>
 
-    <!-- ===================================== -->
-    <!-- LOGIN -->
-    <!-- ===================================== -->
-
     <section
             id="login-section"
             class="card"
@@ -79,22 +75,106 @@
 
         <p id="login-mensagem"></p>
 
+        <div class="trocar-formulario">
+
+            <p>
+                Ainda não possui uma conta?
+            </p>
+
+            <button
+                    type="button"
+                    class="botao-secundario"
+                    onclick="mostrarCadastro()"
+            >
+                Criar conta
+            </button>
+
+        </div>
+
+        </div>
+
+
+        <div
+                id="form-cadastro"
+                class="hidden"
+        >
+
+            <h2>Criar conta</h2>
+
+
+            <label for="cadastro-email">
+                Email
+            </label>
+
+            <input
+                    type="email"
+                    id="cadastro-email"
+                    placeholder="Digite seu email"
+                    autocomplete="email"
+            >
+
+
+            <label for="cadastro-senha">
+                Senha
+            </label>
+
+            <input
+                    type="password"
+                    id="cadastro-senha"
+                    placeholder="Mínimo de 6 caracteres"
+                    autocomplete="new-password"
+            >
+
+
+            <label for="cadastro-confirmar-senha">
+                Confirmar senha
+            </label>
+
+            <input
+                    type="password"
+                    id="cadastro-confirmar-senha"
+                    placeholder="Digite novamente sua senha"
+                    autocomplete="new-password"
+            >
+
+
+            <button
+                    type="button"
+                    onclick="cadastrarUsuario()"
+            >
+                Criar conta
+            </button>
+
+
+            <p id="cadastro-mensagem"></p>
+
+
+            <div class="trocar-formulario">
+
+                <p>
+                    Já possui uma conta?
+                </p>
+
+                <button
+                        type="button"
+                        class="botao-secundario"
+                        onclick="mostrarLogin()"
+                >
+                    Voltar para o login
+                </button>
+
+            </div>
+
+        </div>
+
     </section>
 
-
-    <!-- ===================================== -->
-    <!-- SISTEMA -->
-    <!-- ===================================== -->
+    </section>
 
     <section
             id="sistema"
             class="hidden"
     >
-
-
-        <!-- ===================================== -->
-        <!-- TOPO -->
-        <!-- ===================================== -->
 
         <div class="topo">
 
@@ -120,11 +200,6 @@
             </button>
 
         </div>
-
-
-        <!-- ===================================== -->
-        <!-- CADASTRO / EDIÇÃO DE PRODUTO -->
-        <!-- ===================================== -->
 
         <section class="card">
 
@@ -226,11 +301,6 @@
 
         </section>
 
-
-        <!-- ===================================== -->
-        <!-- LISTA DE PRODUTOS -->
-        <!-- ===================================== -->
-
         <section class="card">
 
             <div class="topo">
@@ -259,11 +329,6 @@
             </div>
 
         </section>
-
-
-        <!-- ===================================== -->
-        <!-- MOVIMENTAÇÃO DE ESTOQUE -->
-        <!-- ===================================== -->
 
         <section class="card">
 
@@ -340,11 +405,6 @@
             <p id="movimentacao-mensagem"></p>
 
         </section>
-
-
-        <!-- ===================================== -->
-        <!-- HISTÓRICO DE MOVIMENTAÇÕES -->
-        <!-- ===================================== -->
 
         <section class="card">
 

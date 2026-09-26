@@ -67,7 +67,6 @@ public class SecurityConfig {
                                 "/style.css"
                         ).permitAll()
 
-                        // TODO O RESTO PRECISA DE AUTENTICAÇÃO
                         .anyRequest().authenticated()
                 )
 
@@ -96,7 +95,6 @@ public class SecurityConfig {
                                 }
                         )
 
-                        // AUTENTICADO, MAS SEM PERMISSÃO
                         .accessDeniedHandler(
                                 (request, response, accessDeniedException) -> {
 
