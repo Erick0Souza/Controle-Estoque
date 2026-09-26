@@ -38,58 +38,62 @@
             class="card"
     >
 
-        <h2>Entrar</h2>
+        <div id="form-login">
+
+            <h2>Entrar</h2>
 
 
-        <label for="email">
-            Email
-        </label>
+            <label for="email">
+                Email
+            </label>
 
-        <input
-                type="email"
-                id="email"
-                placeholder="Digite seu email"
-                autocomplete="email"
-        >
-
-
-        <label for="senha">
-            Senha
-        </label>
-
-        <input
-                type="password"
-                id="senha"
-                placeholder="Digite sua senha"
-                autocomplete="current-password"
-        >
+            <input
+                    type="email"
+                    id="email"
+                    placeholder="Digite seu email"
+                    autocomplete="email"
+            >
 
 
-        <button
-                type="button"
-                onclick="login()"
-        >
-            Entrar
-        </button>
+            <label for="senha">
+                Senha
+            </label>
 
+            <input
+                    type="password"
+                    id="senha"
+                    placeholder="Digite sua senha"
+                    autocomplete="current-password"
+            >
 
-        <p id="login-mensagem"></p>
-
-        <div class="trocar-formulario">
-
-            <p>
-                Ainda não possui uma conta?
-            </p>
 
             <button
                     type="button"
-                    class="botao-secundario"
-                    onclick="mostrarCadastro()"
+                    onclick="login()"
             >
-                Criar conta
+                Entrar
             </button>
 
-        </div>
+
+            <p id="login-mensagem"></p>
+
+
+            <div class="trocar-formulario">
+
+                <p>
+                    Ainda não possui uma conta?
+                </p>
+
+
+                <button
+                        type="button"
+                        class="botao-secundario"
+                        onclick="mostrarCadastro()"
+                >
+                    Criar conta
+                </button>
+
+            </div>
 
         </div>
 
@@ -155,6 +159,7 @@
                     Já possui uma conta?
                 </p>
 
+
                 <button
                         type="button"
                         class="botao-secundario"
@@ -169,7 +174,6 @@
 
     </section>
 
-    </section>
 
     <section
             id="sistema"
@@ -200,6 +204,7 @@
             </button>
 
         </div>
+
 
         <section class="card">
 
@@ -301,6 +306,7 @@
 
         </section>
 
+
         <section class="card">
 
             <div class="topo">
@@ -329,6 +335,7 @@
             </div>
 
         </section>
+
 
         <section class="card">
 
@@ -390,7 +397,7 @@
             <textarea
                     id="movimentacaoObservacao"
                     maxlength="500"
-                    placeholder="Ex: Compra do fornecedor, venda, ajuste..."
+                    placeholder="Ex: Compra, venda, ajuste..."
             ></textarea>
 
 
@@ -405,6 +412,7 @@
             <p id="movimentacao-mensagem"></p>
 
         </section>
+
 
         <section class="card">
 

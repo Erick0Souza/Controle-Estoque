@@ -1,10 +1,192 @@
+function mostrarCadastro() {
+
+    document
+        .getElementById("form-login")
+        .classList
+        .add("hidden");
+
+    document
+        .getElementById("form-cadastro")
+        .classList
+        .remove("hidden");
+
+    document
+        .getElementById("login-mensagem")
+        .textContent = "";
+}
+
+
+function mostrarLogin() {
+
+    document
+        .getElementById("form-cadastro")
+        .classList
+        .add("hidden");
+
+    document
+        .getElementById("form-login")
+        .classList
+        .remove("hidden");
+
+    document
+        .getElementById("cadastro-mensagem")
+        .textContent = "";
+}
+
+
+async function cadastrarUsuario() {
+
+    const email =
+        document
+            .getElementById("cadastro-email")
+            .value
+            .trim();
+
+    const senha =
+        document
+            .getElementById("cadastro-senha")
+            .value;
+
+    const confirmarSenha =
+        document
+            .getElementById("cadastro-confirmar-senha")
+            .value;
+
+    const mensagem =
+        document.getElementById("cadastro-mensagem");
+
+
+    if (!email || !senha || !confirmarSenha) {
+
+        mensagem.textContent =
+            "Preencha todos os campos.";
+
+        return;
+    }
+
+
+    if (senha.length < 6) {
+
+        mensagem.textContent =
+            "A senha deve ter pelo menos 6 caracteres.";
+
+        return;
+    }
+
+
+    if (senha !== confirmarSenha) {
+
+        mensagem.textContent =
+            "As senhas não são iguais.";
+
+        return;
+    }
+
+
+    mensagem.textContent =
+        "Criando conta...";
+
+
+    try {
+
+        const resposta = await fetch(
+            "/auth/register",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    email: email,
+                    senha: senha
+                })
+            }
+        );
+
+
+        let dados = {};
+
+        try {
+            dados = await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+
+        if (!resposta.ok) {
+
+            mensagem.textContent =
+                dados.mensagem ||
+                "Não foi possível criar a conta.";
+
+            return;
+        }
+
+
+        mensagem.textContent =
+            "Conta criada com sucesso!";
+
+
+        document
+            .getElementById("cadastro-email")
+            .value = "";
+
+        document
+            .getElementById("cadastro-senha")
+            .value = "";
+
+        document
+            .getElementById("cadastro-confirmar-senha")
+            .value = "";
+
+
+        document
+            .getElementById("email")
+            .value =
+            email;
+
+
+        setTimeout(
+            () => {
+
+                mostrarLogin();
+
+                document
+                    .getElementById("login-mensagem")
+                    .textContent =
+                    "Conta criada. Faça login.";
+            },
+            700
+        );
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao cadastrar usuário:",
+            erro
+        );
+
+        mensagem.textContent =
+            "Erro ao conectar com o servidor.";
+    }
+}
+
+
 async function login() {
 
     const email =
-        document.getElementById("email").value.trim();
+        document
+            .getElementById("email")
+            .value
+            .trim();
 
     const senha =
-        document.getElementById("senha").value;
+        document
+            .getElementById("senha")
+            .value;
 
     const mensagem =
         document.getElementById("login-mensagem");
@@ -31,7 +213,8 @@ async function login() {
                 method: "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                        "application/json"
                 },
 
                 body: JSON.stringify({
@@ -42,8 +225,13 @@ async function login() {
         );
 
 
-        const dados =
-            await resposta.json();
+        let dados = {};
+
+        try {
+            dados = await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
 
 
         if (!resposta.ok) {
@@ -60,7 +248,6 @@ async function login() {
             "token",
             dados.token
         );
-
 
         sessionStorage.setItem(
             "email",
@@ -87,7 +274,6 @@ async function login() {
             erro
         );
 
-
         mensagem.textContent =
             "Erro ao conectar com o servidor.";
     }
@@ -96,33 +282,21 @@ async function login() {
 
 function mostrarSistema() {
 
-    const loginSection =
-        document.getElementById(
-            "login-section"
-        );
-
-    const sistema =
-        document.getElementById(
-            "sistema"
-        );
-
-    const usuario =
-        document.getElementById(
-            "usuario-logado"
-        );
-
-
-    loginSection
+    document
+        .getElementById("login-section")
         .classList
         .add("hidden");
 
 
-    sistema
+    document
+        .getElementById("sistema")
         .classList
         .remove("hidden");
 
 
-    usuario.textContent =
+    document
+        .getElementById("usuario-logado")
+        .textContent =
         sessionStorage.getItem("email") || "";
 }
 
@@ -130,6 +304,7 @@ function mostrarSistema() {
 function logout() {
 
     sessionStorage.removeItem("token");
+
     sessionStorage.removeItem("email");
 
 
@@ -146,11 +321,6 @@ function logout() {
 
 
     document
-        .getElementById("login-mensagem")
-        .textContent = "";
-
-
-    document
         .getElementById("produtos")
         .innerHTML = "";
 
@@ -163,6 +333,8 @@ function logout() {
     limparFormularioProduto();
 
     limparFormularioMovimentacao();
+
+    mostrarLogin();
 }
 
 
@@ -172,17 +344,7 @@ async function carregarCategorias() {
         sessionStorage.getItem("token");
 
     const select =
-        document.getElementById(
-            "categoriaId"
-        );
-
-
-    if (!token) {
-
-        logout();
-
-        return;
-    }
+        document.getElementById("categoriaId");
 
 
     try {
@@ -190,8 +352,6 @@ async function carregarCategorias() {
         const resposta = await fetch(
             "/categorias",
             {
-                method: "GET",
-
                 headers: {
                     "Authorization":
                         "Bearer " + token
@@ -202,21 +362,7 @@ async function carregarCategorias() {
 
         if (resposta.status === 401) {
 
-            alert(
-                "Sua sessão expirou. Faça login novamente."
-            );
-
             logout();
-
-            return;
-        }
-
-
-        if (!resposta.ok) {
-
-            console.error(
-                "Não foi possível carregar as categorias."
-            );
 
             return;
         }
@@ -234,22 +380,15 @@ async function carregarCategorias() {
             categoria => {
 
                 const option =
-                    document.createElement(
-                        "option"
-                    );
-
+                    document.createElement("option");
 
                 option.value =
                     categoria.id;
 
-
                 option.textContent =
                     categoria.nome;
 
-
-                select.appendChild(
-                    option
-                );
+                select.appendChild(option);
             }
         );
 
@@ -269,17 +408,7 @@ async function carregarProdutos() {
         sessionStorage.getItem("token");
 
     const lista =
-        document.getElementById(
-            "produtos"
-        );
-
-
-    if (!token) {
-
-        logout();
-
-        return;
-    }
+        document.getElementById("produtos");
 
 
     lista.innerHTML =
@@ -291,8 +420,6 @@ async function carregarProdutos() {
         const resposta = await fetch(
             "/produtos",
             {
-                method: "GET",
-
                 headers: {
                     "Authorization":
                         "Bearer " + token
@@ -303,10 +430,6 @@ async function carregarProdutos() {
 
         if (resposta.status === 401) {
 
-            alert(
-                "Sua sessão expirou. Faça login novamente."
-            );
-
             logout();
 
             return;
@@ -316,7 +439,7 @@ async function carregarProdutos() {
         if (!resposta.ok) {
 
             lista.innerHTML =
-                "<p>Não foi possível carregar os produtos.</p>";
+                "<p>Erro ao carregar produtos.</p>";
 
             return;
         }
@@ -326,14 +449,9 @@ async function carregarProdutos() {
             await resposta.json();
 
 
-        mostrarProdutos(
-            produtos
-        );
+        mostrarProdutos(produtos);
 
-
-        preencherProdutosMovimentacao(
-            produtos
-        );
+        preencherProdutosMovimentacao(produtos);
 
     } catch (erro) {
 
@@ -342,30 +460,22 @@ async function carregarProdutos() {
             erro
         );
 
-
         lista.innerHTML =
             "<p>Erro ao conectar com a API.</p>";
     }
 }
 
 
-function mostrarProdutos(
-    produtos
-) {
+function mostrarProdutos(produtos) {
 
     const lista =
-        document.getElementById(
-            "produtos"
-        );
+        document.getElementById("produtos");
 
 
     lista.innerHTML = "";
 
 
-    if (
-        !produtos ||
-        produtos.length === 0
-    ) {
+    if (!produtos || produtos.length === 0) {
 
         lista.innerHTML =
             "<p>Nenhum produto cadastrado.</p>";
@@ -378,119 +488,84 @@ function mostrarProdutos(
         produto => {
 
             const card =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-
-            card.classList.add(
-                "produto"
-            );
+            card.classList.add("produto");
 
 
             const titulo =
-                document.createElement(
-                    "h3"
-                );
-
+                document.createElement("h3");
 
             titulo.textContent =
                 produto.nome;
 
 
             const preco =
-                document.createElement(
-                    "p"
-                );
-
+                document.createElement("p");
 
             preco.textContent =
-                "Preço: R$ "
-                + Number(
-                    produto.preco
-                ).toFixed(2);
+                "Preço: R$ " +
+                Number(produto.preco)
+                    .toFixed(2);
 
 
             const quantidade =
-                document.createElement(
-                    "p"
-                );
-
+                document.createElement("p");
 
             quantidade.textContent =
-                "Quantidade: "
-                + produto.quantidade;
+                "Quantidade: " +
+                produto.quantidade;
 
 
             const categoria =
-                document.createElement(
-                    "p"
-                );
-
+                document.createElement("p");
 
             categoria.textContent =
-                "Categoria: "
-                + produto.categoriaNome;
+                "Categoria: " +
+                (
+                    produto.categoriaNome ||
+                    "Sem categoria"
+                );
 
 
             const descricao =
-                document.createElement(
-                    "p"
-                );
-
+                document.createElement("p");
 
             descricao.textContent =
-                "Descrição: "
-                + (
+                "Descrição: " +
+                (
                     produto.descricao ||
                     "Sem descrição"
                 );
 
 
             const acoes =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-
-            acoes.classList.add(
-                "acoes"
-            );
+            acoes.classList.add("acoes");
 
 
             const botaoEditar =
-                document.createElement(
-                    "button"
-                );
-
+                document.createElement("button");
 
             botaoEditar.type =
                 "button";
 
-
             botaoEditar.textContent =
                 "Editar";
 
-
             botaoEditar.onclick =
-                () => prepararEdicao(
-                    produto
-                );
+                () => prepararEdicao(produto);
 
 
             const botaoExcluir =
-                document.createElement(
-                    "button"
-                );
-
+                document.createElement("button");
 
             botaoExcluir.type =
                 "button";
 
-
             botaoExcluir.textContent =
                 "Excluir";
-
 
             botaoExcluir.onclick =
                 () => excluirProduto(
@@ -499,44 +574,25 @@ function mostrarProdutos(
                 );
 
 
-            acoes.appendChild(
-                botaoEditar
-            );
+            acoes.appendChild(botaoEditar);
+
+            acoes.appendChild(botaoExcluir);
 
 
-            acoes.appendChild(
-                botaoExcluir
-            );
+            card.appendChild(titulo);
+
+            card.appendChild(preco);
+
+            card.appendChild(quantidade);
+
+            card.appendChild(categoria);
+
+            card.appendChild(descricao);
+
+            card.appendChild(acoes);
 
 
-            card.appendChild(
-                titulo
-            );
-
-            card.appendChild(
-                preco
-            );
-
-            card.appendChild(
-                quantidade
-            );
-
-            card.appendChild(
-                categoria
-            );
-
-            card.appendChild(
-                descricao
-            );
-
-            card.appendChild(
-                acoes
-            );
-
-
-            lista.appendChild(
-                card
-            );
+            lista.appendChild(card);
         }
     );
 }
@@ -552,12 +608,6 @@ function preencherProdutosMovimentacao(
         );
 
 
-    if (!select) {
-
-        return;
-    }
-
-
     select.innerHTML =
         '<option value="">Selecione um produto</option>';
 
@@ -566,24 +616,17 @@ function preencherProdutosMovimentacao(
         produto => {
 
             const option =
-                document.createElement(
-                    "option"
-                );
-
+                document.createElement("option");
 
             option.value =
                 produto.id;
 
-
             option.textContent =
-                produto.nome
-                + " - estoque: "
-                + produto.quantidade;
+                produto.nome +
+                " - estoque: " +
+                produto.quantidade;
 
-
-            select.appendChild(
-                option
-            );
+            select.appendChild(option);
         }
     );
 }
@@ -593,17 +636,13 @@ async function salvarProduto() {
 
     const produtoId =
         document
-            .getElementById(
-                "produtoIdEdicao"
-            )
+            .getElementById("produtoIdEdicao")
             .value;
 
 
     if (produtoId) {
 
-        await editarProduto(
-            produtoId
-        );
+        await editarProduto(produtoId);
 
     } else {
 
@@ -615,18 +654,7 @@ async function salvarProduto() {
 async function criarProduto() {
 
     const token =
-        sessionStorage.getItem(
-            "token"
-        );
-
-
-    if (!token) {
-
-        logout();
-
-        return;
-    }
-
+        sessionStorage.getItem("token");
 
     const nome =
         document
@@ -634,31 +662,26 @@ async function criarProduto() {
             .value
             .trim();
 
-
     const preco =
         document
             .getElementById("preco")
             .value;
-
 
     const quantidade =
         document
             .getElementById("quantidade")
             .value;
 
-
     const categoriaId =
         document
             .getElementById("categoriaId")
             .value;
-
 
     const descricao =
         document
             .getElementById("descricao")
             .value
             .trim();
-
 
     const mensagem =
         document.getElementById(
@@ -678,28 +701,6 @@ async function criarProduto() {
 
         return;
     }
-
-
-    if (Number(preco) < 0) {
-
-        mensagem.textContent =
-            "O preço não pode ser negativo.";
-
-        return;
-    }
-
-
-    if (Number(quantidade) < 0) {
-
-        mensagem.textContent =
-            "A quantidade não pode ser negativa.";
-
-        return;
-    }
-
-
-    mensagem.textContent =
-        "Cadastrando produto...";
 
 
     try {
@@ -718,7 +719,6 @@ async function criarProduto() {
                 },
 
                 body: JSON.stringify({
-
                     nome:
                     nome,
 
@@ -738,20 +738,14 @@ async function criarProduto() {
         );
 
 
-        if (resposta.status === 401) {
+        let dados = {};
 
-            alert(
-                "Sua sessão expirou. Faça login novamente."
-            );
-
-            logout();
-
-            return;
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
         }
-
-
-        const dados =
-            await resposta.json();
 
 
         if (!resposta.ok) {
@@ -770,16 +764,9 @@ async function criarProduto() {
 
         limparFormularioProduto();
 
-
         await carregarProdutos();
 
     } catch (erro) {
-
-        console.error(
-            "Erro ao cadastrar produto:",
-            erro
-        );
-
 
         mensagem.textContent =
             "Erro ao conectar com o servidor.";
@@ -787,41 +774,32 @@ async function criarProduto() {
 }
 
 
-function prepararEdicao(
-    produto
-) {
+function prepararEdicao(produto) {
 
     document
-        .getElementById(
-            "produtoIdEdicao"
-        )
+        .getElementById("produtoIdEdicao")
         .value =
         produto.id;
-
 
     document
         .getElementById("nome")
         .value =
         produto.nome;
 
-
     document
         .getElementById("preco")
         .value =
         produto.preco;
-
 
     document
         .getElementById("quantidade")
         .value =
         produto.quantidade;
 
-
     document
         .getElementById("categoriaId")
         .value =
         produto.categoriaId;
-
 
     document
         .getElementById("descricao")
@@ -830,60 +808,28 @@ function prepararEdicao(
 
 
     document
-        .getElementById(
-            "botaoSalvar"
-        )
+        .getElementById("botaoSalvar")
         .textContent =
         "Salvar alterações";
 
 
     document
-        .getElementById(
-            "botaoCancelar"
-        )
+        .getElementById("botaoCancelar")
         .classList
         .remove("hidden");
 
 
     document
-        .getElementById(
-            "titulo-formulario"
-        )
+        .getElementById("titulo-formulario")
         .textContent =
         "Editar Produto";
-
-
-    document
-        .getElementById(
-            "produto-mensagem"
-        )
-        .textContent = "";
-
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
 }
 
 
-async function editarProduto(
-    id
-) {
+async function editarProduto(id) {
 
     const token =
-        sessionStorage.getItem(
-            "token"
-        );
-
-
-    if (!token) {
-
-        logout();
-
-        return;
-    }
-
+        sessionStorage.getItem("token");
 
     const nome =
         document
@@ -891,24 +837,20 @@ async function editarProduto(
             .value
             .trim();
 
-
     const preco =
         document
             .getElementById("preco")
             .value;
-
 
     const quantidade =
         document
             .getElementById("quantidade")
             .value;
 
-
     const categoriaId =
         document
             .getElementById("categoriaId")
             .value;
-
 
     const descricao =
         document
@@ -916,135 +858,73 @@ async function editarProduto(
             .value
             .trim();
 
-
     const mensagem =
         document.getElementById(
             "produto-mensagem"
         );
 
 
-    if (
-        !nome ||
-        preco === "" ||
-        quantidade === "" ||
-        categoriaId === ""
-    ) {
+    const resposta = await fetch(
+        "/produtos/" + id,
+        {
+            method: "PUT",
+
+            headers: {
+                "Content-Type":
+                    "application/json",
+
+                "Authorization":
+                    "Bearer " + token
+            },
+
+            body: JSON.stringify({
+                nome:
+                nome,
+
+                preco:
+                    Number(preco),
+
+                quantidade:
+                    Number(quantidade),
+
+                categoriaId:
+                    Number(categoriaId),
+
+                descricao:
+                descricao
+            })
+        }
+    );
+
+
+    let dados = {};
+
+    try {
+        dados =
+            await resposta.json();
+    } catch (erro) {
+        dados = {};
+    }
+
+
+    if (!resposta.ok) {
 
         mensagem.textContent =
-            "Preencha os campos obrigatórios.";
+            dados.mensagem ||
+            "Erro ao editar produto.";
 
         return;
     }
 
 
-    if (Number(preco) < 0) {
-
-        mensagem.textContent =
-            "O preço não pode ser negativo.";
-
-        return;
-    }
-
-
-    if (Number(quantidade) < 0) {
-
-        mensagem.textContent =
-            "A quantidade não pode ser negativa.";
-
-        return;
-    }
+    cancelarEdicao();
 
 
     mensagem.textContent =
-        "Salvando alterações...";
+        "Produto atualizado com sucesso!";
 
 
-    try {
-
-        const resposta = await fetch(
-            "/produtos/" + id,
-            {
-                method: "PUT",
-
-                headers: {
-                    "Content-Type":
-                        "application/json",
-
-                    "Authorization":
-                        "Bearer " + token
-                },
-
-                body: JSON.stringify({
-
-                    nome:
-                    nome,
-
-                    preco:
-                        Number(preco),
-
-                    quantidade:
-                        Number(quantidade),
-
-                    categoriaId:
-                        Number(categoriaId),
-
-                    descricao:
-                    descricao
-                })
-            }
-        );
-
-
-        if (resposta.status === 401) {
-
-            alert(
-                "Sua sessão expirou. Faça login novamente."
-            );
-
-            logout();
-
-            return;
-        }
-
-
-        const dados =
-            await resposta.json();
-
-
-        if (!resposta.ok) {
-
-            mensagem.textContent =
-                dados.mensagem ||
-                "Erro ao editar produto.";
-
-            return;
-        }
-
-
-        cancelarEdicao();
-
-
-        document
-            .getElementById(
-                "produto-mensagem"
-            )
-            .textContent =
-            "Produto atualizado com sucesso!";
-
-
-        await carregarProdutos();
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao editar produto:",
-            erro
-        );
-
-
-        mensagem.textContent =
-            "Erro ao conectar com o servidor.";
-    }
+    await carregarProdutos();
 }
 
 
@@ -1054,32 +934,24 @@ function cancelarEdicao() {
 
 
     document
-        .getElementById(
-            "produtoIdEdicao"
-        )
+        .getElementById("produtoIdEdicao")
         .value = "";
 
 
     document
-        .getElementById(
-            "botaoSalvar"
-        )
+        .getElementById("botaoSalvar")
         .textContent =
         "Cadastrar";
 
 
     document
-        .getElementById(
-            "botaoCancelar"
-        )
+        .getElementById("botaoCancelar")
         .classList
         .add("hidden");
 
 
     document
-        .getElementById(
-            "titulo-formulario"
-        )
+        .getElementById("titulo-formulario")
         .textContent =
         "Novo Produto";
 }
@@ -1103,87 +975,33 @@ async function excluirProduto(
 
 
     const token =
-        sessionStorage.getItem(
-            "token"
+        sessionStorage.getItem("token");
+
+
+    const resposta = await fetch(
+        "/produtos/" + id,
+        {
+            method: "DELETE",
+
+            headers: {
+                "Authorization":
+                    "Bearer " + token
+            }
+        }
+    );
+
+
+    if (!resposta.ok) {
+
+        alert(
+            "Não foi possível excluir o produto."
         );
-
-
-    if (!token) {
-
-        logout();
 
         return;
     }
 
 
-    try {
-
-        const resposta = await fetch(
-            "/produtos/" + id,
-            {
-                method: "DELETE",
-
-                headers: {
-                    "Authorization":
-                        "Bearer " + token
-                }
-            }
-        );
-
-
-        if (resposta.status === 401) {
-
-            alert(
-                "Sua sessão expirou. Faça login novamente."
-            );
-
-            logout();
-
-            return;
-        }
-
-
-        if (!resposta.ok) {
-
-            alert(
-                "Não foi possível excluir o produto."
-            );
-
-            return;
-        }
-
-
-        const produtoIdEdicao =
-            document
-                .getElementById(
-                    "produtoIdEdicao"
-                )
-                .value;
-
-
-        if (
-            produtoIdEdicao ===
-            String(id)
-        ) {
-
-            cancelarEdicao();
-        }
-
-
-        await carregarProdutos();
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao excluir produto:",
-            erro
-        );
-
-
-        alert(
-            "Erro ao conectar com o servidor."
-        );
-    }
+    await carregarProdutos();
 }
 
 
@@ -1193,21 +1011,17 @@ function limparFormularioProduto() {
         .getElementById("nome")
         .value = "";
 
-
     document
         .getElementById("preco")
         .value = "";
-
 
     document
         .getElementById("quantidade")
         .value = "";
 
-
     document
         .getElementById("categoriaId")
         .value = "";
-
 
     document
         .getElementById("descricao")
@@ -1218,51 +1032,28 @@ function limparFormularioProduto() {
 async function registrarMovimentacao() {
 
     const token =
-        sessionStorage.getItem(
-            "token"
-        );
-
-
-    if (!token) {
-
-        logout();
-
-        return;
-    }
-
+        sessionStorage.getItem("token");
 
     const produtoId =
         document
-            .getElementById(
-                "movimentacaoProdutoId"
-            )
+            .getElementById("movimentacaoProdutoId")
             .value;
-
 
     const tipo =
         document
-            .getElementById(
-                "movimentacaoTipo"
-            )
+            .getElementById("movimentacaoTipo")
             .value;
-
 
     const quantidade =
         document
-            .getElementById(
-                "movimentacaoQuantidade"
-            )
+            .getElementById("movimentacaoQuantidade")
             .value;
-
 
     const observacao =
         document
-            .getElementById(
-                "movimentacaoObservacao"
-            )
+            .getElementById("movimentacaoObservacao")
             .value
             .trim();
-
 
     const mensagem =
         document.getElementById(
@@ -1271,9 +1062,9 @@ async function registrarMovimentacao() {
 
 
     if (
-        produtoId === "" ||
-        tipo === "" ||
-        quantidade === ""
+        !produtoId ||
+        !tipo ||
+        !quantidade
     ) {
 
         mensagem.textContent =
@@ -1283,130 +1074,84 @@ async function registrarMovimentacao() {
     }
 
 
-    if (Number(quantidade) <= 0) {
+    const resposta = await fetch(
+        "/movimentacoes",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json",
+
+                "Authorization":
+                    "Bearer " + token
+            },
+
+            body: JSON.stringify({
+                produtoId:
+                    Number(produtoId),
+
+                tipo:
+                tipo,
+
+                quantidade:
+                    Number(quantidade),
+
+                observacao:
+                observacao
+            })
+        }
+    );
+
+
+    let dados = {};
+
+    try {
+        dados =
+            await resposta.json();
+    } catch (erro) {
+        dados = {};
+    }
+
+
+    if (!resposta.ok) {
 
         mensagem.textContent =
-            "A quantidade deve ser maior que zero.";
+            dados.mensagem ||
+            "Erro ao registrar movimentação.";
 
         return;
     }
 
 
     mensagem.textContent =
-        "Registrando movimentação...";
+        "Movimentação registrada com sucesso!";
 
 
-    try {
+    limparFormularioMovimentacao();
 
-        const resposta = await fetch(
-            "/movimentacoes",
-            {
-                method: "POST",
+    await carregarProdutos();
 
-                headers: {
-                    "Content-Type":
-                        "application/json",
-
-                    "Authorization":
-                        "Bearer " + token
-                },
-
-                body: JSON.stringify({
-
-                    produtoId:
-                        Number(produtoId),
-
-                    tipo:
-                    tipo,
-
-                    quantidade:
-                        Number(quantidade),
-
-                    observacao:
-                    observacao
-                })
-            }
-        );
-
-
-        if (resposta.status === 401) {
-
-            alert(
-                "Sua sessão expirou. Faça login novamente."
-            );
-
-            logout();
-
-            return;
-        }
-
-
-        const dados =
-            await resposta.json();
-
-
-        if (!resposta.ok) {
-
-            mensagem.textContent =
-                dados.mensagem ||
-                "Erro ao registrar movimentação.";
-
-            return;
-        }
-
-
-        mensagem.textContent =
-            "Movimentação registrada com sucesso!";
-
-
-        limparFormularioMovimentacao();
-
-
-        await carregarProdutos();
-
-        await carregarHistorico();
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao registrar movimentação:",
-            erro
-        );
-
-
-        mensagem.textContent =
-            "Erro ao conectar com o servidor.";
-    }
+    await carregarHistorico();
 }
 
 
 function limparFormularioMovimentacao() {
 
     document
-        .getElementById(
-            "movimentacaoProdutoId"
-        )
+        .getElementById("movimentacaoProdutoId")
         .value = "";
 
-
     document
-        .getElementById(
-            "movimentacaoTipo"
-        )
+        .getElementById("movimentacaoTipo")
         .value = "";
 
-
     document
-        .getElementById(
-            "movimentacaoQuantidade"
-        )
+        .getElementById("movimentacaoQuantidade")
         .value = "";
 
-
     document
-        .getElementById(
-            "movimentacaoObservacao"
-        )
+        .getElementById("movimentacaoObservacao")
         .value = "";
 }
 
@@ -1414,10 +1159,7 @@ function limparFormularioMovimentacao() {
 async function carregarHistorico() {
 
     const token =
-        sessionStorage.getItem(
-            "token"
-        );
-
+        sessionStorage.getItem("token");
 
     const historico =
         document.getElementById(
@@ -1425,69 +1167,33 @@ async function carregarHistorico() {
         );
 
 
-    if (!token) {
+    const resposta = await fetch(
+        "/movimentacoes",
+        {
+            headers: {
+                "Authorization":
+                    "Bearer " + token
+            }
+        }
+    );
 
-        logout();
+
+    if (!resposta.ok) {
+
+        historico.innerHTML =
+            "<p>Erro ao carregar histórico.</p>";
 
         return;
     }
 
 
-    historico.innerHTML =
-        "<p>Carregando histórico...</p>";
+    const movimentacoes =
+        await resposta.json();
 
 
-    try {
-
-        const resposta = await fetch(
-            "/movimentacoes",
-            {
-                method: "GET",
-
-                headers: {
-                    "Authorization":
-                        "Bearer " + token
-                }
-            }
-        );
-
-
-        if (resposta.status === 401) {
-
-            logout();
-
-            return;
-        }
-
-
-        if (!resposta.ok) {
-
-            historico.innerHTML =
-                "<p>Não foi possível carregar o histórico.</p>";
-
-            return;
-        }
-
-
-        const movimentacoes =
-            await resposta.json();
-
-
-        mostrarHistorico(
-            movimentacoes
-        );
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao carregar histórico:",
-            erro
-        );
-
-
-        historico.innerHTML =
-            "<p>Erro ao conectar com o servidor.</p>";
-    }
+    mostrarHistorico(
+        movimentacoes
+    );
 }
 
 
@@ -1523,10 +1229,7 @@ function mostrarHistorico(
             movimentacao => {
 
                 const item =
-                    document.createElement(
-                        "div"
-                    );
-
+                    document.createElement("div");
 
                 item.classList.add(
                     "movimentacao"
@@ -1534,75 +1237,56 @@ function mostrarHistorico(
 
 
                 const titulo =
-                    document.createElement(
-                        "h3"
-                    );
-
+                    document.createElement("h3");
 
                 titulo.textContent =
                     movimentacao.produtoNome;
 
 
                 const tipo =
-                    document.createElement(
-                        "p"
-                    );
-
+                    document.createElement("p");
 
                 tipo.textContent =
-                    "Tipo: "
-                    + movimentacao.tipo;
+                    "Tipo: " +
+                    movimentacao.tipo;
 
 
                 const quantidade =
-                    document.createElement(
-                        "p"
-                    );
-
+                    document.createElement("p");
 
                 quantidade.textContent =
-                    "Quantidade: "
-                    + movimentacao.quantidade;
+                    "Quantidade: " +
+                    movimentacao.quantidade;
 
 
                 const estoqueAtual =
-                    document.createElement(
-                        "p"
-                    );
-
+                    document.createElement("p");
 
                 estoqueAtual.textContent =
-                    "Estoque atual: "
-                    + movimentacao.estoqueAtual;
+                    "Estoque atual: " +
+                    movimentacao.estoqueAtual;
 
 
                 const observacao =
-                    document.createElement(
-                        "p"
-                    );
-
+                    document.createElement("p");
 
                 observacao.textContent =
-                    "Observação: "
-                    + (
+                    "Observação: " +
+                    (
                         movimentacao.observacao ||
                         "Sem observação"
                     );
 
 
                 const data =
-                    document.createElement(
-                        "p"
-                    );
+                    document.createElement("p");
 
 
-                if (
-                    movimentacao.dataHora
-                ) {
+                if (movimentacao.dataHora) {
 
                     data.textContent =
-                        "Data: "
-                        + new Date(
+                        "Data: " +
+                        new Date(
                             movimentacao.dataHora
                         ).toLocaleString(
                             "pt-BR"
@@ -1615,34 +1299,20 @@ function mostrarHistorico(
                 }
 
 
-                item.appendChild(
-                    titulo
-                );
+                item.appendChild(titulo);
 
-                item.appendChild(
-                    tipo
-                );
+                item.appendChild(tipo);
 
-                item.appendChild(
-                    quantidade
-                );
+                item.appendChild(quantidade);
 
-                item.appendChild(
-                    estoqueAtual
-                );
+                item.appendChild(estoqueAtual);
 
-                item.appendChild(
-                    observacao
-                );
+                item.appendChild(observacao);
 
-                item.appendChild(
-                    data
-                );
+                item.appendChild(data);
 
 
-                historico.appendChild(
-                    item
-                );
+                historico.appendChild(item);
             }
         );
 }
@@ -1653,24 +1323,22 @@ document.addEventListener(
     async () => {
 
         const token =
-            sessionStorage.getItem(
-                "token"
-            );
+            sessionStorage.getItem("token");
 
 
         if (token) {
 
             mostrarSistema();
 
-
             await carregarCategorias();
-
 
             await carregarProdutos();
 
-
             await carregarHistorico();
+
+        } else {
+
+            mostrarLogin();
         }
     }
 );
-
