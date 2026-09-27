@@ -25,13 +25,22 @@ public class Produto {
  @Column(nullable = false)
  private Integer quantidade = 0;
 
+ @Column(name = "estoque_minimo")
+ private Integer estoqueMinimo = 0;
+
  @ManyToOne(optional = false)
- @JoinColumn(name = "categoria_id", nullable = false)
+ @JoinColumn(
+         name = "categoria_id",
+         nullable = false
+ )
  private Categoria categoria;
 
  private String descricao;
 
- @Column(name = "imagem_url", length = 500)
+ @Column(
+         name = "imagem_url",
+         length = 500
+ )
  private String imagemUrl;
 
  public Produto() {
@@ -57,6 +66,10 @@ public class Produto {
   return quantidade;
  }
 
+ public Integer getEstoqueMinimo() {
+  return estoqueMinimo;
+ }
+
  public Categoria getCategoria() {
   return categoria;
  }
@@ -69,31 +82,51 @@ public class Produto {
   return imagemUrl;
  }
 
- public void setSku(String sku) {
+ public void setSku(
+         String sku
+ ) {
   this.sku = sku;
  }
 
- public void setNome(String nome) {
+ public void setNome(
+         String nome
+ ) {
   this.nome = nome;
  }
 
- public void setPreco(BigDecimal preco) {
+ public void setPreco(
+         BigDecimal preco
+ ) {
   this.preco = preco;
  }
 
- public void setQuantidade(Integer quantidade) {
+ public void setQuantidade(
+         Integer quantidade
+ ) {
   this.quantidade = quantidade;
  }
 
- public void setCategoria(Categoria categoria) {
+ public void setEstoqueMinimo(
+         Integer estoqueMinimo
+ ) {
+  this.estoqueMinimo = estoqueMinimo;
+ }
+
+ public void setCategoria(
+         Categoria categoria
+ ) {
   this.categoria = categoria;
  }
 
- public void setDescricao(String descricao) {
+ public void setDescricao(
+         String descricao
+ ) {
   this.descricao = descricao;
  }
 
- public void setImagemUrl(String imagemUrl) {
+ public void setImagemUrl(
+         String imagemUrl
+ ) {
   this.imagemUrl = imagemUrl;
  }
 }

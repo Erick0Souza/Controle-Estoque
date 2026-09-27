@@ -3,6 +3,7 @@ package com.erick.estoque.security;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,7 +25,9 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration
     ) throws Exception {
-        return configuration.getAuthenticationManager();
+
+        return configuration
+                .getAuthenticationManager();
     }
 
     @Bean
@@ -34,100 +37,247 @@ public class SecurityConfig {
     ) throws Exception {
 
         return http
-                .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
+                .csrf(
+                        csrf ->
+                                csrf.disable()
                 )
 
-                .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers(
-                                "/auth/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/app.js",
-                                "/style.css",
-                                "/css/**",
-                                "/js/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/uploads/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/error"
-                        ).permitAll()
-
-                        .anyRequest()
-                        .authenticated()
+                .sessionManagement(
+                        session ->
+                                session.sessionCreationPolicy(
+                                        SessionCreationPolicy.STATELESS
+                                )
                 )
 
-                .exceptionHandling(exception -> exception
+                .authorizeHttpRequests(
+                        auth -> auth
 
-                        .authenticationEntryPoint(
-                                (
-                                        request,
-                                        response,
-                                        authException
-                                ) -> {
+                                .requestMatchers(
+                                        "/auth/**"
+                                )
+                                .permitAll()
 
-                                    response.setStatus(
-                                            HttpServletResponse.SC_UNAUTHORIZED
-                                    );
+                                .requestMatchers(
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**"
+                                )
+                                .permitAll()
 
-                                    response.setContentType(
-                                            "application/json;charset=UTF-8"
-                                    );
+                                .requestMatchers(
+                                        "/",
+                                        "/index.html",
+                                        "/app.js",
+                                        "/style.css",
+                                        "/css/**",
+                                        "/js/**"
+                                )
+                                .permitAll()
 
-                                    response.getWriter().write(
-                                            """
-                                            {
-                                              "status": 401,
-                                              "mensagem": "Autenticação necessária"
-                                            }
-                                            """
-                                    );
-                                }
-                        )
+                                .requestMatchers(
+                                        "/uploads/**"
+                                )
+                                .permitAll()
 
-                        .accessDeniedHandler(
-                                (
-                                        request,
-                                        response,
-                                        accessDeniedException
-                                ) -> {
+                                .requestMatchers(
+                                        "/error"
+                                )
+                                .permitAll()
 
-                                    response.setStatus(
-                                            HttpServletResponse.SC_FORBIDDEN
-                                    );
+                                .requestMatchers(
+                                        "/admin/**"
+                                )
+                                .hasRole(
+                                        "ADMIN"
+                                )
 
-                                    response.setContentType(
-                                            "application/json;charset=UTF-8"
-                                    );
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/produtos/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR",
+                                        "CONSULTA"
+                                )
 
-                                    response.getWriter().write(
-                                            """
-                                            {
-                                              "status": 403,
-                                              "mensagem": "Acesso negado"
-                                            }
-                                            """
-                                    );
-                                }
-                        )
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/produtos/*/imagem"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.DELETE,
+                                        "/produtos/*/imagem"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/produtos"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/produtos/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.DELETE,
+                                        "/produtos/**"
+                                )
+                                .hasRole(
+                                        "ADMIN"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/movimentacoes/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR",
+                                        "CONSULTA"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/movimentacoes/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/movimentacoes/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.DELETE,
+                                        "/movimentacoes/**"
+                                )
+                                .hasRole(
+                                        "ADMIN"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/categorias/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "OPERADOR",
+                                        "CONSULTA"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/categorias/**"
+                                )
+                                .hasRole(
+                                        "ADMIN"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/categorias/**"
+                                )
+                                .hasRole(
+                                        "ADMIN"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.DELETE,
+                                        "/categorias/**"
+                                )
+                                .hasRole(
+                                        "ADMIN"
+                                )
+
+                                .anyRequest()
+                                .authenticated()
+                )
+
+                .exceptionHandling(
+                        exception -> exception
+
+                                .authenticationEntryPoint(
+                                        (
+                                                request,
+                                                response,
+                                                authException
+                                        ) -> {
+
+                                            response.setStatus(
+                                                    HttpServletResponse.SC_UNAUTHORIZED
+                                            );
+
+                                            response.setContentType(
+                                                    "application/json;charset=UTF-8"
+                                            );
+
+                                            response
+                                                    .getWriter()
+                                                    .write(
+                                                            """
+                                                            {
+                                                              "status": 401,
+                                                              "mensagem": "Autenticação necessária"
+                                                            }
+                                                            """
+                                                    );
+                                        }
+                                )
+
+                                .accessDeniedHandler(
+                                        (
+                                                request,
+                                                response,
+                                                accessDeniedException
+                                        ) -> {
+
+                                            response.setStatus(
+                                                    HttpServletResponse.SC_FORBIDDEN
+                                            );
+
+                                            response.setContentType(
+                                                    "application/json;charset=UTF-8"
+                                            );
+
+                                            response
+                                                    .getWriter()
+                                                    .write(
+                                                            """
+                                                            {
+                                                              "status": 403,
+                                                              "mensagem": "Você não possui permissão para realizar esta ação"
+                                                            }
+                                                            """
+                                                    );
+                                        }
+                                )
                 )
 
                 .addFilterBefore(

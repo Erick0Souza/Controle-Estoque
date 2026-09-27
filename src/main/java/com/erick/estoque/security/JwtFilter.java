@@ -5,13 +5,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -56,11 +57,15 @@ public class JwtFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String authorization =
-                request.getHeader("Authorization");
+                request.getHeader(
+                        "Authorization"
+                );
 
         if (
                 authorization == null
-                        || !authorization.startsWith("Bearer ")
+                        || !authorization.startsWith(
+                        "Bearer "
+                )
         ) {
 
             filterChain.doFilter(
@@ -72,9 +77,15 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String token =
-                authorization.substring(7);
+                authorization.substring(
+                        7
+                );
 
-        if (!jwtService.tokenValido(token)) {
+        if (
+                !jwtService.tokenValido(
+                        token
+                )
+        ) {
 
             respostaNaoAutorizada(
                     response,
@@ -97,11 +108,14 @@ public class JwtFilter extends OncePerRequestFilter {
                     );
 
             var usuarioOptional =
-                    userRepository.findByEmail(
-                            email
-                    );
+                    userRepository
+                            .findByEmail(
+                                    email
+                            );
 
-            if (usuarioOptional.isEmpty()) {
+            if (
+                    usuarioOptional.isEmpty()
+            ) {
 
                 respostaNaoAutorizada(
                         response,
@@ -111,19 +125,34 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            var usuario =
+            UserEntity usuario =
                     usuarioOptional.get();
+
+            String role =
+                    "ROLE_"
+                            + usuario
+                            .getPerfil()
+                            .name();
+
+            SimpleGrantedAuthority autoridade =
+                    new SimpleGrantedAuthority(
+                            role
+                    );
 
             var authentication =
                     new UsernamePasswordAuthenticationToken(
                             usuario.getEmail(),
                             null,
-                            Collections.emptyList()
+                            List.of(
+                                    autoridade
+                            )
                     );
 
             authentication.setDetails(
                     new WebAuthenticationDetailsSource()
-                            .buildDetails(request)
+                            .buildDetails(
+                                    request
+                            )
             );
 
             SecurityContextHolder
@@ -160,7 +189,9 @@ public class JwtFilter extends OncePerRequestFilter {
                           "status": 401,
                           "mensagem": "%s"
                         }
-                        """.formatted(mensagem)
+                        """.formatted(
+                                mensagem
+                        )
                 );
     }
 }

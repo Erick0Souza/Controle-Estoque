@@ -4,13 +4,17 @@ import com.erick.estoque.categoria.Categoria;
 import com.erick.estoque.categoria.CategoriaRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.Locale;
 
 @RestController
@@ -36,33 +40,87 @@ public class ProdutoController {
  }
 
  @GetMapping
- public List<ProdutoResponse> listar(
-         @RequestParam(required = false) String nome
+ public Page<ProdutoResponse> listar(
+         @RequestParam(required = false)
+         String nome,
+
+         @RequestParam(required = false)
+         String sku,
+
+         @RequestParam(required = false)
+         Long categoriaId,
+
+         @RequestParam(required = false)
+         BigDecimal precoMin,
+
+         @RequestParam(required = false)
+         BigDecimal precoMax,
+
+         @RequestParam(required = false)
+         Integer quantidadeMin,
+
+         @RequestParam(required = false)
+         Integer quantidadeMax,
+
+         @RequestParam(defaultValue = "0")
+         Integer page,
+
+         @RequestParam(defaultValue = "10")
+         Integer size,
+
+         @RequestParam(defaultValue = "nome")
+         String sort,
+
+         @RequestParam(defaultValue = "asc")
+         String direction
  ) {
 
-  List<Produto> produtos;
+  validarFiltros(
+          page,
+          size,
+          precoMin,
+          precoMax,
+          quantidadeMin,
+          quantidadeMax
+  );
 
-  if (
-          nome != null &&
-                  !nome.isBlank()
-  ) {
+  String campoOrdenacao =
+          normalizarCampoOrdenacao(
+                  sort
+          );
 
-   produtos =
-           produtoRepository
-                   .findByNomeContainingIgnoreCase(
-                           nome.trim()
-                   );
+  Sort.Direction direcao =
+          normalizarDirecao(
+                  direction
+          );
 
-  } else {
+  Pageable pageable =
+          PageRequest.of(
+                  page,
+                  size,
+                  Sort.by(
+                          direcao,
+                          campoOrdenacao
+                  )
+          );
 
-   produtos =
-           produtoRepository.findAll();
-  }
+  Page<Produto> produtos =
+          produtoRepository.findAll(
+                  ProdutoSpecification.comFiltros(
+                          nome,
+                          sku,
+                          categoriaId,
+                          precoMin,
+                          precoMax,
+                          quantidadeMin,
+                          quantidadeMax
+                  ),
+                  pageable
+          );
 
-  return produtos
-          .stream()
-          .map(this::toResponse)
-          .toList();
+  return produtos.map(
+          this::toResponse
+  );
  }
 
  @GetMapping("/{id}")
@@ -129,6 +187,10 @@ public class ProdutoController {
 
   produto.setQuantidade(
           request.quantidade()
+  );
+
+  produto.setEstoqueMinimo(
+          request.estoqueMinimo()
   );
 
   produto.setCategoria(
@@ -203,6 +265,10 @@ public class ProdutoController {
 
   produto.setQuantidade(
           request.quantidade()
+  );
+
+  produto.setEstoqueMinimo(
+          request.estoqueMinimo()
   );
 
   produto.setCategoria(
@@ -375,6 +441,192 @@ public class ProdutoController {
           );
  }
 
+ private void validarFiltros(
+         Integer page,
+         Integer size,
+         BigDecimal precoMin,
+         BigDecimal precoMax,
+         Integer quantidadeMin,
+         Integer quantidadeMax
+ ) {
+
+  if (
+          page == null ||
+                  page < 0
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "A página não pode ser negativa"
+   );
+  }
+
+  if (
+          size == null ||
+                  size < 1 ||
+                  size > 100
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "O tamanho da página deve estar entre 1 e 100"
+   );
+  }
+
+  if (
+          precoMin != null &&
+                  precoMin.compareTo(
+                          BigDecimal.ZERO
+                  ) < 0
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "O preço mínimo não pode ser negativo"
+   );
+  }
+
+  if (
+          precoMax != null &&
+                  precoMax.compareTo(
+                          BigDecimal.ZERO
+                  ) < 0
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "O preço máximo não pode ser negativo"
+   );
+  }
+
+  if (
+          precoMin != null &&
+                  precoMax != null &&
+                  precoMin.compareTo(
+                          precoMax
+                  ) > 0
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "O preço mínimo não pode ser maior que o preço máximo"
+   );
+  }
+
+  if (
+          quantidadeMin != null &&
+                  quantidadeMin < 0
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "A quantidade mínima não pode ser negativa"
+   );
+  }
+
+  if (
+          quantidadeMax != null &&
+                  quantidadeMax < 0
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "A quantidade máxima não pode ser negativa"
+   );
+  }
+
+  if (
+          quantidadeMin != null &&
+                  quantidadeMax != null &&
+                  quantidadeMin > quantidadeMax
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "A quantidade mínima não pode ser maior que a quantidade máxima"
+   );
+  }
+ }
+
+ private String normalizarCampoOrdenacao(
+         String sort
+ ) {
+
+  if (
+          sort == null ||
+                  sort.isBlank()
+  ) {
+
+   return "nome";
+  }
+
+  return switch (
+          sort
+                  .trim()
+                  .toLowerCase(
+                          Locale.ROOT
+                  )
+          ) {
+
+   case "id" ->
+           "id";
+
+   case "sku" ->
+           "sku";
+
+   case "nome" ->
+           "nome";
+
+   case "preco" ->
+           "preco";
+
+   case "quantidade" ->
+           "quantidade";
+
+   case "estoqueminimo" ->
+           "estoqueMinimo";
+
+   case "categoria" ->
+           "categoria.nome";
+
+   default ->
+           throw new ResponseStatusException(
+                   HttpStatus.BAD_REQUEST,
+                   "Campo de ordenação inválido"
+           );
+  };
+ }
+
+ private Sort.Direction normalizarDirecao(
+         String direction
+ ) {
+
+  if (
+          direction == null ||
+                  direction.isBlank() ||
+                  direction.equalsIgnoreCase(
+                          "asc"
+                  )
+  ) {
+
+   return Sort.Direction.ASC;
+  }
+
+  if (
+          direction.equalsIgnoreCase(
+                  "desc"
+          )
+  ) {
+
+   return Sort.Direction.DESC;
+  }
+
+  throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "A direção deve ser asc ou desc"
+  );
+ }
+
  private String normalizarSku(
          String sku
  ) {
@@ -393,6 +645,7 @@ public class ProdutoController {
   if (
           descricao == null
   ) {
+
    return null;
   }
 
@@ -402,6 +655,7 @@ public class ProdutoController {
   if (
           descricaoTratada.isBlank()
   ) {
+
    return null;
   }
 
@@ -412,12 +666,27 @@ public class ProdutoController {
          Produto produto
  ) {
 
+  int quantidade =
+          produto.getQuantidade() != null
+                  ? produto.getQuantidade()
+                  : 0;
+
+  int estoqueMinimo =
+          produto.getEstoqueMinimo() != null
+                  ? produto.getEstoqueMinimo()
+                  : 0;
+
+  boolean estoqueBaixo =
+          quantidade <= estoqueMinimo;
+
   return new ProdutoResponse(
           produto.getId(),
           produto.getSku(),
           produto.getNome(),
           produto.getPreco(),
-          produto.getQuantidade(),
+          quantidade,
+          estoqueMinimo,
+          estoqueBaixo,
           produto.getCategoria().getId(),
           produto.getCategoria().getNome(),
           produto.getDescricao(),

@@ -1,5 +1,11 @@
 let previewObjectUrl = null;
 
+let paginaAtualProdutos = 0;
+let totalPaginasProdutos = 0;
+
+let paginaAtualUsuarios = 0;
+let totalPaginasUsuarios = 0;
+
 const TIPOS_IMAGEM_PERMITIDOS = [
     "image/jpeg",
     "image/png",
@@ -8,6 +14,193 @@ const TIPOS_IMAGEM_PERMITIDOS = [
 
 const TAMANHO_MAXIMO_IMAGEM =
     5 * 1024 * 1024;
+
+
+function obterPerfilUsuario() {
+    return (
+        sessionStorage.getItem("perfil") ||
+        "CONSULTA"
+    ).toUpperCase();
+}
+
+
+function obterNomeUsuario() {
+    return (
+        sessionStorage.getItem("nomeUsuario") ||
+        sessionStorage.getItem("email") ||
+        "Usuário"
+    );
+}
+
+
+function obterEmailUsuario() {
+    return (
+        sessionStorage.getItem("email") ||
+        ""
+    ).toLowerCase();
+}
+
+
+function ehAdmin() {
+    return obterPerfilUsuario() === "ADMIN";
+}
+
+
+function podeEditarProdutos() {
+    const perfil =
+        obterPerfilUsuario();
+
+    return perfil === "ADMIN"
+        || perfil === "OPERADOR";
+}
+
+
+function podeExcluirProdutos() {
+    return ehAdmin();
+}
+
+
+function podeMovimentarEstoque() {
+    const perfil =
+        obterPerfilUsuario();
+
+    return perfil === "ADMIN"
+        || perfil === "OPERADOR";
+}
+
+
+function aplicarClassePerfil(
+    elemento,
+    perfil
+) {
+    if (!elemento) {
+        return;
+    }
+
+    elemento.classList.remove(
+        "perfil-admin",
+        "perfil-operador",
+        "perfil-consulta"
+    );
+
+    if (perfil === "ADMIN") {
+        elemento.classList.add(
+            "perfil-admin"
+        );
+
+        return;
+    }
+
+    if (perfil === "OPERADOR") {
+        elemento.classList.add(
+            "perfil-operador"
+        );
+
+        return;
+    }
+
+    elemento.classList.add(
+        "perfil-consulta"
+    );
+}
+
+
+function aplicarPermissoesInterface() {
+    const perfil =
+        obterPerfilUsuario();
+
+    const nomeUsuario =
+        obterNomeUsuario();
+
+    const usuarioLogado =
+        document.getElementById(
+            "usuario-logado"
+        );
+
+    const perfilUsuario =
+        document.getElementById(
+            "perfil-usuario"
+        );
+
+    const responsavelMovimentacao =
+        document.getElementById(
+            "responsavel-movimentacao-atual"
+        );
+
+    const produtoFormSection =
+        document.getElementById(
+            "produto-form-section"
+        );
+
+    const movimentacaoSection =
+        document.getElementById(
+            "movimentacao-section"
+        );
+
+    const adminUsuariosSection =
+        document.getElementById(
+            "admin-usuarios-section"
+        );
+
+    if (usuarioLogado) {
+        usuarioLogado.textContent =
+            nomeUsuario;
+    }
+
+    if (perfilUsuario) {
+        perfilUsuario.textContent =
+            perfil;
+
+        aplicarClassePerfil(
+            perfilUsuario,
+            perfil
+        );
+    }
+
+    if (responsavelMovimentacao) {
+        responsavelMovimentacao.textContent =
+            nomeUsuario;
+    }
+
+    if (produtoFormSection) {
+
+        if (podeEditarProdutos()) {
+            produtoFormSection
+                .classList
+                .remove("hidden");
+        } else {
+            produtoFormSection
+                .classList
+                .add("hidden");
+        }
+    }
+
+    if (movimentacaoSection) {
+
+        if (podeMovimentarEstoque()) {
+            movimentacaoSection
+                .classList
+                .remove("hidden");
+        } else {
+            movimentacaoSection
+                .classList
+                .add("hidden");
+        }
+    }
+
+    if (adminUsuariosSection) {
+
+        if (ehAdmin()) {
+            adminUsuariosSection
+                .classList
+                .remove("hidden");
+        } else {
+            adminUsuariosSection
+                .classList
+                .add("hidden");
+        }
+    }
+}
 
 
 function mostrarCadastro() {
@@ -45,6 +238,14 @@ function mostrarLogin() {
 
 
 async function cadastrarUsuario() {
+    const nomeUsuario =
+        document
+            .getElementById(
+                "cadastro-nome-usuario"
+            )
+            .value
+            .trim();
+
     const email =
         document
             .getElementById("cadastro-email")
@@ -58,7 +259,9 @@ async function cadastrarUsuario() {
 
     const confirmarSenha =
         document
-            .getElementById("cadastro-confirmar-senha")
+            .getElementById(
+                "cadastro-confirmar-senha"
+            )
             .value;
 
     const mensagem =
@@ -67,12 +270,23 @@ async function cadastrarUsuario() {
         );
 
     if (
+        !nomeUsuario ||
         !email ||
         !senha ||
         !confirmarSenha
     ) {
         mensagem.textContent =
             "Preencha todos os campos.";
+
+        return;
+    }
+
+    if (
+        nomeUsuario.length < 3 ||
+        nomeUsuario.length > 50
+    ) {
+        mensagem.textContent =
+            "O nome de usuário deve ter entre 3 e 50 caracteres.";
 
         return;
     }
@@ -107,8 +321,14 @@ async function cadastrarUsuario() {
                     },
 
                     body: JSON.stringify({
-                        email: email,
-                        senha: senha
+                        nomeUsuario:
+                        nomeUsuario,
+
+                        email:
+                        email,
+
+                        senha:
+                        senha
                     })
                 }
             );
@@ -126,24 +346,32 @@ async function cadastrarUsuario() {
             mensagem.textContent =
                 dados.mensagem ||
                 dados.message ||
+                dados.detail ||
                 "Não foi possível criar a conta.";
 
             return;
         }
 
         mensagem.textContent =
-            "Conta criada com sucesso!";
+            "Conta criada com sucesso. Perfil inicial: "
+            + (
+                dados.perfil ||
+                "CONSULTA"
+            )
+            + ".";
 
         document
             .getElementById(
-                "cadastro-email"
+                "cadastro-nome-usuario"
             )
             .value = "";
 
         document
-            .getElementById(
-                "cadastro-senha"
-            )
+            .getElementById("cadastro-email")
+            .value = "";
+
+        document
+            .getElementById("cadastro-senha")
             .value = "";
 
         document
@@ -168,7 +396,7 @@ async function cadastrarUsuario() {
                     .textContent =
                     "Conta criada. Faça login.";
             },
-            700
+            900
         );
 
     } catch (erro) {
@@ -245,6 +473,7 @@ async function login() {
             mensagem.textContent =
                 dados.mensagem ||
                 dados.message ||
+                dados.detail ||
                 "Email ou senha inválidos.";
 
             return;
@@ -257,7 +486,20 @@ async function login() {
 
         sessionStorage.setItem(
             "email",
+            dados.email || email
+        );
+
+        sessionStorage.setItem(
+            "nomeUsuario",
+            dados.nomeUsuario ||
+            dados.email ||
             email
+        );
+
+        sessionStorage.setItem(
+            "perfil",
+            dados.perfil ||
+            "CONSULTA"
         );
 
         mensagem.textContent = "";
@@ -265,8 +507,26 @@ async function login() {
         mostrarSistema();
 
         await carregarCategorias();
+
+        paginaAtualProdutos = 0;
+
         await carregarProdutos();
+
+        if (
+            podeMovimentarEstoque()
+        ) {
+            await carregarProdutosMovimentacao();
+        }
+
         await carregarHistorico();
+
+        if (ehAdmin()) {
+            paginaAtualUsuarios = 0;
+
+            await carregarUsuariosAdmin(
+                0
+            );
+        }
 
     } catch (erro) {
         console.error(
@@ -291,16 +551,21 @@ function mostrarSistema() {
         .classList
         .remove("hidden");
 
-    document
-        .getElementById("usuario-logado")
-        .textContent =
-        sessionStorage.getItem("email") || "";
+    aplicarPermissoesInterface();
 }
 
 
 function logout() {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("email");
+    sessionStorage.removeItem("nomeUsuario");
+    sessionStorage.removeItem("perfil");
+
+    paginaAtualProdutos = 0;
+    totalPaginasProdutos = 0;
+
+    paginaAtualUsuarios = 0;
+    totalPaginasUsuarios = 0;
 
     document
         .getElementById("sistema")
@@ -322,9 +587,824 @@ function logout() {
         )
         .innerHTML = "";
 
+    const listaUsuarios =
+        document.getElementById(
+            "admin-usuarios-lista"
+        );
+
+    if (listaUsuarios) {
+        listaUsuarios.innerHTML = "";
+    }
+
+    const contadorUsuarios =
+        document.getElementById(
+            "admin-usuarios-contador"
+        );
+
+    if (contadorUsuarios) {
+        contadorUsuarios.textContent = "";
+    }
+
     limparFormularioProduto();
     limparFormularioMovimentacao();
     mostrarLogin();
+}
+
+
+function montarParametrosUsuarios(
+    pagina
+) {
+    const params =
+        new URLSearchParams();
+
+    const buscaElemento =
+        document.getElementById(
+            "buscaUsuario"
+        );
+
+    const perfilElemento =
+        document.getElementById(
+            "filtroPerfilUsuario"
+        );
+
+    const ordenacaoElemento =
+        document.getElementById(
+            "ordenacaoUsuario"
+        );
+
+    const direcaoElemento =
+        document.getElementById(
+            "direcaoUsuario"
+        );
+
+    const tamanhoElemento =
+        document.getElementById(
+            "tamanhoPaginaUsuario"
+        );
+
+    const busca =
+        buscaElemento
+            ? buscaElemento.value.trim()
+            : "";
+
+    const perfil =
+        perfilElemento
+            ? perfilElemento.value
+            : "";
+
+    const sort =
+        ordenacaoElemento
+            ? ordenacaoElemento.value
+            : "nomeUsuario";
+
+    const direction =
+        direcaoElemento
+            ? direcaoElemento.value
+            : "asc";
+
+    const size =
+        tamanhoElemento
+            ? tamanhoElemento.value
+            : "10";
+
+    if (busca) {
+        params.set(
+            "busca",
+            busca
+        );
+    }
+
+    if (perfil) {
+        params.set(
+            "perfil",
+            perfil
+        );
+    }
+
+    params.set(
+        "page",
+        pagina
+    );
+
+    params.set(
+        "size",
+        size
+    );
+
+    params.set(
+        "sort",
+        sort
+    );
+
+    params.set(
+        "direction",
+        direction
+    );
+
+    return params;
+}
+
+
+async function carregarUsuariosAdmin(
+    pagina = paginaAtualUsuarios
+) {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    const lista =
+        document.getElementById(
+            "admin-usuarios-lista"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "admin-usuarios-mensagem"
+        );
+
+    if (!lista) {
+        return;
+    }
+
+    lista.innerHTML =
+        "<p>Carregando usuários...</p>";
+
+    if (mensagem) {
+        mensagem.textContent = "";
+    }
+
+    const params =
+        montarParametrosUsuarios(
+            pagina
+        );
+
+    try {
+        const resposta =
+            await fetch(
+                "/admin/usuarios?"
+                + params.toString(),
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer "
+                            + token
+                    }
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            lista.innerHTML = "";
+
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    "Você não possui permissão para acessar esta área.";
+            }
+
+            return;
+        }
+
+        if (!resposta.ok) {
+            lista.innerHTML = "";
+
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    dados.message ||
+                    dados.detail ||
+                    "Não foi possível carregar os usuários.";
+            }
+
+            return;
+        }
+
+        const usuarios =
+            dados.content || [];
+
+        if (
+            usuarios.length === 0 &&
+            pagina > 0 &&
+            dados.totalPages > 0
+        ) {
+            paginaAtualUsuarios =
+                dados.totalPages - 1;
+
+            await carregarUsuariosAdmin(
+                paginaAtualUsuarios
+            );
+
+            return;
+        }
+
+        paginaAtualUsuarios =
+            dados.number || 0;
+
+        totalPaginasUsuarios =
+            dados.totalPages || 0;
+
+        mostrarUsuariosAdmin(
+            usuarios
+        );
+
+        atualizarPaginacaoUsuarios(
+            dados
+        );
+
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar usuários:",
+            erro
+        );
+
+        lista.innerHTML = "";
+
+        if (mensagem) {
+            mensagem.textContent =
+                "Erro ao processar a lista de usuários.";
+        }
+    }
+}
+
+
+function atualizarPaginacaoUsuarios(
+    dados
+) {
+    const contador =
+        document.getElementById(
+            "admin-usuarios-contador"
+        );
+
+    const info =
+        document.getElementById(
+            "admin-pagina-info"
+        );
+
+    const anterior =
+        document.getElementById(
+            "admin-pagina-anterior"
+        );
+
+    const proxima =
+        document.getElementById(
+            "admin-pagina-proxima"
+        );
+
+    const total =
+        dados.totalElements || 0;
+
+    if (contador) {
+        contador.textContent =
+            total
+            + (
+                total === 1
+                    ? " usuário encontrado"
+                    : " usuários encontrados"
+            );
+    }
+
+    if (
+        !info ||
+        !anterior ||
+        !proxima
+    ) {
+        return;
+    }
+
+    if (
+        !dados.totalPages ||
+        dados.totalPages === 0
+    ) {
+        info.textContent =
+            "Nenhum usuário encontrado";
+
+        anterior.disabled = true;
+        proxima.disabled = true;
+
+        return;
+    }
+
+    info.textContent =
+        "Página "
+        + (dados.number + 1)
+        + " de "
+        + dados.totalPages;
+
+    anterior.disabled =
+        dados.first === true;
+
+    proxima.disabled =
+        dados.last === true;
+}
+
+
+async function aplicarFiltrosUsuarios() {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    paginaAtualUsuarios = 0;
+
+    await carregarUsuariosAdmin(
+        0
+    );
+}
+
+
+async function limparFiltrosUsuarios() {
+    const busca =
+        document.getElementById(
+            "buscaUsuario"
+        );
+
+    const perfil =
+        document.getElementById(
+            "filtroPerfilUsuario"
+        );
+
+    const ordenacao =
+        document.getElementById(
+            "ordenacaoUsuario"
+        );
+
+    const direcao =
+        document.getElementById(
+            "direcaoUsuario"
+        );
+
+    const tamanho =
+        document.getElementById(
+            "tamanhoPaginaUsuario"
+        );
+
+    if (busca) {
+        busca.value = "";
+    }
+
+    if (perfil) {
+        perfil.value = "";
+    }
+
+    if (ordenacao) {
+        ordenacao.value =
+            "nomeUsuario";
+    }
+
+    if (direcao) {
+        direcao.value =
+            "asc";
+    }
+
+    if (tamanho) {
+        tamanho.value =
+            "10";
+    }
+
+    const mensagem =
+        document.getElementById(
+            "admin-usuarios-mensagem"
+        );
+
+    if (mensagem) {
+        mensagem.textContent = "";
+    }
+
+    paginaAtualUsuarios = 0;
+
+    await carregarUsuariosAdmin(
+        0
+    );
+}
+
+
+async function mudarPaginaUsuarios(
+    direcao
+) {
+    const novaPagina =
+        paginaAtualUsuarios
+        + direcao;
+
+    if (
+        novaPagina < 0 ||
+        novaPagina >= totalPaginasUsuarios
+    ) {
+        return;
+    }
+
+    paginaAtualUsuarios =
+        novaPagina;
+
+    await carregarUsuariosAdmin(
+        paginaAtualUsuarios
+    );
+
+    const secao =
+        document.getElementById(
+            "admin-usuarios-section"
+        );
+
+    if (secao) {
+        secao.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+}
+
+
+function mostrarUsuariosAdmin(
+    usuarios
+) {
+    const lista =
+        document.getElementById(
+            "admin-usuarios-lista"
+        );
+
+    lista.innerHTML = "";
+
+    if (
+        !usuarios ||
+        usuarios.length === 0
+    ) {
+        lista.innerHTML =
+            "<p>Nenhum usuário encontrado.</p>";
+
+        return;
+    }
+
+    const emailLogado =
+        obterEmailUsuario();
+
+    usuarios.forEach(
+        usuario => {
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.classList.add(
+                "usuario-admin-card"
+            );
+
+            const cabecalho =
+                document.createElement(
+                    "div"
+                );
+
+            cabecalho.classList.add(
+                "usuario-admin-cabecalho"
+            );
+
+            const dados =
+                document.createElement(
+                    "div"
+                );
+
+            const nome =
+                document.createElement(
+                    "h3"
+                );
+
+            nome.textContent =
+                usuario.nomeUsuario ||
+                usuario.email;
+
+            const email =
+                document.createElement(
+                    "p"
+                );
+
+            email.textContent =
+                usuario.email;
+
+            dados.appendChild(
+                nome
+            );
+
+            dados.appendChild(
+                email
+            );
+
+            const badge =
+                document.createElement(
+                    "span"
+                );
+
+            badge.classList.add(
+                "badge-perfil"
+            );
+
+            badge.textContent =
+                usuario.perfil;
+
+            aplicarClassePerfil(
+                badge,
+                usuario.perfil
+            );
+
+            cabecalho.appendChild(
+                dados
+            );
+
+            cabecalho.appendChild(
+                badge
+            );
+
+            card.appendChild(
+                cabecalho
+            );
+
+            const proprioUsuario =
+                usuario.email
+                    .toLowerCase()
+                === emailLogado;
+
+            if (proprioUsuario) {
+                const aviso =
+                    document.createElement(
+                        "div"
+                    );
+
+                aviso.classList.add(
+                    "usuario-proprio-aviso"
+                );
+
+                aviso.textContent =
+                    "Esta é sua conta administrativa.";
+
+                card.appendChild(
+                    aviso
+                );
+            }
+
+            const areaPerfil =
+                document.createElement(
+                    "div"
+                );
+
+            areaPerfil.classList.add(
+                "usuario-admin-perfil"
+            );
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+            label.textContent =
+                "Perfil";
+
+            const select =
+                document.createElement(
+                    "select"
+                );
+
+            select.id =
+                "perfil-usuario-"
+                + usuario.id;
+
+            [
+                "CONSULTA",
+                "OPERADOR",
+                "ADMIN"
+            ].forEach(
+                perfil => {
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        perfil;
+
+                    option.textContent =
+                        perfil;
+
+                    if (
+                        perfil ===
+                        usuario.perfil
+                    ) {
+                        option.selected =
+                            true;
+                    }
+
+                    select.appendChild(
+                        option
+                    );
+                }
+            );
+
+            if (proprioUsuario) {
+                select.disabled =
+                    true;
+            }
+
+            areaPerfil.appendChild(
+                label
+            );
+
+            areaPerfil.appendChild(
+                select
+            );
+
+            card.appendChild(
+                areaPerfil
+            );
+
+            if (!proprioUsuario) {
+                const botao =
+                    document.createElement(
+                        "button"
+                    );
+
+                botao.type =
+                    "button";
+
+                botao.textContent =
+                    "Salvar perfil";
+
+                botao.onclick =
+                    () =>
+                        alterarPerfilUsuario(
+                            usuario.id,
+                            usuario.nomeUsuario ||
+                            usuario.email
+                        );
+
+                card.appendChild(
+                    botao
+                );
+            }
+
+            lista.appendChild(
+                card
+            );
+        }
+    );
+}
+
+
+async function alterarPerfilUsuario(
+    usuarioId,
+    nomeUsuario
+) {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const select =
+        document.getElementById(
+            "perfil-usuario-"
+            + usuarioId
+        );
+
+    if (!select) {
+        return;
+    }
+
+    const novoPerfil =
+        select.value;
+
+    const confirmar =
+        confirm(
+            `Deseja alterar o perfil de "${nomeUsuario}" para ${novoPerfil}?`
+        );
+
+    if (!confirmar) {
+        await carregarUsuariosAdmin(
+            paginaAtualUsuarios
+        );
+
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "admin-usuarios-mensagem"
+        );
+
+    mensagem.textContent =
+        "Atualizando perfil...";
+
+    try {
+        const resposta =
+            await fetch(
+                "/admin/usuarios/"
+                + usuarioId
+                + "/perfil",
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            "Bearer "
+                            + token
+                    },
+
+                    body: JSON.stringify({
+                        perfil:
+                        novoPerfil
+                    })
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            mensagem.textContent =
+                dados.mensagem ||
+                "Você não possui permissão para alterar usuários.";
+
+            await carregarUsuariosAdmin(
+                paginaAtualUsuarios
+            );
+
+            return;
+        }
+
+        if (!resposta.ok) {
+            mensagem.textContent =
+                dados.mensagem ||
+                dados.message ||
+                dados.detail ||
+                "Não foi possível alterar o perfil.";
+
+            await carregarUsuariosAdmin(
+                paginaAtualUsuarios
+            );
+
+            return;
+        }
+
+        mensagem.textContent =
+            "Perfil de "
+            + (
+                dados.nomeUsuario ||
+                dados.email
+            )
+            + " atualizado para "
+            + dados.perfil
+            + ".";
+
+        await carregarUsuariosAdmin(
+            paginaAtualUsuarios
+        );
+
+    } catch (erro) {
+        console.error(
+            "Erro ao alterar perfil:",
+            erro
+        );
+
+        mensagem.textContent =
+            "Erro ao conectar com o servidor.";
+    }
 }
 
 
@@ -332,9 +1412,14 @@ async function carregarCategorias() {
     const token =
         sessionStorage.getItem("token");
 
-    const select =
+    const selectCadastro =
         document.getElementById(
             "categoriaId"
+        );
+
+    const selectFiltro =
+        document.getElementById(
+            "filtroCategoriaId"
         );
 
     try {
@@ -344,12 +1429,15 @@ async function carregarCategorias() {
                 {
                     headers: {
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer "
+                            + token
                     }
                 }
             );
 
-        if (resposta.status === 401) {
+        if (
+            resposta.status === 401
+        ) {
             logout();
             return;
         }
@@ -361,24 +1449,42 @@ async function carregarCategorias() {
         const categorias =
             await resposta.json();
 
-        select.innerHTML =
+        selectCadastro.innerHTML =
             '<option value="">Selecione uma categoria</option>';
+
+        selectFiltro.innerHTML =
+            '<option value="">Todas</option>';
 
         categorias.forEach(
             categoria => {
-                const option =
+                const optionCadastro =
                     document.createElement(
                         "option"
                     );
 
-                option.value =
+                optionCadastro.value =
                     categoria.id;
 
-                option.textContent =
+                optionCadastro.textContent =
                     categoria.nome;
 
-                select.appendChild(
-                    option
+                selectCadastro.appendChild(
+                    optionCadastro
+                );
+
+                const optionFiltro =
+                    document.createElement(
+                        "option"
+                    );
+
+                optionFiltro.value =
+                    categoria.id;
+
+                optionFiltro.textContent =
+                    categoria.nome;
+
+                selectFiltro.appendChild(
+                    optionFiltro
                 );
             }
         );
@@ -392,7 +1498,156 @@ async function carregarCategorias() {
 }
 
 
-async function carregarProdutos() {
+function montarParametrosProdutos(
+    pagina
+) {
+    const params =
+        new URLSearchParams();
+
+    const nome =
+        document
+            .getElementById("filtroNome")
+            .value
+            .trim();
+
+    const sku =
+        document
+            .getElementById("filtroSku")
+            .value
+            .trim();
+
+    const categoriaId =
+        document
+            .getElementById(
+                "filtroCategoriaId"
+            )
+            .value;
+
+    const precoMin =
+        document
+            .getElementById(
+                "filtroPrecoMin"
+            )
+            .value;
+
+    const precoMax =
+        document
+            .getElementById(
+                "filtroPrecoMax"
+            )
+            .value;
+
+    const quantidadeMin =
+        document
+            .getElementById(
+                "filtroQuantidadeMin"
+            )
+            .value;
+
+    const quantidadeMax =
+        document
+            .getElementById(
+                "filtroQuantidadeMax"
+            )
+            .value;
+
+    const sort =
+        document
+            .getElementById(
+                "ordenacaoProduto"
+            )
+            .value;
+
+    const direction =
+        document
+            .getElementById(
+                "direcaoProduto"
+            )
+            .value;
+
+    const size =
+        document
+            .getElementById(
+                "tamanhoPaginaProduto"
+            )
+            .value;
+
+    if (nome) {
+        params.set(
+            "nome",
+            nome
+        );
+    }
+
+    if (sku) {
+        params.set(
+            "sku",
+            sku
+        );
+    }
+
+    if (categoriaId) {
+        params.set(
+            "categoriaId",
+            categoriaId
+        );
+    }
+
+    if (precoMin !== "") {
+        params.set(
+            "precoMin",
+            precoMin
+        );
+    }
+
+    if (precoMax !== "") {
+        params.set(
+            "precoMax",
+            precoMax
+        );
+    }
+
+    if (quantidadeMin !== "") {
+        params.set(
+            "quantidadeMin",
+            quantidadeMin
+        );
+    }
+
+    if (quantidadeMax !== "") {
+        params.set(
+            "quantidadeMax",
+            quantidadeMax
+        );
+    }
+
+    params.set(
+        "page",
+        pagina
+    );
+
+    params.set(
+        "size",
+        size
+    );
+
+    params.set(
+        "sort",
+        sort
+    );
+
+    params.set(
+        "direction",
+        direction
+    );
+
+    return params;
+}
+
+
+async function carregarProdutos(
+    pagina = paginaAtualProdutos
+) {
     const token =
         sessionStorage.getItem("token");
 
@@ -401,42 +1656,94 @@ async function carregarProdutos() {
             "produtos"
         );
 
+    const mensagem =
+        document.getElementById(
+            "filtro-mensagem"
+        );
+
     lista.innerHTML =
         "<p>Carregando produtos...</p>";
+
+    mensagem.textContent = "";
+
+    const params =
+        montarParametrosProdutos(
+            pagina
+        );
 
     try {
         const resposta =
             await fetch(
-                "/produtos",
+                "/produtos?"
+                + params.toString(),
                 {
                     headers: {
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer "
+                            + token
                     }
                 }
             );
 
-        if (resposta.status === 401) {
+        if (
+            resposta.status === 401
+        ) {
             logout();
             return;
         }
 
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
         if (!resposta.ok) {
             lista.innerHTML =
-                "<p>Erro ao carregar produtos.</p>";
+                "<p>Não foi possível carregar os produtos.</p>";
+
+            mensagem.textContent =
+                dados.mensagem ||
+                dados.message ||
+                dados.detail ||
+                "Erro ao aplicar os filtros.";
 
             return;
         }
 
         const produtos =
-            await resposta.json();
+            dados.content || [];
+
+        if (
+            produtos.length === 0 &&
+            pagina > 0 &&
+            dados.totalPages > 0
+        ) {
+            paginaAtualProdutos =
+                dados.totalPages - 1;
+
+            await carregarProdutos(
+                paginaAtualProdutos
+            );
+
+            return;
+        }
+
+        paginaAtualProdutos =
+            dados.number || 0;
+
+        totalPaginasProdutos =
+            dados.totalPages || 0;
 
         mostrarProdutos(
             produtos
         );
 
-        preencherProdutosMovimentacao(
-            produtos
+        atualizarPaginacaoProdutos(
+            dados
         );
 
     } catch (erro) {
@@ -451,7 +1758,231 @@ async function carregarProdutos() {
 }
 
 
-function mostrarProdutos(produtos) {
+function atualizarPaginacaoProdutos(
+    dados
+) {
+    const info =
+        document.getElementById(
+            "paginaInfo"
+        );
+
+    const anterior =
+        document.getElementById(
+            "botaoPaginaAnterior"
+        );
+
+    const proxima =
+        document.getElementById(
+            "botaoPaginaProxima"
+        );
+
+    const totalElementos =
+        dados.totalElements || 0;
+
+    if (
+        !dados.totalPages ||
+        dados.totalPages === 0
+    ) {
+        info.textContent =
+            "Nenhum produto encontrado";
+
+        anterior.disabled = true;
+        proxima.disabled = true;
+
+        return;
+    }
+
+    info.textContent =
+        "Página "
+        + (dados.number + 1)
+        + " de "
+        + dados.totalPages
+        + " • "
+        + totalElementos
+        + (
+            totalElementos === 1
+                ? " produto"
+                : " produtos"
+        );
+
+    anterior.disabled =
+        dados.first === true;
+
+    proxima.disabled =
+        dados.last === true;
+}
+
+
+async function mudarPaginaProdutos(
+    direcao
+) {
+    const novaPagina =
+        paginaAtualProdutos
+        + direcao;
+
+    if (
+        novaPagina < 0 ||
+        novaPagina >= totalPaginasProdutos
+    ) {
+        return;
+    }
+
+    paginaAtualProdutos =
+        novaPagina;
+
+    await carregarProdutos(
+        paginaAtualProdutos
+    );
+
+    document
+        .getElementById("produtos")
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+}
+
+
+async function aplicarFiltrosProdutos() {
+    const mensagem =
+        document.getElementById(
+            "filtro-mensagem"
+        );
+
+    const precoMin =
+        document
+            .getElementById(
+                "filtroPrecoMin"
+            )
+            .value;
+
+    const precoMax =
+        document
+            .getElementById(
+                "filtroPrecoMax"
+            )
+            .value;
+
+    const quantidadeMin =
+        document
+            .getElementById(
+                "filtroQuantidadeMin"
+            )
+            .value;
+
+    const quantidadeMax =
+        document
+            .getElementById(
+                "filtroQuantidadeMax"
+            )
+            .value;
+
+    if (
+        precoMin !== "" &&
+        precoMax !== "" &&
+        Number(precoMin) >
+        Number(precoMax)
+    ) {
+        mensagem.textContent =
+            "O preço mínimo não pode ser maior que o preço máximo.";
+
+        return;
+    }
+
+    if (
+        quantidadeMin !== "" &&
+        quantidadeMax !== "" &&
+        Number(quantidadeMin) >
+        Number(quantidadeMax)
+    ) {
+        mensagem.textContent =
+            "O estoque mínimo da busca não pode ser maior que o estoque máximo.";
+
+        return;
+    }
+
+    paginaAtualProdutos = 0;
+
+    await carregarProdutos(
+        0
+    );
+}
+
+
+async function limparFiltrosProdutos() {
+    document
+        .getElementById("filtroNome")
+        .value = "";
+
+    document
+        .getElementById("filtroSku")
+        .value = "";
+
+    document
+        .getElementById(
+            "filtroCategoriaId"
+        )
+        .value = "";
+
+    document
+        .getElementById(
+            "filtroPrecoMin"
+        )
+        .value = "";
+
+    document
+        .getElementById(
+            "filtroPrecoMax"
+        )
+        .value = "";
+
+    document
+        .getElementById(
+            "filtroQuantidadeMin"
+        )
+        .value = "";
+
+    document
+        .getElementById(
+            "filtroQuantidadeMax"
+        )
+        .value = "";
+
+    document
+        .getElementById(
+            "ordenacaoProduto"
+        )
+        .value = "nome";
+
+    document
+        .getElementById(
+            "direcaoProduto"
+        )
+        .value = "asc";
+
+    document
+        .getElementById(
+            "tamanhoPaginaProduto"
+        )
+        .value = "10";
+
+    document
+        .getElementById(
+            "filtro-mensagem"
+        )
+        .textContent = "";
+
+    paginaAtualProdutos = 0;
+
+    await carregarProdutos(
+        0
+    );
+}
+
+
+function mostrarProdutos(
+    produtos
+) {
     const lista =
         document.getElementById(
             "produtos"
@@ -464,7 +1995,7 @@ function mostrarProdutos(produtos) {
         produtos.length === 0
     ) {
         lista.innerHTML =
-            "<p>Nenhum produto cadastrado.</p>";
+            "<p>Nenhum produto encontrado.</p>";
 
         return;
     }
@@ -480,6 +2011,14 @@ function mostrarProdutos(produtos) {
                 "produto"
             );
 
+            if (
+                produto.estoqueBaixo
+            ) {
+                card.classList.add(
+                    "produto-estoque-baixo"
+                );
+            }
+
             if (produto.imagemUrl) {
                 const imagem =
                     document.createElement(
@@ -490,8 +2029,8 @@ function mostrarProdutos(produtos) {
                     produto.imagemUrl;
 
                 imagem.alt =
-                    "Imagem de " +
-                    produto.nome;
+                    "Imagem de "
+                    + produto.nome;
 
                 imagem.classList.add(
                     "produto-imagem"
@@ -524,6 +2063,26 @@ function mostrarProdutos(produtos) {
                 );
             }
 
+            if (
+                produto.estoqueBaixo
+            ) {
+                const alerta =
+                    document.createElement(
+                        "div"
+                    );
+
+                alerta.classList.add(
+                    "alerta-estoque-baixo"
+                );
+
+                alerta.textContent =
+                    "⚠ Estoque baixo";
+
+                card.appendChild(
+                    alerta
+                );
+            }
+
             const titulo =
                 document.createElement(
                     "h3"
@@ -538,8 +2097,8 @@ function mostrarProdutos(produtos) {
                 );
 
             sku.textContent =
-                "SKU: " +
-                (
+                "SKU: "
+                + (
                     produto.sku ||
                     "Não definido"
                 );
@@ -550,8 +2109,8 @@ function mostrarProdutos(produtos) {
                 );
 
             identificador.textContent =
-                "ID: " +
-                produto.id;
+                "ID: "
+                + produto.id;
 
             const preco =
                 document.createElement(
@@ -559,8 +2118,8 @@ function mostrarProdutos(produtos) {
                 );
 
             preco.textContent =
-                "Preço: R$ " +
-                Number(
+                "Preço: R$ "
+                + Number(
                     produto.preco
                 ).toFixed(2);
 
@@ -570,8 +2129,20 @@ function mostrarProdutos(produtos) {
                 );
 
             quantidade.textContent =
-                "Quantidade: " +
-                produto.quantidade;
+                "Quantidade atual: "
+                + produto.quantidade;
+
+            const estoqueMinimo =
+                document.createElement(
+                    "p"
+                );
+
+            estoqueMinimo.textContent =
+                "Estoque mínimo: "
+                + (
+                    produto.estoqueMinimo
+                    ?? 0
+                );
 
             const categoria =
                 document.createElement(
@@ -579,8 +2150,8 @@ function mostrarProdutos(produtos) {
                 );
 
             categoria.textContent =
-                "Categoria: " +
-                (
+                "Categoria: "
+                + (
                     produto.categoriaNome ||
                     "Sem categoria"
                 );
@@ -591,63 +2162,11 @@ function mostrarProdutos(produtos) {
                 );
 
             descricao.textContent =
-                "Descrição: " +
-                (
+                "Descrição: "
+                + (
                     produto.descricao ||
                     "Sem descrição"
                 );
-
-            const acoes =
-                document.createElement(
-                    "div"
-                );
-
-            acoes.classList.add(
-                "acoes"
-            );
-
-            const botaoEditar =
-                document.createElement(
-                    "button"
-                );
-
-            botaoEditar.type =
-                "button";
-
-            botaoEditar.textContent =
-                "Editar";
-
-            botaoEditar.onclick =
-                () =>
-                    prepararEdicao(
-                        produto
-                    );
-
-            const botaoExcluir =
-                document.createElement(
-                    "button"
-                );
-
-            botaoExcluir.type =
-                "button";
-
-            botaoExcluir.textContent =
-                "Excluir";
-
-            botaoExcluir.onclick =
-                () =>
-                    excluirProduto(
-                        produto.id,
-                        produto.nome
-                    );
-
-            acoes.appendChild(
-                botaoEditar
-            );
-
-            acoes.appendChild(
-                botaoExcluir
-            );
 
             card.appendChild(
                 titulo
@@ -670,6 +2189,10 @@ function mostrarProdutos(produtos) {
             );
 
             card.appendChild(
+                estoqueMinimo
+            );
+
+            card.appendChild(
                 categoria
             );
 
@@ -677,9 +2200,78 @@ function mostrarProdutos(produtos) {
                 descricao
             );
 
-            card.appendChild(
-                acoes
-            );
+            if (
+                podeEditarProdutos()
+                || podeExcluirProdutos()
+            ) {
+                const acoes =
+                    document.createElement(
+                        "div"
+                    );
+
+                acoes.classList.add(
+                    "acoes"
+                );
+
+                if (
+                    podeEditarProdutos()
+                ) {
+                    const botaoEditar =
+                        document.createElement(
+                            "button"
+                        );
+
+                    botaoEditar.type =
+                        "button";
+
+                    botaoEditar.textContent =
+                        "Editar";
+
+                    botaoEditar.onclick =
+                        () =>
+                            prepararEdicao(
+                                produto
+                            );
+
+                    acoes.appendChild(
+                        botaoEditar
+                    );
+                }
+
+                if (
+                    podeExcluirProdutos()
+                ) {
+                    const botaoExcluir =
+                        document.createElement(
+                            "button"
+                        );
+
+                    botaoExcluir.type =
+                        "button";
+
+                    botaoExcluir.textContent =
+                        "Excluir";
+
+                    botaoExcluir.classList.add(
+                        "botao-excluir"
+                    );
+
+                    botaoExcluir.onclick =
+                        () =>
+                            excluirProduto(
+                                produto.id,
+                                produto.nome
+                            );
+
+                    acoes.appendChild(
+                        botaoExcluir
+                    );
+                }
+
+                card.appendChild(
+                    acoes
+                );
+            }
 
             lista.appendChild(
                 card
@@ -706,6 +2298,81 @@ function criarPlaceholderImagem() {
 }
 
 
+async function carregarProdutosMovimentacao() {
+    if (
+        !podeMovimentarEstoque()
+    ) {
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    const produtos = [];
+
+    let pagina = 0;
+    let totalPaginas = 1;
+
+    try {
+        while (
+            pagina < totalPaginas
+            ) {
+            const resposta =
+                await fetch(
+                    "/produtos?page="
+                    + pagina
+                    + "&size=100&sort=nome&direction=asc",
+                    {
+                        headers: {
+                            "Authorization":
+                                "Bearer "
+                                + token
+                        }
+                    }
+                );
+
+            if (
+                resposta.status === 401
+            ) {
+                logout();
+                return;
+            }
+
+            if (!resposta.ok) {
+                return;
+            }
+
+            const dados =
+                await resposta.json();
+
+            produtos.push(
+                ...(
+                    dados.content ||
+                    []
+                )
+            );
+
+            totalPaginas =
+                dados.totalPages || 0;
+
+            pagina++;
+        }
+
+        preencherProdutosMovimentacao(
+            produtos
+        );
+
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar produtos para movimentação:",
+            erro
+        );
+    }
+}
+
+
 function preencherProdutosMovimentacao(
     produtos
 ) {
@@ -713,6 +2380,9 @@ function preencherProdutosMovimentacao(
         document.getElementById(
             "movimentacaoProdutoId"
         );
+
+    const valorAtual =
+        select.value;
 
     select.innerHTML =
         '<option value="">Selecione um produto</option>';
@@ -730,22 +2400,50 @@ function preencherProdutosMovimentacao(
             option.textContent =
                 (
                     produto.sku
-                        ? produto.sku + " - "
+                        ? produto.sku
+                        + " - "
                         : ""
-                ) +
-                produto.nome +
-                " - estoque: " +
-                produto.quantidade;
+                )
+                + produto.nome
+                + " - estoque: "
+                + produto.quantidade
+                + (
+                    produto.estoqueBaixo
+                        ? " - ⚠ baixo"
+                        : ""
+                );
 
             select.appendChild(
                 option
             );
         }
     );
+
+    if (
+        valorAtual &&
+        produtos.some(
+            produto =>
+                String(produto.id) ===
+                String(valorAtual)
+        )
+    ) {
+        select.value =
+            valorAtual;
+    }
 }
 
 
 async function salvarProduto() {
+    if (
+        !podeEditarProdutos()
+    ) {
+        alert(
+            "Seu perfil não possui permissão para cadastrar ou editar produtos."
+        );
+
+        return;
+    }
+
     const produtoId =
         document
             .getElementById(
@@ -772,7 +2470,9 @@ function obterSkuFormulario() {
 }
 
 
-function validarSku(sku) {
+function validarSku(
+    sku
+) {
     if (!sku) {
         return {
             valida: false,
@@ -781,7 +2481,9 @@ function validarSku(sku) {
         };
     }
 
-    if (sku.length > 50) {
+    if (
+        sku.length > 50
+    ) {
         return {
             valida: false,
             mensagem:
@@ -792,7 +2494,11 @@ function validarSku(sku) {
     const padrao =
         /^[A-Za-z0-9_-]+$/;
 
-    if (!padrao.test(sku)) {
+    if (
+        !padrao.test(
+            sku
+        )
+    ) {
         return {
             valida: false,
             mensagem:
@@ -808,8 +2514,16 @@ function validarSku(sku) {
 
 
 async function criarProduto() {
+    if (
+        !podeEditarProdutos()
+    ) {
+        return;
+    }
+
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
 
     const sku =
         obterSkuFormulario();
@@ -830,18 +2544,19 @@ async function criarProduto() {
             .getElementById("quantidade")
             .value;
 
+    const estoqueMinimo =
+        document
+            .getElementById("estoqueMinimo")
+            .value;
+
     const categoriaId =
         document
-            .getElementById(
-                "categoriaId"
-            )
+            .getElementById("categoriaId")
             .value;
 
     const descricao =
         document
-            .getElementById(
-                "descricao"
-            )
+            .getElementById("descricao")
             .value
             .trim();
 
@@ -858,7 +2573,9 @@ async function criarProduto() {
             sku
         );
 
-    if (!validacaoSku.valida) {
+    if (
+        !validacaoSku.valida
+    ) {
         mensagem.textContent =
             validacaoSku.mensagem;
 
@@ -869,6 +2586,7 @@ async function criarProduto() {
         !nome ||
         preco === "" ||
         quantidade === "" ||
+        estoqueMinimo === "" ||
         categoriaId === ""
     ) {
         mensagem.textContent =
@@ -895,13 +2613,24 @@ async function criarProduto() {
         return;
     }
 
+    if (
+        Number(estoqueMinimo) < 0
+    ) {
+        mensagem.textContent =
+            "O estoque mínimo não pode ser negativo.";
+
+        return;
+    }
+
     if (imagem) {
         const validacao =
             validarImagem(
                 imagem
             );
 
-        if (!validacao.valida) {
+        if (
+            !validacao.valida
+        ) {
             mensagem.textContent =
                 validacao.mensagem;
 
@@ -924,7 +2653,8 @@ async function criarProduto() {
                             "application/json",
 
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer "
+                            + token
                     },
 
                     body: JSON.stringify({
@@ -935,11 +2665,18 @@ async function criarProduto() {
                         nome,
 
                         preco:
-                            Number(preco),
+                            Number(
+                                preco
+                            ),
 
                         quantidade:
                             Number(
                                 quantidade
+                            ),
+
+                        estoqueMinimo:
+                            Number(
+                                estoqueMinimo
                             ),
 
                         categoriaId:
@@ -967,6 +2704,16 @@ async function criarProduto() {
                 await resposta.json();
         } catch (erro) {
             dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            mensagem.textContent =
+                dados.mensagem ||
+                "Você não possui permissão para cadastrar produtos.";
+
+            return;
         }
 
         if (!resposta.ok) {
@@ -998,6 +2745,7 @@ async function criarProduto() {
                     "Produto cadastrado, mas não foi possível enviar a imagem.";
 
                 await carregarProdutos();
+                await carregarProdutosMovimentacao();
 
                 return;
             }
@@ -1008,7 +2756,13 @@ async function criarProduto() {
         mensagem.textContent =
             "Produto cadastrado com sucesso!";
 
-        await carregarProdutos();
+        paginaAtualProdutos = 0;
+
+        await carregarProdutos(
+            0
+        );
+
+        await carregarProdutosMovimentacao();
 
     } catch (erro) {
         console.error(
@@ -1022,7 +2776,19 @@ async function criarProduto() {
 }
 
 
-function prepararEdicao(produto) {
+function prepararEdicao(
+    produto
+) {
+    if (
+        !podeEditarProdutos()
+    ) {
+        alert(
+            "Seu perfil não possui permissão para editar produtos."
+        );
+
+        return;
+    }
+
     limparPreviewImagem();
 
     document
@@ -1048,82 +2814,85 @@ function prepararEdicao(produto) {
         produto.preco;
 
     document
-        .getElementById(
-            "quantidade"
-        )
+        .getElementById("quantidade")
         .value =
         produto.quantidade;
 
     document
-        .getElementById(
-            "categoriaId"
-        )
+        .getElementById("estoqueMinimo")
+        .value =
+        produto.estoqueMinimo ?? 0;
+
+    document
+        .getElementById("categoriaId")
         .value =
         produto.categoriaId;
 
     document
-        .getElementById(
-            "descricao"
-        )
+        .getElementById("descricao")
         .value =
         produto.descricao || "";
 
     document
-        .getElementById(
-            "imagemUrlAtual"
-        )
+        .getElementById("imagemUrlAtual")
         .value =
         produto.imagemUrl || "";
 
     document
-        .getElementById(
-            "imagemProduto"
-        )
+        .getElementById("imagemProduto")
         .value = "";
 
     document
-        .getElementById(
-            "botaoSalvar"
-        )
+        .getElementById("botaoSalvar")
         .textContent =
         "Salvar alterações";
 
     document
-        .getElementById(
-            "botaoCancelar"
-        )
+        .getElementById("botaoCancelar")
         .classList
         .remove("hidden");
 
     document
-        .getElementById(
-            "titulo-formulario"
-        )
+        .getElementById("titulo-formulario")
         .textContent =
         "Editar Produto";
 
     document
-        .getElementById(
-            "produto-mensagem"
-        )
+        .getElementById("produto-mensagem")
         .textContent = "";
 
-    if (produto.imagemUrl) {
+    if (
+        produto.imagemUrl
+    ) {
         mostrarImagemAtual(
             produto.imagemUrl
         );
     }
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+    document
+        .getElementById(
+            "produto-form-section"
+        )
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
 }
 
 
-async function editarProduto(id) {
+async function editarProduto(
+    id
+) {
+    if (
+        !podeEditarProdutos()
+    ) {
+        return;
+    }
+
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
 
     const sku =
         obterSkuFormulario();
@@ -1141,23 +2910,22 @@ async function editarProduto(id) {
 
     const quantidade =
         document
-            .getElementById(
-                "quantidade"
-            )
+            .getElementById("quantidade")
+            .value;
+
+    const estoqueMinimo =
+        document
+            .getElementById("estoqueMinimo")
             .value;
 
     const categoriaId =
         document
-            .getElementById(
-                "categoriaId"
-            )
+            .getElementById("categoriaId")
             .value;
 
     const descricao =
         document
-            .getElementById(
-                "descricao"
-            )
+            .getElementById("descricao")
             .value
             .trim();
 
@@ -1174,7 +2942,9 @@ async function editarProduto(id) {
             sku
         );
 
-    if (!validacaoSku.valida) {
+    if (
+        !validacaoSku.valida
+    ) {
         mensagem.textContent =
             validacaoSku.mensagem;
 
@@ -1185,6 +2955,7 @@ async function editarProduto(id) {
         !nome ||
         preco === "" ||
         quantidade === "" ||
+        estoqueMinimo === "" ||
         categoriaId === ""
     ) {
         mensagem.textContent =
@@ -1211,13 +2982,24 @@ async function editarProduto(id) {
         return;
     }
 
+    if (
+        Number(estoqueMinimo) < 0
+    ) {
+        mensagem.textContent =
+            "O estoque mínimo não pode ser negativo.";
+
+        return;
+    }
+
     if (imagem) {
         const validacao =
             validarImagem(
                 imagem
             );
 
-        if (!validacao.valida) {
+        if (
+            !validacao.valida
+        ) {
             mensagem.textContent =
                 validacao.mensagem;
 
@@ -1231,7 +3013,8 @@ async function editarProduto(id) {
     try {
         const resposta =
             await fetch(
-                "/produtos/" + id,
+                "/produtos/"
+                + id,
                 {
                     method: "PUT",
 
@@ -1240,7 +3023,8 @@ async function editarProduto(id) {
                             "application/json",
 
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer "
+                            + token
                     },
 
                     body: JSON.stringify({
@@ -1251,11 +3035,18 @@ async function editarProduto(id) {
                         nome,
 
                         preco:
-                            Number(preco),
+                            Number(
+                                preco
+                            ),
 
                         quantidade:
                             Number(
                                 quantidade
+                            ),
+
+                        estoqueMinimo:
+                            Number(
+                                estoqueMinimo
                             ),
 
                         categoriaId:
@@ -1283,6 +3074,16 @@ async function editarProduto(id) {
                 await resposta.json();
         } catch (erro) {
             dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            mensagem.textContent =
+                dados.mensagem ||
+                "Você não possui permissão para editar produtos.";
+
+            return;
         }
 
         if (!resposta.ok) {
@@ -1314,6 +3115,7 @@ async function editarProduto(id) {
                     "Produto atualizado, mas não foi possível enviar a nova imagem.";
 
                 await carregarProdutos();
+                await carregarProdutosMovimentacao();
 
                 return;
             }
@@ -1325,6 +3127,7 @@ async function editarProduto(id) {
             "Produto atualizado com sucesso!";
 
         await carregarProdutos();
+        await carregarProdutosMovimentacao();
 
     } catch (erro) {
         console.error(
@@ -1343,7 +3146,9 @@ async function enviarImagemProduto(
     arquivo
 ) {
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
 
     const formData =
         new FormData();
@@ -1355,15 +3160,16 @@ async function enviarImagemProduto(
 
     const resposta =
         await fetch(
-            "/produtos/" +
-            produtoId +
-            "/imagem",
+            "/produtos/"
+            + produtoId
+            + "/imagem",
             {
                 method: "POST",
 
                 headers: {
                     "Authorization":
-                        "Bearer " + token
+                        "Bearer "
+                        + token
                 },
 
                 body:
@@ -1404,6 +3210,12 @@ async function enviarImagemProduto(
 
 
 async function removerImagemProduto() {
+    if (
+        !podeEditarProdutos()
+    ) {
+        return;
+    }
+
     const inputImagem =
         document.getElementById(
             "imagemProduto"
@@ -1470,20 +3282,23 @@ async function removerImagemProduto() {
     }
 
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
 
     try {
         const resposta =
             await fetch(
-                "/produtos/" +
-                produtoId +
-                "/imagem",
+                "/produtos/"
+                + produtoId
+                + "/imagem",
                 {
                     method: "DELETE",
 
                     headers: {
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer "
+                            + token
                     }
                 }
             );
@@ -1556,7 +3371,9 @@ function obterImagemSelecionada() {
 }
 
 
-function validarImagem(arquivo) {
+function validarImagem(
+    arquivo
+) {
     if (
         !TIPOS_IMAGEM_PERMITIDOS
             .includes(
@@ -1695,20 +3512,13 @@ function limparPreviewObjectUrl() {
             previewObjectUrl
         );
 
-        previewObjectUrl =
-            null;
+        previewObjectUrl = null;
     }
 }
 
 
 function cancelarEdicao() {
     limparFormularioProduto();
-
-    document
-        .getElementById(
-            "produtoIdEdicao"
-        )
-        .value = "";
 
     document
         .getElementById(
@@ -1737,9 +3547,19 @@ async function excluirProduto(
     id,
     nome
 ) {
+    if (
+        !podeExcluirProdutos()
+    ) {
+        alert(
+            "Somente administradores podem excluir produtos."
+        );
+
+        return;
+    }
+
     const confirmar =
         confirm(
-            `Deseja realmente excluir "${nome}"?`
+            `Deseja realmente excluir "${nome}"?\n\nAs movimentações relacionadas a este produto também serão excluídas.`
         );
 
     if (!confirmar) {
@@ -1754,13 +3574,15 @@ async function excluirProduto(
     try {
         const resposta =
             await fetch(
-                "/produtos/" + id,
+                "/produtos/"
+                + id,
                 {
                     method: "DELETE",
 
                     headers: {
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer "
+                            + token
                     }
                 }
             );
@@ -1780,47 +3602,6 @@ async function excluirProduto(
                     await resposta.json();
             } catch (erro) {
                 dados = {};
-            }
-
-            if (
-                resposta.status === 409
-            ) {
-                alert(
-                    dados.mensagem ||
-                    dados.message ||
-                    dados.detail ||
-                    "Este produto possui movimentações de estoque e não pode ser excluído."
-                );
-
-                return;
-            }
-
-            if (
-                resposta.status === 404
-            ) {
-                alert(
-                    dados.mensagem ||
-                    dados.message ||
-                    dados.detail ||
-                    "Produto não encontrado."
-                );
-
-                await carregarProdutos();
-
-                return;
-            }
-
-            if (
-                resposta.status === 403
-            ) {
-                alert(
-                    dados.mensagem ||
-                    dados.message ||
-                    dados.detail ||
-                    "Você não possui permissão para excluir este produto."
-                );
-
-                return;
             }
 
             alert(
@@ -1848,6 +3629,14 @@ async function excluirProduto(
         }
 
         await carregarProdutos();
+
+        if (
+            podeMovimentarEstoque()
+        ) {
+            await carregarProdutosMovimentacao();
+        }
+
+        await carregarHistorico();
 
         alert(
             "Produto excluído com sucesso."
@@ -1880,39 +3669,31 @@ function limparFormularioProduto() {
         .value = "";
 
     document
-        .getElementById(
-            "quantidade"
-        )
+        .getElementById("quantidade")
         .value = "";
 
     document
-        .getElementById(
-            "categoriaId"
-        )
+        .getElementById("estoqueMinimo")
         .value = "";
 
     document
-        .getElementById(
-            "descricao"
-        )
+        .getElementById("categoriaId")
         .value = "";
 
     document
-        .getElementById(
-            "produtoIdEdicao"
-        )
+        .getElementById("descricao")
         .value = "";
 
     document
-        .getElementById(
-            "imagemUrlAtual"
-        )
+        .getElementById("produtoIdEdicao")
         .value = "";
 
     document
-        .getElementById(
-            "imagemProduto"
-        )
+        .getElementById("imagemUrlAtual")
+        .value = "";
+
+    document
+        .getElementById("imagemProduto")
         .value = "";
 
     limparPreviewImagem();
@@ -1920,6 +3701,16 @@ function limparFormularioProduto() {
 
 
 async function registrarMovimentacao() {
+    if (
+        !podeMovimentarEstoque()
+    ) {
+        alert(
+            "Seu perfil não possui permissão para movimentar o estoque."
+        );
+
+        return;
+    }
+
     const token =
         sessionStorage.getItem(
             "token"
@@ -1994,7 +3785,8 @@ async function registrarMovimentacao() {
                             "application/json",
 
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer "
+                            + token
                     },
 
                     body: JSON.stringify({
@@ -2033,6 +3825,16 @@ async function registrarMovimentacao() {
             dados = {};
         }
 
+        if (
+            resposta.status === 403
+        ) {
+            mensagem.textContent =
+                dados.mensagem ||
+                "Você não possui permissão para movimentar o estoque.";
+
+            return;
+        }
+
         if (!resposta.ok) {
             mensagem.textContent =
                 dados.mensagem ||
@@ -2044,11 +3846,14 @@ async function registrarMovimentacao() {
         }
 
         mensagem.textContent =
-            "Movimentação registrada com sucesso!";
+            "Movimentação registrada por "
+            + obterNomeUsuario()
+            + ".";
 
         limparFormularioMovimentacao();
 
         await carregarProdutos();
+        await carregarProdutosMovimentacao();
         await carregarHistorico();
 
     } catch (erro) {
@@ -2111,7 +3916,8 @@ async function carregarHistorico() {
                 {
                     headers: {
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer "
+                            + token
                     }
                 }
             );
@@ -2197,8 +4003,8 @@ function mostrarHistorico(
                     );
 
                 tipo.textContent =
-                    "Tipo: " +
-                    movimentacao.tipo;
+                    "Tipo: "
+                    + movimentacao.tipo;
 
                 const quantidade =
                     document.createElement(
@@ -2206,8 +4012,8 @@ function mostrarHistorico(
                     );
 
                 quantidade.textContent =
-                    "Quantidade: " +
-                    movimentacao.quantidade;
+                    "Quantidade: "
+                    + movimentacao.quantidade;
 
                 const estoqueAtual =
                     document.createElement(
@@ -2215,8 +4021,37 @@ function mostrarHistorico(
                     );
 
                 estoqueAtual.textContent =
-                    "Estoque atual: " +
-                    movimentacao.estoqueAtual;
+                    "Estoque atual: "
+                    + movimentacao.estoqueAtual;
+
+                const responsavel =
+                    document.createElement(
+                        "p"
+                    );
+
+                responsavel.classList.add(
+                    "responsavel-historico"
+                );
+
+                responsavel.textContent =
+                    "Responsável: "
+                    + (
+                        movimentacao.responsavelNome ||
+                        movimentacao.responsavelEmail ||
+                        "Não registrado"
+                    );
+
+                const perfil =
+                    document.createElement(
+                        "p"
+                    );
+
+                perfil.textContent =
+                    "Perfil: "
+                    + (
+                        movimentacao.responsavelPerfil ||
+                        "Não registrado"
+                    );
 
                 const observacao =
                     document.createElement(
@@ -2224,8 +4059,8 @@ function mostrarHistorico(
                     );
 
                 observacao.textContent =
-                    "Observação: " +
-                    (
+                    "Observação: "
+                    + (
                         movimentacao.observacao ||
                         "Sem observação"
                     );
@@ -2239,8 +4074,8 @@ function mostrarHistorico(
                     movimentacao.dataHora
                 ) {
                     data.textContent =
-                        "Data: " +
-                        new Date(
+                        "Data: "
+                        + new Date(
                             movimentacao.dataHora
                         ).toLocaleString(
                             "pt-BR"
@@ -2265,6 +4100,14 @@ function mostrarHistorico(
 
                 item.appendChild(
                     estoqueAtual
+                );
+
+                item.appendChild(
+                    responsavel
+                );
+
+                item.appendChild(
+                    perfil
                 );
 
                 item.appendChild(
@@ -2302,6 +4145,137 @@ document.addEventListener(
             );
         }
 
+        const filtroSku =
+            document.getElementById(
+                "filtroSku"
+            );
+
+        if (filtroSku) {
+            filtroSku.addEventListener(
+                "input",
+                () => {
+                    filtroSku.value =
+                        filtroSku.value
+                            .toUpperCase();
+                }
+            );
+        }
+
+        const camposEnter = [
+            "filtroNome",
+            "filtroSku",
+            "filtroPrecoMin",
+            "filtroPrecoMax",
+            "filtroQuantidadeMin",
+            "filtroQuantidadeMax"
+        ];
+
+        camposEnter.forEach(
+            id => {
+                const elemento =
+                    document.getElementById(
+                        id
+                    );
+
+                if (elemento) {
+                    elemento.addEventListener(
+                        "keydown",
+                        async evento => {
+                            if (
+                                evento.key ===
+                                "Enter"
+                            ) {
+                                evento.preventDefault();
+
+                                await aplicarFiltrosProdutos();
+                            }
+                        }
+                    );
+                }
+            }
+        );
+
+        const buscaUsuario =
+            document.getElementById(
+                "buscaUsuario"
+            );
+
+        if (buscaUsuario) {
+            buscaUsuario.addEventListener(
+                "keydown",
+                async evento => {
+                    if (
+                        evento.key ===
+                        "Enter"
+                    ) {
+                        evento.preventDefault();
+
+                        await aplicarFiltrosUsuarios();
+                    }
+                }
+            );
+        }
+
+        const filtroPerfilUsuario =
+            document.getElementById(
+                "filtroPerfilUsuario"
+            );
+
+        if (filtroPerfilUsuario) {
+            filtroPerfilUsuario.addEventListener(
+                "change",
+                async () => {
+                    await aplicarFiltrosUsuarios();
+                }
+            );
+        }
+
+        const ordenacaoUsuario =
+            document.getElementById(
+                "ordenacaoUsuario"
+            );
+
+        if (ordenacaoUsuario) {
+            ordenacaoUsuario.addEventListener(
+                "change",
+                async () => {
+                    await aplicarFiltrosUsuarios();
+                }
+            );
+        }
+
+        const direcaoUsuario =
+            document.getElementById(
+                "direcaoUsuario"
+            );
+
+        if (direcaoUsuario) {
+            direcaoUsuario.addEventListener(
+                "change",
+                async () => {
+                    await aplicarFiltrosUsuarios();
+                }
+            );
+        }
+
+        const tamanhoPaginaUsuario =
+            document.getElementById(
+                "tamanhoPaginaUsuario"
+            );
+
+        if (tamanhoPaginaUsuario) {
+            tamanhoPaginaUsuario.addEventListener(
+                "change",
+                async () => {
+                    paginaAtualUsuarios = 0;
+
+                    await carregarUsuariosAdmin(
+                        0
+                    );
+                }
+            );
+        }
+
         const inputImagem =
             document.getElementById(
                 "imagemProduto"
@@ -2331,7 +4305,6 @@ document.addEventListener(
                             mostrarImagemAtual(
                                 imagemAtual
                             );
-
                         } else {
                             limparPreviewImagem();
                         }
@@ -2364,7 +4337,6 @@ document.addEventListener(
                             mostrarImagemAtual(
                                 imagemAtual
                             );
-
                         } else {
                             limparPreviewImagem();
                         }
@@ -2387,12 +4359,62 @@ document.addEventListener(
                 "token"
             );
 
-        if (token) {
+        const perfil =
+            sessionStorage.getItem(
+                "perfil"
+            );
+
+        if (
+            token &&
+            perfil
+        ) {
             mostrarSistema();
 
             await carregarCategorias();
             await carregarProdutos();
+
+            if (
+                podeMovimentarEstoque()
+            ) {
+                await carregarProdutosMovimentacao();
+            }
+
             await carregarHistorico();
+
+            if (ehAdmin()) {
+                paginaAtualUsuarios = 0;
+
+                await carregarUsuariosAdmin(
+                    0
+                );
+            }
+
+        } else if (token) {
+
+            sessionStorage.removeItem(
+                "token"
+            );
+
+            sessionStorage.removeItem(
+                "email"
+            );
+
+            sessionStorage.removeItem(
+                "nomeUsuario"
+            );
+
+            sessionStorage.removeItem(
+                "perfil"
+            );
+
+            mostrarLogin();
+
+            document
+                .getElementById(
+                    "login-mensagem"
+                )
+                .textContent =
+                "Faça login novamente para carregar seu nome de usuário e suas permissões.";
 
         } else {
             mostrarLogin();

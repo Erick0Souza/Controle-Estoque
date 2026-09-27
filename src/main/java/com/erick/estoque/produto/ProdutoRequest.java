@@ -36,6 +36,10 @@ public record ProdutoRequest(
         @PositiveOrZero(message = "A quantidade não pode ser negativa")
         Integer quantidade,
 
+        @NotNull(message = "O estoque mínimo é obrigatório")
+        @PositiveOrZero(message = "O estoque mínimo não pode ser negativo")
+        Integer estoqueMinimo,
+
         @NotNull(message = "A categoria é obrigatória")
         Long categoriaId,
 

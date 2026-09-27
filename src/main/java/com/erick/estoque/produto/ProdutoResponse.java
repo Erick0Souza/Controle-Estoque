@@ -9,6 +9,8 @@ public record ProdutoResponse(
         String nome,
         BigDecimal preco,
         Integer quantidade,
+        Integer estoqueMinimo,
+        Boolean estoqueBaixo,
         Long categoriaId,
         String categoriaNome,
         String descricao,

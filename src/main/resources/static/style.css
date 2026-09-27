@@ -33,7 +33,7 @@ header p {
 
 main {
     width: 92%;
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 30px auto;
 }
 
@@ -84,6 +84,14 @@ select:focus {
             0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+input:disabled,
+textarea:disabled,
+select:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
 textarea {
     min-height: 100px;
     resize: vertical;
@@ -121,7 +129,8 @@ button {
 
     transition:
             background 0.2s,
-            transform 0.1s;
+            transform 0.1s,
+            opacity 0.2s;
 }
 
 button:hover {
@@ -130,6 +139,15 @@ button:hover {
 
 button:active {
     transform: scale(0.98);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+button:disabled:hover {
+    background: #2563eb;
 }
 
 .hidden {
@@ -152,6 +170,96 @@ button:active {
     margin: 5px 0 0;
 }
 
+.topo-sistema {
+    padding: 5px 0;
+}
+
+.usuario-resumo {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 7px;
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.separador-usuario {
+    color: #9ca3af;
+}
+
+.perfil-topo {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.badge-perfil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: bold;
+    letter-spacing: 0.4px;
+}
+
+.perfil-admin {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.perfil-operador {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.perfil-consulta {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.perfil-cadastro-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 18px;
+    padding: 13px 15px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.perfil-cadastro-info span {
+    font-weight: bold;
+    color: #374151;
+}
+
+.usuario-movimentacao-info {
+    margin-top: 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-size: 14px;
+}
+
+.subtitulo {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.campo-ajuda,
+#imagem-ajuda {
+    display: block;
+    margin-top: 7px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
 .acoes-formulario {
     display: flex;
     gap: 10px;
@@ -161,13 +269,6 @@ button:active {
 
 .acoes-formulario button {
     margin: 0;
-}
-
-#imagem-ajuda {
-    display: block;
-    margin-top: 7px;
-    color: #6b7280;
-    font-size: 13px;
 }
 
 #previewImagemContainer {
@@ -207,6 +308,166 @@ button:active {
     background: #b91c1c;
 }
 
+.admin-legenda {
+    display: grid;
+
+    grid-template-columns:
+            repeat(
+                    auto-fit,
+                    minmax(210px, 1fr)
+            );
+
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.admin-legenda div {
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    background: #f9fafb;
+}
+
+.admin-legenda strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.admin-legenda span {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.filtros-usuarios,
+.filtros-produtos {
+    display: grid;
+
+    grid-template-columns:
+            repeat(
+                    auto-fit,
+                    minmax(180px, 1fr)
+            );
+
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+}
+
+.campo-filtro label {
+    margin-top: 0;
+}
+
+.acoes-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.botao-limpar {
+    background: #4b5563;
+}
+
+.botao-limpar:hover {
+    background: #374151;
+}
+
+#admin-usuarios-mensagem {
+    min-height: 20px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.admin-contador {
+    margin-top: 6px;
+    margin-bottom: 16px;
+    color: #4b5563;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#admin-usuarios-lista {
+    display: grid;
+
+    grid-template-columns:
+            repeat(
+                    auto-fit,
+                    minmax(260px, 1fr)
+            );
+
+    gap: 15px;
+}
+
+.usuario-admin-card {
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+
+    transition:
+            transform 0.15s,
+            box-shadow 0.15s,
+            border-color 0.15s;
+}
+
+.usuario-admin-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+.usuario-admin-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.usuario-admin-cabecalho h3 {
+    margin: 0;
+    color: #111827;
+}
+
+.usuario-admin-cabecalho p {
+    margin: 5px 0 0;
+    color: #6b7280;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.usuario-admin-perfil {
+    margin-top: 16px;
+}
+
+.usuario-admin-perfil label {
+    margin-top: 0;
+}
+
+.usuario-admin-card > button {
+    width: 100%;
+    margin-top: 14px;
+}
+
+.usuario-proprio-aviso {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 7px;
+    background: #fff7ed;
+    color: #9a3412;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+#filtro-mensagem {
+    min-height: 20px;
+    margin-top: 12px;
+    font-weight: bold;
+}
+
 #produtos {
     display: grid;
 
@@ -218,6 +479,7 @@ button:active {
 
     gap: 16px;
     margin-top: 20px;
+
     justify-content: start;
     align-items: start;
 }
@@ -234,7 +496,8 @@ button:active {
 
     transition:
             transform 0.15s,
-            box-shadow 0.15s;
+            box-shadow 0.15s,
+            border-color 0.15s;
 }
 
 .produto:hover {
@@ -242,6 +505,29 @@ button:active {
 
     box-shadow:
             0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.produto-estoque-baixo {
+    border: 2px solid #dc2626;
+    background: #fff7f7;
+}
+
+.produto-estoque-baixo:hover {
+    box-shadow:
+            0 4px 14px rgba(220, 38, 38, 0.18);
+}
+
+.alerta-estoque-baixo {
+    display: inline-block;
+    margin-bottom: 14px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .produto-imagem {
@@ -292,12 +578,37 @@ button:active {
     margin: 0;
 }
 
-.acoes button:last-child {
+.botao-excluir {
     background: #dc2626;
 }
 
-.acoes button:last-child:hover {
+.botao-excluir:hover {
     background: #b91c1c;
+}
+
+.paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.paginacao span {
+    min-width: 190px;
+    text-align: center;
+    font-weight: bold;
+    color: #374151;
+}
+
+#paginaInfo,
+#admin-pagina-info {
+    min-width: 190px;
+    text-align: center;
+    font-weight: bold;
+    color: #374151;
 }
 
 #movimentacao-mensagem {
@@ -329,6 +640,14 @@ button:active {
 .movimentacao p {
     margin: 5px 0;
     line-height: 1.4;
+}
+
+.responsavel-historico {
+    margin-top: 10px !important;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+    font-weight: bold;
+    color: #1f2937;
 }
 
 #login-mensagem,
@@ -398,19 +717,53 @@ select {
         width: 100%;
     }
 
+    .usuario-resumo {
+        align-items: flex-start;
+    }
+
+    .separador-usuario {
+        display: none;
+    }
+
+    .perfil-topo {
+        width: 100%;
+    }
+
+    .perfil-cadastro-info {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-legenda {
+        grid-template-columns: 1fr;
+    }
+
+    .filtros-usuarios,
+    .filtros-produtos {
+        grid-template-columns: 1fr;
+    }
+
+    #admin-usuarios-lista {
+        grid-template-columns: 1fr;
+    }
+
+    .usuario-admin-cabecalho {
+        flex-direction: column;
+    }
+
+    .acoes-filtros {
+        flex-direction: column;
+    }
+
+    .acoes-filtros button {
+        width: 100%;
+    }
+
     .acoes-formulario {
         flex-direction: column;
     }
 
     .acoes-formulario button {
-        width: 100%;
-    }
-
-    .acoes {
-        flex-direction: column;
-    }
-
-    .acoes button {
         width: 100%;
     }
 
@@ -422,6 +775,29 @@ select {
     .produto {
         width: 100%;
         max-width: none;
+    }
+
+    .acoes {
+        flex-direction: column;
+    }
+
+    .acoes button {
+        width: 100%;
+    }
+
+    .paginacao {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .paginacao button {
+        width: 100%;
+    }
+
+    .paginacao span,
+    #paginaInfo,
+    #admin-pagina-info {
+        min-width: 0;
     }
 
     .produto-imagem,

@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-
     <meta
             name="viewport"
             content="width=device-width, initial-scale=1.0"
@@ -20,14 +19,12 @@
 <body>
 
 <header>
-
     <h1>Controle de Estoque</h1>
 
     <p>
         Sistema para gerenciamento de produtos,
         categorias e movimentações
     </p>
-
 </header>
 
 <main>
@@ -97,6 +94,38 @@
 
             <h2>Criar conta</h2>
 
+            <label for="cadastro-nome-usuario">
+                Nome de usuário
+            </label>
+
+            <input
+                    type="text"
+                    id="cadastro-nome-usuario"
+                    maxlength="50"
+                    placeholder="Ex: Erick"
+                    autocomplete="username"
+            >
+
+            <small class="campo-ajuda">
+                Esse nome será exibido nas movimentações realizadas por você.
+            </small>
+
+            <div class="perfil-cadastro-info">
+
+                <span>
+                    Perfil inicial da conta
+                </span>
+
+                <strong class="badge-perfil perfil-consulta">
+                    CONSULTA
+                </strong>
+
+            </div>
+
+            <small class="campo-ajuda">
+                O perfil poderá ser alterado posteriormente por um administrador.
+            </small>
+
             <label for="cadastro-email">
                 Email
             </label>
@@ -164,7 +193,7 @@
             class="hidden"
     >
 
-        <div class="topo">
+        <div class="topo topo-sistema">
 
             <div>
 
@@ -172,10 +201,27 @@
                     Gerenciamento de Estoque
                 </h2>
 
-                <p>
-                    Usuário:
-                    <strong id="usuario-logado"></strong>
-                </p>
+                <div class="usuario-resumo">
+
+                    <span>
+                        Usuário:
+                        <strong id="usuario-logado"></strong>
+                    </span>
+
+                    <span class="separador-usuario">
+                        •
+                    </span>
+
+                    <span class="perfil-topo">
+                        Perfil:
+
+                        <strong
+                                id="perfil-usuario"
+                                class="badge-perfil"
+                        ></strong>
+                    </span>
+
+                </div>
 
             </div>
 
@@ -188,7 +234,249 @@
 
         </div>
 
-        <section class="card">
+        <section
+                id="admin-usuarios-section"
+                class="card hidden"
+        >
+
+            <div class="topo">
+
+                <div>
+                    <h2>
+                        Gerenciar Usuários
+                    </h2>
+
+                    <p class="subtitulo">
+                        Área exclusiva para administradores.
+                    </p>
+                </div>
+
+                <button
+                        type="button"
+                        onclick="carregarUsuariosAdmin()"
+                >
+                    Atualizar usuários
+                </button>
+
+            </div>
+
+            <div class="admin-legenda">
+
+                <div>
+                    <strong>ADMIN</strong>
+
+                    <span>
+                        Controle completo do sistema.
+                    </span>
+                </div>
+
+                <div>
+                    <strong>OPERADOR</strong>
+
+                    <span>
+                        Cadastra, edita e movimenta estoque.
+                    </span>
+                </div>
+
+                <div>
+                    <strong>CONSULTA</strong>
+
+                    <span>
+                        Apenas visualiza produtos e histórico.
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="filtros-usuarios">
+
+                <div class="campo-filtro">
+
+                    <label for="buscaUsuario">
+                        Pesquisar
+                    </label>
+
+                    <input
+                            type="text"
+                            id="buscaUsuario"
+                            placeholder="Nome ou email"
+                    >
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="filtroPerfilUsuario">
+                        Perfil
+                    </label>
+
+                    <select id="filtroPerfilUsuario">
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option value="ADMIN">
+                            ADMIN
+                        </option>
+
+                        <option value="OPERADOR">
+                            OPERADOR
+                        </option>
+
+                        <option value="CONSULTA">
+                            CONSULTA
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="ordenacaoUsuario">
+                        Ordenar por
+                    </label>
+
+                    <select id="ordenacaoUsuario">
+
+                        <option value="nomeUsuario">
+                            Nome
+                        </option>
+
+                        <option value="email">
+                            Email
+                        </option>
+
+                        <option value="perfil">
+                            Perfil
+                        </option>
+
+                        <option value="id">
+                            ID
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="direcaoUsuario">
+                        Direção
+                    </label>
+
+                    <select id="direcaoUsuario">
+
+                        <option value="asc">
+                            Crescente
+                        </option>
+
+                        <option value="desc">
+                            Decrescente
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="tamanhoPaginaUsuario">
+                        Por página
+                    </label>
+
+                    <select id="tamanhoPaginaUsuario">
+
+                        <option value="6">
+                            6
+                        </option>
+
+                        <option
+                                value="10"
+                                selected
+                        >
+                            10
+                        </option>
+
+                        <option value="20">
+                            20
+                        </option>
+
+                        <option value="50">
+                            50
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="acoes-filtros">
+
+                <button
+                        type="button"
+                        onclick="aplicarFiltrosUsuarios()"
+                >
+                    Buscar
+                </button>
+
+                <button
+                        type="button"
+                        class="botao-limpar"
+                        onclick="limparFiltrosUsuarios()"
+                >
+                    Limpar filtros
+                </button>
+
+            </div>
+
+            <p id="admin-usuarios-mensagem"></p>
+
+            <div
+                    id="admin-usuarios-contador"
+                    class="admin-contador"
+            ></div>
+
+            <div id="admin-usuarios-lista">
+
+                <p>
+                    Carregando usuários...
+                </p>
+
+            </div>
+
+            <div class="paginacao">
+
+                <button
+                        type="button"
+                        id="admin-pagina-anterior"
+                        onclick="mudarPaginaUsuarios(-1)"
+                >
+                    ← Anterior
+                </button>
+
+                <span id="admin-pagina-info">
+                    Página 1
+                </span>
+
+                <button
+                        type="button"
+                        id="admin-pagina-proxima"
+                        onclick="mudarPaginaUsuarios(1)"
+                >
+                    Próxima →
+                </button>
+
+            </div>
+
+        </section>
+
+        <section
+                id="produto-form-section"
+                class="card"
+        >
 
             <h2 id="titulo-formulario">
                 Novo Produto
@@ -216,8 +504,8 @@
                     autocomplete="off"
             >
 
-            <small>
-                Código único do produto. Exemplo: TEC-001, MOU-002 ou MON-003.
+            <small class="campo-ajuda">
+                Código único do produto.
             </small>
 
             <label for="nome">
@@ -244,7 +532,7 @@
             >
 
             <label for="quantidade">
-                Quantidade
+                Quantidade atual
             </label>
 
             <input
@@ -254,16 +542,29 @@
                     placeholder="Ex: 10"
             >
 
+            <label for="estoqueMinimo">
+                Estoque mínimo
+            </label>
+
+            <input
+                    type="number"
+                    id="estoqueMinimo"
+                    min="0"
+                    placeholder="Ex: 5"
+            >
+
+            <small class="campo-ajuda">
+                O sistema exibirá um alerta quando a quantidade estiver abaixo deste valor.
+            </small>
+
             <label for="categoriaId">
                 Categoria
             </label>
 
             <select id="categoriaId">
-
                 <option value="">
                     Selecione uma categoria
                 </option>
-
             </select>
 
             <label for="descricao">
@@ -302,7 +603,7 @@
                 <img
                         id="previewImagemProduto"
                         src=""
-                        alt="Pré-visualização da imagem do produto"
+                        alt="Pré-visualização"
                 >
 
                 <button
@@ -345,9 +646,15 @@
 
             <div class="topo">
 
-                <h2>
-                    Produtos cadastrados
-                </h2>
+                <div>
+                    <h2>
+                        Produtos cadastrados
+                    </h2>
+
+                    <p class="subtitulo">
+                        Pesquise, filtre e organize seu estoque.
+                    </p>
+                </div>
 
                 <button
                         type="button"
@@ -358,32 +665,209 @@
 
             </div>
 
-            <div id="produtos">
+            <div class="filtros-produtos">
 
-                <p>
-                    Carregando produtos...
-                </p>
+                <div class="campo-filtro">
+                    <label for="filtroNome">
+                        Nome
+                    </label>
+
+                    <input
+                            type="text"
+                            id="filtroNome"
+                            placeholder="Ex: Teclado"
+                    >
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="filtroSku">
+                        SKU
+                    </label>
+
+                    <input
+                            type="text"
+                            id="filtroSku"
+                            placeholder="Ex: TEC"
+                    >
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="filtroCategoriaId">
+                        Categoria
+                    </label>
+
+                    <select id="filtroCategoriaId">
+                        <option value="">
+                            Todas
+                        </option>
+                    </select>
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="filtroPrecoMin">
+                        Preço mínimo
+                    </label>
+
+                    <input
+                            type="number"
+                            id="filtroPrecoMin"
+                            min="0"
+                            step="0.01"
+                    >
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="filtroPrecoMax">
+                        Preço máximo
+                    </label>
+
+                    <input
+                            type="number"
+                            id="filtroPrecoMax"
+                            min="0"
+                            step="0.01"
+                    >
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="filtroQuantidadeMin">
+                        Estoque mínimo da busca
+                    </label>
+
+                    <input
+                            type="number"
+                            id="filtroQuantidadeMin"
+                            min="0"
+                    >
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="filtroQuantidadeMax">
+                        Estoque máximo da busca
+                    </label>
+
+                    <input
+                            type="number"
+                            id="filtroQuantidadeMax"
+                            min="0"
+                    >
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="ordenacaoProduto">
+                        Ordenar por
+                    </label>
+
+                    <select id="ordenacaoProduto">
+                        <option value="nome">Nome</option>
+                        <option value="sku">SKU</option>
+                        <option value="preco">Preço</option>
+                        <option value="quantidade">Quantidade</option>
+                        <option value="estoqueMinimo">Estoque mínimo</option>
+                        <option value="categoria">Categoria</option>
+                        <option value="id">ID</option>
+                    </select>
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="direcaoProduto">
+                        Direção
+                    </label>
+
+                    <select id="direcaoProduto">
+                        <option value="asc">Crescente</option>
+                        <option value="desc">Decrescente</option>
+                    </select>
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="tamanhoPaginaProduto">
+                        Por página
+                    </label>
+
+                    <select id="tamanhoPaginaProduto">
+                        <option value="6">6</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="acoes-filtros">
+
+                <button
+                        type="button"
+                        onclick="aplicarFiltrosProdutos()"
+                >
+                    Buscar
+                </button>
+
+                <button
+                        type="button"
+                        class="botao-limpar"
+                        onclick="limparFiltrosProdutos()"
+                >
+                    Limpar filtros
+                </button>
+
+            </div>
+
+            <p id="filtro-mensagem"></p>
+
+            <div id="produtos">
+                <p>Carregando produtos...</p>
+            </div>
+
+            <div class="paginacao">
+
+                <button
+                        type="button"
+                        id="botaoPaginaAnterior"
+                        onclick="mudarPaginaProdutos(-1)"
+                >
+                    ← Anterior
+                </button>
+
+                <span id="paginaInfo">
+                    Página 1
+                </span>
+
+                <button
+                        type="button"
+                        id="botaoPaginaProxima"
+                        onclick="mudarPaginaProdutos(1)"
+                >
+                    Próxima →
+                </button>
 
             </div>
 
         </section>
 
-        <section class="card">
+        <section
+                id="movimentacao-section"
+                class="card"
+        >
 
             <h2>
                 Movimentação de Estoque
             </h2>
+
+            <p class="usuario-movimentacao-info">
+                A movimentação será registrada em nome de
+                <strong id="responsavel-movimentacao-atual"></strong>.
+            </p>
 
             <label for="movimentacaoProdutoId">
                 Produto
             </label>
 
             <select id="movimentacaoProdutoId">
-
                 <option value="">
                     Selecione um produto
                 </option>
-
             </select>
 
             <label for="movimentacaoTipo">
@@ -391,19 +875,9 @@
             </label>
 
             <select id="movimentacaoTipo">
-
-                <option value="">
-                    Selecione o tipo
-                </option>
-
-                <option value="ENTRADA">
-                    Entrada
-                </option>
-
-                <option value="SAIDA">
-                    Saída
-                </option>
-
+                <option value="">Selecione o tipo</option>
+                <option value="ENTRADA">Entrada</option>
+                <option value="SAIDA">Saída</option>
             </select>
 
             <label for="movimentacaoQuantidade">
@@ -414,7 +888,6 @@
                     type="number"
                     id="movimentacaoQuantidade"
                     min="1"
-                    placeholder="Quantidade"
             >
 
             <label for="movimentacaoObservacao">
@@ -442,9 +915,15 @@
 
             <div class="topo">
 
-                <h2>
-                    Histórico de Movimentações
-                </h2>
+                <div>
+                    <h2>
+                        Histórico de Movimentações
+                    </h2>
+
+                    <p class="subtitulo">
+                        Consulte quem realizou cada entrada ou saída.
+                    </p>
+                </div>
 
                 <button
                         type="button"
@@ -456,11 +935,7 @@
             </div>
 
             <div id="historico-movimentacoes">
-
-                <p>
-                    Nenhuma movimentação registrada.
-                </p>
-
+                <p>Nenhuma movimentação registrada.</p>
             </div>
 
         </section>
@@ -472,5 +947,4 @@
 <script src="/app.js"></script>
 
 </body>
-
 </html>

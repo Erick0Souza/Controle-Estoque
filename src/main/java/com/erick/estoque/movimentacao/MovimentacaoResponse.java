@@ -1,5 +1,7 @@
 package com.erick.estoque.movimentacao;
 
+import com.erick.estoque.security.PerfilUsuario;
+
 import java.time.LocalDateTime;
 
 public record MovimentacaoResponse(
@@ -15,6 +17,12 @@ public record MovimentacaoResponse(
         Integer quantidade,
 
         Integer estoqueAtual,
+
+        String responsavelNome,
+
+        String responsavelEmail,
+
+        PerfilUsuario responsavelPerfil,
 
         String observacao,
 

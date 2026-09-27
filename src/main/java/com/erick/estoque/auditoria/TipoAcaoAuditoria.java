@@ -1,0 +1,17 @@
+package com.erick.estoque.auditoria;
+
+public enum TipoAcaoAuditoria {
+
+    PRODUTO_CRIADO,
+    PRODUTO_EDITADO,
+    PRODUTO_EXCLUIDO,
+
+    IMAGEM_PRODUTO_ADICIONADA,
+    IMAGEM_PRODUTO_REMOVIDA,
+
+    MOVIMENTACAO_ENTRADA,
+    MOVIMENTACAO_SAIDA,
+
+    PERFIL_USUARIO_ALTERADO
+
+}
