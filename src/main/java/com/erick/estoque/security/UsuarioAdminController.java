@@ -1,5 +1,7 @@
 package com.erick.estoque.security;
 
+import com.erick.estoque.auditoria.AuditoriaService;
+import com.erick.estoque.auditoria.TipoAcaoAuditoria;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
@@ -18,12 +20,17 @@ import java.util.Locale;
 public class UsuarioAdminController {
 
     private final UserRepository userRepository;
+    private final AuditoriaService auditoriaService;
 
     public UsuarioAdminController(
-            UserRepository userRepository
+            UserRepository userRepository,
+            AuditoriaService auditoriaService
     ) {
         this.userRepository =
                 userRepository;
+
+        this.auditoriaService =
+                auditoriaService;
     }
 
     @GetMapping
@@ -179,6 +186,18 @@ public class UsuarioAdminController {
                 userRepository.save(
                         usuario
                 );
+
+        auditoriaService.registrar(
+                TipoAcaoAuditoria.PERFIL_USUARIO_ALTERADO,
+                "USUARIO",
+                usuarioSalvo.getId(),
+                "Perfil do usuário \"" +
+                        usuarioSalvo.getNomeUsuario() +
+                        "\" alterado de " +
+                        perfilAtual +
+                        " para " +
+                        novoPerfil
+        );
 
         return toResponse(
                 usuarioSalvo

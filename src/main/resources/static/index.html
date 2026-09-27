@@ -235,6 +235,156 @@
         </div>
 
         <section
+                id="admin-dashboard-section"
+                class="card hidden"
+        >
+
+            <div class="topo">
+
+                <div>
+                    <h2>
+                        Dashboard
+                    </h2>
+
+                    <p class="subtitulo">
+                        Visão geral dos principais indicadores do estoque.
+                    </p>
+                </div>
+
+                <button
+                        type="button"
+                        onclick="carregarDashboard()"
+                >
+                    Atualizar dashboard
+                </button>
+
+            </div>
+
+            <p id="dashboard-mensagem"></p>
+
+            <div class="dashboard-grid">
+
+                <div class="dashboard-card">
+                    <span class="dashboard-card-titulo">
+                        Produtos
+                    </span>
+
+                    <strong
+                            id="dashboard-total-produtos"
+                            class="dashboard-card-valor"
+                    >0</strong>
+                </div>
+
+                <div class="dashboard-card">
+                    <span class="dashboard-card-titulo">
+                        Unidades em estoque
+                    </span>
+
+                    <strong
+                            id="dashboard-total-unidades"
+                            class="dashboard-card-valor"
+                    >0</strong>
+                </div>
+
+                <div class="dashboard-card dashboard-card-alerta">
+                    <span class="dashboard-card-titulo">
+                        Produtos com estoque baixo
+                    </span>
+
+                    <strong
+                            id="dashboard-estoque-baixo"
+                            class="dashboard-card-valor"
+                    >0</strong>
+                </div>
+
+                <div class="dashboard-card">
+                    <span class="dashboard-card-titulo">
+                        Valor estimado do estoque
+                    </span>
+
+                    <strong
+                            id="dashboard-valor-estoque"
+                            class="dashboard-card-valor dashboard-card-valor-menor"
+                    >R$ 0,00</strong>
+                </div>
+
+                <div class="dashboard-card">
+                    <span class="dashboard-card-titulo">
+                        Categorias
+                    </span>
+
+                    <strong
+                            id="dashboard-total-categorias"
+                            class="dashboard-card-valor"
+                    >0</strong>
+                </div>
+
+                <div class="dashboard-card">
+                    <span class="dashboard-card-titulo">
+                        Usuários
+                    </span>
+
+                    <strong
+                            id="dashboard-total-usuarios"
+                            class="dashboard-card-valor"
+                    >0</strong>
+                </div>
+
+                <div class="dashboard-card">
+                    <span class="dashboard-card-titulo">
+                        Movimentações
+                    </span>
+
+                    <strong
+                            id="dashboard-total-movimentacoes"
+                            class="dashboard-card-valor"
+                    >0</strong>
+                </div>
+
+                <div class="dashboard-card dashboard-card-entrada">
+                    <span class="dashboard-card-titulo">
+                        Entradas
+                    </span>
+
+                    <strong
+                            id="dashboard-total-entradas"
+                            class="dashboard-card-valor"
+                    >0</strong>
+                </div>
+
+                <div class="dashboard-card dashboard-card-saida">
+                    <span class="dashboard-card-titulo">
+                        Saídas
+                    </span>
+
+                    <strong
+                            id="dashboard-total-saidas"
+                            class="dashboard-card-valor"
+                    >0</strong>
+                </div>
+
+            </div>
+
+            <div class="dashboard-atividades">
+
+                <h3>
+                    Atividades recentes
+                </h3>
+
+                <p class="subtitulo">
+                    Últimas ações registradas pela auditoria.
+                </p>
+
+                <div id="dashboard-atividades-lista">
+                    <p>
+                        Carregando atividades...
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+        <section
                 id="admin-usuarios-section"
                 class="card hidden"
         >
@@ -465,6 +615,335 @@
                         type="button"
                         id="admin-pagina-proxima"
                         onclick="mudarPaginaUsuarios(1)"
+                >
+                    Próxima →
+                </button>
+
+            </div>
+
+        </section>
+
+        <section
+                id="admin-auditoria-section"
+                class="card hidden"
+        >
+
+            <div class="topo">
+
+                <div>
+                    <h2>
+                        Auditoria do Sistema
+                    </h2>
+
+                    <p class="subtitulo">
+                        Consulte as ações registradas no sistema.
+                    </p>
+                </div>
+
+                <button
+                        type="button"
+                        onclick="carregarAuditorias()"
+                >
+                    Atualizar auditoria
+                </button>
+
+            </div>
+
+            <div class="filtros-auditoria">
+
+                <div class="campo-filtro">
+
+                    <label for="auditoriaUsuario">
+                        Usuário
+                    </label>
+
+                    <input
+                            type="text"
+                            id="auditoriaUsuario"
+                            placeholder="Nome ou email"
+                    >
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="auditoriaPerfil">
+                        Perfil
+                    </label>
+
+                    <select id="auditoriaPerfil">
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option value="ADMIN">
+                            ADMIN
+                        </option>
+
+                        <option value="OPERADOR">
+                            OPERADOR
+                        </option>
+
+                        <option value="CONSULTA">
+                            CONSULTA
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="auditoriaAcao">
+                        Ação
+                    </label>
+
+                    <select id="auditoriaAcao">
+
+                        <option value="">
+                            Todas
+                        </option>
+
+                        <option value="PRODUTO_CRIADO">
+                            Produto criado
+                        </option>
+
+                        <option value="PRODUTO_EDITADO">
+                            Produto editado
+                        </option>
+
+                        <option value="PRODUTO_EXCLUIDO">
+                            Produto excluído
+                        </option>
+
+                        <option value="IMAGEM_PRODUTO_ADICIONADA">
+                            Imagem de produto adicionada
+                        </option>
+
+                        <option value="IMAGEM_PRODUTO_REMOVIDA">
+                            Imagem de produto removida
+                        </option>
+
+                        <option value="MOVIMENTACAO_ENTRADA">
+                            Movimentação de entrada
+                        </option>
+
+                        <option value="MOVIMENTACAO_SAIDA">
+                            Movimentação de saída
+                        </option>
+
+                        <option value="PERFIL_USUARIO_ALTERADO">
+                            Perfil de usuário alterado
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="auditoriaEntidade">
+                        Entidade
+                    </label>
+
+                    <select id="auditoriaEntidade">
+
+                        <option value="">
+                            Todas
+                        </option>
+
+                        <option value="PRODUTO">
+                            PRODUTO
+                        </option>
+
+                        <option value="MOVIMENTACAO">
+                            MOVIMENTACAO
+                        </option>
+
+                        <option value="USUARIO">
+                            USUARIO
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="auditoriaDataInicio">
+                        Data inicial
+                    </label>
+
+                    <input
+                            type="datetime-local"
+                            id="auditoriaDataInicio"
+                    >
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="auditoriaDataFim">
+                        Data final
+                    </label>
+
+                    <input
+                            type="datetime-local"
+                            id="auditoriaDataFim"
+                    >
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="ordenacaoAuditoria">
+                        Ordenar por
+                    </label>
+
+                    <select id="ordenacaoAuditoria">
+
+                        <option value="dataHora">
+                            Data e hora
+                        </option>
+
+                        <option value="usuarioNome">
+                            Usuário
+                        </option>
+
+                        <option value="usuarioEmail">
+                            Email
+                        </option>
+
+                        <option value="usuarioPerfil">
+                            Perfil
+                        </option>
+
+                        <option value="acao">
+                            Ação
+                        </option>
+
+                        <option value="entidade">
+                            Entidade
+                        </option>
+
+                        <option value="entidadeId">
+                            ID da entidade
+                        </option>
+
+                        <option value="id">
+                            ID da auditoria
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="direcaoAuditoria">
+                        Direção
+                    </label>
+
+                    <select id="direcaoAuditoria">
+
+                        <option value="desc">
+                            Mais recentes
+                        </option>
+
+                        <option value="asc">
+                            Mais antigos
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo-filtro">
+
+                    <label for="tamanhoPaginaAuditoria">
+                        Por página
+                    </label>
+
+                    <select id="tamanhoPaginaAuditoria">
+
+                        <option value="10">
+                            10
+                        </option>
+
+                        <option
+                                value="20"
+                                selected
+                        >
+                            20
+                        </option>
+
+                        <option value="50">
+                            50
+                        </option>
+
+                        <option value="100">
+                            100
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="acoes-filtros">
+
+                <button
+                        type="button"
+                        onclick="aplicarFiltrosAuditoria()"
+                >
+                    Buscar
+                </button>
+
+                <button
+                        type="button"
+                        class="botao-limpar"
+                        onclick="limparFiltrosAuditoria()"
+                >
+                    Limpar filtros
+                </button>
+
+            </div>
+
+            <p id="auditoria-mensagem"></p>
+
+            <div
+                    id="auditoria-contador"
+                    class="admin-contador"
+            ></div>
+
+            <div id="auditoria-lista">
+
+                <p>
+                    Carregando auditoria...
+                </p>
+
+            </div>
+
+            <div class="paginacao">
+
+                <button
+                        type="button"
+                        id="auditoria-pagina-anterior"
+                        onclick="mudarPaginaAuditoria(-1)"
+                >
+                    ← Anterior
+                </button>
+
+                <span id="auditoria-pagina-info">
+                    Página 1
+                </span>
+
+                <button
+                        type="button"
+                        id="auditoria-pagina-proxima"
+                        onclick="mudarPaginaAuditoria(1)"
                 >
                     Próxima →
                 </button>

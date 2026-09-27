@@ -6,6 +6,9 @@ let totalPaginasProdutos = 0;
 let paginaAtualUsuarios = 0;
 let totalPaginasUsuarios = 0;
 
+let paginaAtualAuditoria = 0;
+let totalPaginasAuditoria = 0;
+
 const TIPOS_IMAGEM_PERMITIDOS = [
     "image/jpeg",
     "image/png",
@@ -142,6 +145,16 @@ function aplicarPermissoesInterface() {
             "admin-usuarios-section"
         );
 
+    const adminAuditoriaSection =
+        document.getElementById(
+            "admin-auditoria-section"
+        );
+
+    const adminDashboardSection =
+        document.getElementById(
+            "admin-dashboard-section"
+        );
+
     if (usuarioLogado) {
         usuarioLogado.textContent =
             nomeUsuario;
@@ -196,6 +209,32 @@ function aplicarPermissoesInterface() {
                 .remove("hidden");
         } else {
             adminUsuariosSection
+                .classList
+                .add("hidden");
+        }
+    }
+
+    if (adminAuditoriaSection) {
+
+        if (ehAdmin()) {
+            adminAuditoriaSection
+                .classList
+                .remove("hidden");
+        } else {
+            adminAuditoriaSection
+                .classList
+                .add("hidden");
+        }
+    }
+
+    if (adminDashboardSection) {
+
+        if (ehAdmin()) {
+            adminDashboardSection
+                .classList
+                .remove("hidden");
+        } else {
+            adminDashboardSection
                 .classList
                 .add("hidden");
         }
@@ -521,9 +560,17 @@ async function login() {
         await carregarHistorico();
 
         if (ehAdmin()) {
+            await carregarDashboard();
+
             paginaAtualUsuarios = 0;
 
             await carregarUsuariosAdmin(
+                0
+            );
+
+            paginaAtualAuditoria = 0;
+
+            await carregarAuditorias(
                 0
             );
         }
@@ -567,6 +614,9 @@ function logout() {
     paginaAtualUsuarios = 0;
     totalPaginasUsuarios = 0;
 
+    paginaAtualAuditoria = 0;
+    totalPaginasAuditoria = 0;
+
     document
         .getElementById("sistema")
         .classList
@@ -604,6 +654,26 @@ function logout() {
     if (contadorUsuarios) {
         contadorUsuarios.textContent = "";
     }
+
+    const listaAuditoria =
+        document.getElementById(
+            "auditoria-lista"
+        );
+
+    if (listaAuditoria) {
+        listaAuditoria.innerHTML = "";
+    }
+
+    const contadorAuditoria =
+        document.getElementById(
+            "auditoria-contador"
+        );
+
+    if (contadorAuditoria) {
+        contadorAuditoria.textContent = "";
+    }
+
+    limparDashboard();
 
     limparFormularioProduto();
     limparFormularioMovimentacao();
@@ -1408,6 +1478,1258 @@ async function alterarPerfilUsuario(
 }
 
 
+async function carregarDashboard() {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "dashboard-mensagem"
+        );
+
+    if (mensagem) {
+        mensagem.textContent =
+            "Carregando dashboard...";
+    }
+
+    try {
+        const resposta =
+            await fetch(
+                "/admin/dashboard",
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer "
+                            + token
+                    }
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    "Você não possui permissão para acessar o dashboard.";
+            }
+
+            return;
+        }
+
+        if (!resposta.ok) {
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    dados.message ||
+                    dados.detail ||
+                    "Não foi possível carregar o dashboard.";
+            }
+
+            return;
+        }
+
+        mostrarDashboard(
+            dados
+        );
+
+        if (mensagem) {
+            mensagem.textContent = "";
+        }
+
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar dashboard:",
+            erro
+        );
+
+        if (mensagem) {
+            mensagem.textContent =
+                "Erro ao conectar com o servidor.";
+        }
+    }
+}
+
+
+function mostrarDashboard(
+    dados
+) {
+    definirValorDashboard(
+        "dashboard-total-produtos",
+        dados.totalProdutos ?? 0
+    );
+
+    definirValorDashboard(
+        "dashboard-total-unidades",
+        dados.totalUnidadesEstoque ?? 0
+    );
+
+    definirValorDashboard(
+        "dashboard-estoque-baixo",
+        dados.produtosEstoqueBaixo ?? 0
+    );
+
+    definirValorDashboard(
+        "dashboard-valor-estoque",
+        formatarValorMonetarioDashboard(
+            dados.valorTotalEstoque
+        )
+    );
+
+    definirValorDashboard(
+        "dashboard-total-categorias",
+        dados.totalCategorias ?? 0
+    );
+
+    definirValorDashboard(
+        "dashboard-total-usuarios",
+        dados.totalUsuarios ?? 0
+    );
+
+    definirValorDashboard(
+        "dashboard-total-movimentacoes",
+        dados.totalMovimentacoes ?? 0
+    );
+
+    definirValorDashboard(
+        "dashboard-total-entradas",
+        dados.totalEntradas ?? 0
+    );
+
+    definirValorDashboard(
+        "dashboard-total-saidas",
+        dados.totalSaidas ?? 0
+    );
+
+    mostrarAtividadesDashboard(
+        dados.atividadesRecentes || []
+    );
+}
+
+
+function definirValorDashboard(
+    id,
+    valor
+) {
+    const elemento =
+        document.getElementById(
+            id
+        );
+
+    if (elemento) {
+        elemento.textContent =
+            valor;
+    }
+}
+
+
+function formatarValorMonetarioDashboard(
+    valor
+) {
+    const numero =
+        Number(
+            valor ?? 0
+        );
+
+    if (!Number.isFinite(numero)) {
+        return "R$ 0,00";
+    }
+
+    return numero.toLocaleString(
+        "pt-BR",
+        {
+            style: "currency",
+            currency: "BRL"
+        }
+    );
+}
+
+
+function mostrarAtividadesDashboard(
+    atividades
+) {
+    const lista =
+        document.getElementById(
+            "dashboard-atividades-lista"
+        );
+
+    if (!lista) {
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    if (
+        !atividades ||
+        atividades.length === 0
+    ) {
+        lista.innerHTML =
+            "<p>Nenhuma atividade recente registrada.</p>";
+
+        return;
+    }
+
+    atividades.forEach(
+        atividade => {
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.classList.add(
+                "dashboard-atividade-item"
+            );
+
+            const cabecalho =
+                document.createElement(
+                    "div"
+                );
+
+            cabecalho.classList.add(
+                "dashboard-atividade-cabecalho"
+            );
+
+            const acao =
+                document.createElement(
+                    "strong"
+                );
+
+            acao.textContent =
+                formatarAcaoAuditoria(
+                    atividade.acao
+                );
+
+            cabecalho.appendChild(
+                acao
+            );
+
+            const data =
+                document.createElement(
+                    "span"
+                );
+
+            data.classList.add(
+                "dashboard-atividade-data"
+            );
+
+            if (atividade.dataHora) {
+                data.textContent =
+                    new Date(
+                        atividade.dataHora
+                    ).toLocaleString(
+                        "pt-BR"
+                    );
+            } else {
+                data.textContent =
+                    "Data não informada";
+            }
+
+            cabecalho.appendChild(
+                data
+            );
+
+            item.appendChild(
+                cabecalho
+            );
+
+            const usuario =
+                document.createElement(
+                    "div"
+                );
+
+            usuario.classList.add(
+                "dashboard-atividade-usuario"
+            );
+
+            const nome =
+                document.createElement(
+                    "span"
+                );
+
+            nome.textContent =
+                atividade.usuarioNome ||
+                atividade.usuarioEmail ||
+                "SISTEMA";
+
+            usuario.appendChild(
+                nome
+            );
+
+            if (atividade.usuarioPerfil) {
+                const perfil =
+                    document.createElement(
+                        "strong"
+                    );
+
+                perfil.classList.add(
+                    "badge-perfil"
+                );
+
+                perfil.textContent =
+                    atividade.usuarioPerfil;
+
+                aplicarClassePerfil(
+                    perfil,
+                    atividade.usuarioPerfil
+                );
+
+                usuario.appendChild(
+                    perfil
+                );
+            }
+
+            item.appendChild(
+                usuario
+            );
+
+            const entidade =
+                document.createElement(
+                    "p"
+                );
+
+            entidade.textContent =
+                "Entidade: "
+                + (
+                    atividade.entidade ||
+                    "Não informada"
+                )
+                + (
+                    atividade.entidadeId != null
+                        ? " • ID: "
+                        + atividade.entidadeId
+                        : ""
+                );
+
+            item.appendChild(
+                entidade
+            );
+
+            const descricao =
+                document.createElement(
+                    "p"
+                );
+
+            descricao.classList.add(
+                "dashboard-atividade-descricao"
+            );
+
+            descricao.textContent =
+                atividade.descricao ||
+                "Sem descrição.";
+
+            item.appendChild(
+                descricao
+            );
+
+            lista.appendChild(
+                item
+            );
+        }
+    );
+}
+
+
+function limparDashboard() {
+    const valores = [
+        "dashboard-total-produtos",
+        "dashboard-total-unidades",
+        "dashboard-estoque-baixo",
+        "dashboard-total-categorias",
+        "dashboard-total-usuarios",
+        "dashboard-total-movimentacoes",
+        "dashboard-total-entradas",
+        "dashboard-total-saidas"
+    ];
+
+    valores.forEach(
+        id => {
+            definirValorDashboard(
+                id,
+                0
+            );
+        }
+    );
+
+    definirValorDashboard(
+        "dashboard-valor-estoque",
+        "R$ 0,00"
+    );
+
+    const atividades =
+        document.getElementById(
+            "dashboard-atividades-lista"
+        );
+
+    if (atividades) {
+        atividades.innerHTML = "";
+    }
+
+    const mensagem =
+        document.getElementById(
+            "dashboard-mensagem"
+        );
+
+    if (mensagem) {
+        mensagem.textContent = "";
+    }
+}
+
+function montarParametrosAuditoria(
+    pagina
+) {
+    const params =
+        new URLSearchParams();
+
+    const usuarioElemento =
+        document.getElementById(
+            "auditoriaUsuario"
+        );
+
+    const perfilElemento =
+        document.getElementById(
+            "auditoriaPerfil"
+        );
+
+    const acaoElemento =
+        document.getElementById(
+            "auditoriaAcao"
+        );
+
+    const entidadeElemento =
+        document.getElementById(
+            "auditoriaEntidade"
+        );
+
+    const dataInicioElemento =
+        document.getElementById(
+            "auditoriaDataInicio"
+        );
+
+    const dataFimElemento =
+        document.getElementById(
+            "auditoriaDataFim"
+        );
+
+    const ordenacaoElemento =
+        document.getElementById(
+            "ordenacaoAuditoria"
+        );
+
+    const direcaoElemento =
+        document.getElementById(
+            "direcaoAuditoria"
+        );
+
+    const tamanhoElemento =
+        document.getElementById(
+            "tamanhoPaginaAuditoria"
+        );
+
+    const usuario =
+        usuarioElemento
+            ? usuarioElemento.value.trim()
+            : "";
+
+    const perfil =
+        perfilElemento
+            ? perfilElemento.value
+            : "";
+
+    const acao =
+        acaoElemento
+            ? acaoElemento.value
+            : "";
+
+    const entidade =
+        entidadeElemento
+            ? entidadeElemento.value
+            : "";
+
+    const dataInicio =
+        dataInicioElemento
+            ? dataInicioElemento.value
+            : "";
+
+    const dataFim =
+        dataFimElemento
+            ? dataFimElemento.value
+            : "";
+
+    const sort =
+        ordenacaoElemento
+            ? ordenacaoElemento.value
+            : "dataHora";
+
+    const direction =
+        direcaoElemento
+            ? direcaoElemento.value
+            : "desc";
+
+    const size =
+        tamanhoElemento
+            ? tamanhoElemento.value
+            : "20";
+
+    if (usuario) {
+        params.set(
+            "usuario",
+            usuario
+        );
+    }
+
+    if (perfil) {
+        params.set(
+            "perfil",
+            perfil
+        );
+    }
+
+    if (acao) {
+        params.set(
+            "acao",
+            acao
+        );
+    }
+
+    if (entidade) {
+        params.set(
+            "entidade",
+            entidade
+        );
+    }
+
+    if (dataInicio) {
+        params.set(
+            "dataInicio",
+            dataInicio
+        );
+    }
+
+    if (dataFim) {
+        params.set(
+            "dataFim",
+            dataFim
+        );
+    }
+
+    params.set(
+        "page",
+        pagina
+    );
+
+    params.set(
+        "size",
+        size
+    );
+
+    params.set(
+        "sort",
+        sort
+    );
+
+    params.set(
+        "direction",
+        direction
+    );
+
+    return params;
+}
+
+
+async function carregarAuditorias(
+    pagina = paginaAtualAuditoria
+) {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    const lista =
+        document.getElementById(
+            "auditoria-lista"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "auditoria-mensagem"
+        );
+
+    if (!lista) {
+        return;
+    }
+
+    lista.innerHTML =
+        "<p>Carregando auditoria...</p>";
+
+    if (mensagem) {
+        mensagem.textContent = "";
+    }
+
+    const params =
+        montarParametrosAuditoria(
+            pagina
+        );
+
+    try {
+        const resposta =
+            await fetch(
+                "/admin/auditorias?"
+                + params.toString(),
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer "
+                            + token
+                    }
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            lista.innerHTML = "";
+
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    "Você não possui permissão para acessar a auditoria.";
+            }
+
+            return;
+        }
+
+        if (!resposta.ok) {
+            lista.innerHTML = "";
+
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    dados.message ||
+                    dados.detail ||
+                    "Não foi possível carregar a auditoria.";
+            }
+
+            return;
+        }
+
+        const auditorias =
+            dados.content || [];
+
+        if (
+            auditorias.length === 0 &&
+            pagina > 0 &&
+            dados.totalPages > 0
+        ) {
+            paginaAtualAuditoria =
+                dados.totalPages - 1;
+
+            await carregarAuditorias(
+                paginaAtualAuditoria
+            );
+
+            return;
+        }
+
+        paginaAtualAuditoria =
+            dados.number || 0;
+
+        totalPaginasAuditoria =
+            dados.totalPages || 0;
+
+        mostrarAuditorias(
+            auditorias
+        );
+
+        atualizarPaginacaoAuditoria(
+            dados
+        );
+
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar auditoria:",
+            erro
+        );
+
+        lista.innerHTML = "";
+
+        if (mensagem) {
+            mensagem.textContent =
+                "Erro ao conectar com o servidor.";
+        }
+    }
+}
+
+
+function atualizarPaginacaoAuditoria(
+    dados
+) {
+    const contador =
+        document.getElementById(
+            "auditoria-contador"
+        );
+
+    const info =
+        document.getElementById(
+            "auditoria-pagina-info"
+        );
+
+    const anterior =
+        document.getElementById(
+            "auditoria-pagina-anterior"
+        );
+
+    const proxima =
+        document.getElementById(
+            "auditoria-pagina-proxima"
+        );
+
+    const total =
+        dados.totalElements || 0;
+
+    if (contador) {
+        contador.textContent =
+            total
+            + (
+                total === 1
+                    ? " registro encontrado"
+                    : " registros encontrados"
+            );
+    }
+
+    if (
+        !info ||
+        !anterior ||
+        !proxima
+    ) {
+        return;
+    }
+
+    if (
+        !dados.totalPages ||
+        dados.totalPages === 0
+    ) {
+        info.textContent =
+            "Nenhum registro encontrado";
+
+        anterior.disabled = true;
+        proxima.disabled = true;
+
+        return;
+    }
+
+    info.textContent =
+        "Página "
+        + (dados.number + 1)
+        + " de "
+        + dados.totalPages;
+
+    anterior.disabled =
+        dados.first === true;
+
+    proxima.disabled =
+        dados.last === true;
+}
+
+
+async function aplicarFiltrosAuditoria() {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const mensagem =
+        document.getElementById(
+            "auditoria-mensagem"
+        );
+
+    const dataInicioElemento =
+        document.getElementById(
+            "auditoriaDataInicio"
+        );
+
+    const dataFimElemento =
+        document.getElementById(
+            "auditoriaDataFim"
+        );
+
+    const dataInicio =
+        dataInicioElemento
+            ? dataInicioElemento.value
+            : "";
+
+    const dataFim =
+        dataFimElemento
+            ? dataFimElemento.value
+            : "";
+
+    if (
+        dataInicio &&
+        dataFim &&
+        new Date(dataInicio).getTime() >
+        new Date(dataFim).getTime()
+    ) {
+        if (mensagem) {
+            mensagem.textContent =
+                "A data inicial não pode ser posterior à data final.";
+        }
+
+        return;
+    }
+
+    paginaAtualAuditoria = 0;
+
+    await carregarAuditorias(
+        0
+    );
+}
+
+
+async function limparFiltrosAuditoria() {
+    const usuario =
+        document.getElementById(
+            "auditoriaUsuario"
+        );
+
+    const perfil =
+        document.getElementById(
+            "auditoriaPerfil"
+        );
+
+    const acao =
+        document.getElementById(
+            "auditoriaAcao"
+        );
+
+    const entidade =
+        document.getElementById(
+            "auditoriaEntidade"
+        );
+
+    const dataInicio =
+        document.getElementById(
+            "auditoriaDataInicio"
+        );
+
+    const dataFim =
+        document.getElementById(
+            "auditoriaDataFim"
+        );
+
+    const ordenacao =
+        document.getElementById(
+            "ordenacaoAuditoria"
+        );
+
+    const direcao =
+        document.getElementById(
+            "direcaoAuditoria"
+        );
+
+    const tamanho =
+        document.getElementById(
+            "tamanhoPaginaAuditoria"
+        );
+
+    if (usuario) {
+        usuario.value = "";
+    }
+
+    if (perfil) {
+        perfil.value = "";
+    }
+
+    if (acao) {
+        acao.value = "";
+    }
+
+    if (entidade) {
+        entidade.value = "";
+    }
+
+    if (dataInicio) {
+        dataInicio.value = "";
+    }
+
+    if (dataFim) {
+        dataFim.value = "";
+    }
+
+    if (ordenacao) {
+        ordenacao.value =
+            "dataHora";
+    }
+
+    if (direcao) {
+        direcao.value =
+            "desc";
+    }
+
+    if (tamanho) {
+        tamanho.value =
+            "20";
+    }
+
+    const mensagem =
+        document.getElementById(
+            "auditoria-mensagem"
+        );
+
+    if (mensagem) {
+        mensagem.textContent = "";
+    }
+
+    paginaAtualAuditoria = 0;
+
+    await carregarAuditorias(
+        0
+    );
+}
+
+
+async function mudarPaginaAuditoria(
+    direcao
+) {
+    const novaPagina =
+        paginaAtualAuditoria
+        + direcao;
+
+    if (
+        novaPagina < 0 ||
+        novaPagina >= totalPaginasAuditoria
+    ) {
+        return;
+    }
+
+    paginaAtualAuditoria =
+        novaPagina;
+
+    await carregarAuditorias(
+        paginaAtualAuditoria
+    );
+
+    const secao =
+        document.getElementById(
+            "admin-auditoria-section"
+        );
+
+    if (secao) {
+        secao.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+}
+
+
+function mostrarAuditorias(
+    auditorias
+) {
+    const lista =
+        document.getElementById(
+            "auditoria-lista"
+        );
+
+    if (!lista) {
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    if (
+        !auditorias ||
+        auditorias.length === 0
+    ) {
+        lista.innerHTML =
+            "<p>Nenhum registro de auditoria encontrado.</p>";
+
+        return;
+    }
+
+    auditorias.forEach(
+        auditoria => {
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.classList.add(
+                "auditoria-card"
+            );
+
+            const cabecalho =
+                document.createElement(
+                    "div"
+                );
+
+            cabecalho.classList.add(
+                "auditoria-cabecalho"
+            );
+
+            const titulo =
+                document.createElement(
+                    "h3"
+                );
+
+            titulo.textContent =
+                formatarAcaoAuditoria(
+                    auditoria.acao
+                );
+
+            const data =
+                document.createElement(
+                    "span"
+                );
+
+            data.classList.add(
+                "auditoria-data"
+            );
+
+            if (auditoria.dataHora) {
+                data.textContent =
+                    new Date(
+                        auditoria.dataHora
+                    ).toLocaleString(
+                        "pt-BR"
+                    );
+            } else {
+                data.textContent =
+                    "Data não informada";
+            }
+
+            cabecalho.appendChild(
+                titulo
+            );
+
+            cabecalho.appendChild(
+                data
+            );
+
+            card.appendChild(
+                cabecalho
+            );
+
+            const usuario =
+                document.createElement(
+                    "p"
+                );
+
+            usuario.textContent =
+                "Usuário: "
+                + (
+                    auditoria.usuarioNome ||
+                    auditoria.usuarioEmail ||
+                    "SISTEMA"
+                );
+
+            card.appendChild(
+                usuario
+            );
+
+            if (auditoria.usuarioEmail) {
+                const email =
+                    document.createElement(
+                        "p"
+                    );
+
+                email.textContent =
+                    "Email: "
+                    + auditoria.usuarioEmail;
+
+                card.appendChild(
+                    email
+                );
+            }
+
+            const perfil =
+                document.createElement(
+                    "div"
+                );
+
+            perfil.classList.add(
+                "auditoria-perfil"
+            );
+
+            const perfilTexto =
+                document.createElement(
+                    "span"
+                );
+
+            perfilTexto.textContent =
+                "Perfil: ";
+
+            perfil.appendChild(
+                perfilTexto
+            );
+
+            if (auditoria.usuarioPerfil) {
+                const badge =
+                    document.createElement(
+                        "strong"
+                    );
+
+                badge.classList.add(
+                    "badge-perfil"
+                );
+
+                badge.textContent =
+                    auditoria.usuarioPerfil;
+
+                aplicarClassePerfil(
+                    badge,
+                    auditoria.usuarioPerfil
+                );
+
+                perfil.appendChild(
+                    badge
+                );
+            } else {
+                const semPerfil =
+                    document.createElement(
+                        "span"
+                    );
+
+                semPerfil.textContent =
+                    "Não registrado";
+
+                perfil.appendChild(
+                    semPerfil
+                );
+            }
+
+            card.appendChild(
+                perfil
+            );
+
+            const entidade =
+                document.createElement(
+                    "p"
+                );
+
+            entidade.textContent =
+                "Entidade: "
+                + (
+                    auditoria.entidade ||
+                    "Não informada"
+                )
+                + (
+                    auditoria.entidadeId != null
+                        ? " • ID: "
+                        + auditoria.entidadeId
+                        : ""
+                );
+
+            card.appendChild(
+                entidade
+            );
+
+            const descricao =
+                document.createElement(
+                    "p"
+                );
+
+            descricao.classList.add(
+                "auditoria-descricao"
+            );
+
+            descricao.textContent =
+                auditoria.descricao ||
+                "Sem descrição.";
+
+            card.appendChild(
+                descricao
+            );
+
+            lista.appendChild(
+                card
+            );
+        }
+    );
+}
+
+
+function formatarAcaoAuditoria(
+    acao
+) {
+    return switchAcaoAuditoria(
+        acao
+    );
+}
+
+
+function switchAcaoAuditoria(
+    acao
+) {
+    switch (acao) {
+        case "PRODUTO_CRIADO":
+            return "Produto criado";
+
+        case "PRODUTO_EDITADO":
+            return "Produto editado";
+
+        case "PRODUTO_EXCLUIDO":
+            return "Produto excluído";
+
+        case "IMAGEM_PRODUTO_ADICIONADA":
+            return "Imagem de produto adicionada";
+
+        case "IMAGEM_PRODUTO_REMOVIDA":
+            return "Imagem de produto removida";
+
+        case "MOVIMENTACAO_ENTRADA":
+            return "Movimentação de entrada";
+
+        case "MOVIMENTACAO_SAIDA":
+            return "Movimentação de saída";
+
+        case "PERFIL_USUARIO_ALTERADO":
+            return "Perfil de usuário alterado";
+
+        default:
+            return acao ||
+                "Ação não informada";
+    }
+}
 async function carregarCategorias() {
     const token =
         sessionStorage.getItem("token");
@@ -3139,8 +4461,6 @@ async function editarProduto(
             "Erro ao conectar com o servidor.";
     }
 }
-
-
 async function enviarImagemProduto(
     produtoId,
     arquivo
@@ -4124,8 +5444,6 @@ function mostrarHistorico(
             }
         );
 }
-
-
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
@@ -4276,6 +5594,115 @@ document.addEventListener(
             );
         }
 
+        const auditoriaUsuario =
+            document.getElementById(
+                "auditoriaUsuario"
+            );
+
+        if (auditoriaUsuario) {
+            auditoriaUsuario.addEventListener(
+                "keydown",
+                async evento => {
+                    if (
+                        evento.key ===
+                        "Enter"
+                    ) {
+                        evento.preventDefault();
+
+                        await aplicarFiltrosAuditoria();
+                    }
+                }
+            );
+        }
+
+        const auditoriaPerfil =
+            document.getElementById(
+                "auditoriaPerfil"
+            );
+
+        if (auditoriaPerfil) {
+            auditoriaPerfil.addEventListener(
+                "change",
+                async () => {
+                    await aplicarFiltrosAuditoria();
+                }
+            );
+        }
+
+        const auditoriaAcao =
+            document.getElementById(
+                "auditoriaAcao"
+            );
+
+        if (auditoriaAcao) {
+            auditoriaAcao.addEventListener(
+                "change",
+                async () => {
+                    await aplicarFiltrosAuditoria();
+                }
+            );
+        }
+
+        const auditoriaEntidade =
+            document.getElementById(
+                "auditoriaEntidade"
+            );
+
+        if (auditoriaEntidade) {
+            auditoriaEntidade.addEventListener(
+                "change",
+                async () => {
+                    await aplicarFiltrosAuditoria();
+                }
+            );
+        }
+
+        const ordenacaoAuditoria =
+            document.getElementById(
+                "ordenacaoAuditoria"
+            );
+
+        if (ordenacaoAuditoria) {
+            ordenacaoAuditoria.addEventListener(
+                "change",
+                async () => {
+                    await aplicarFiltrosAuditoria();
+                }
+            );
+        }
+
+        const direcaoAuditoria =
+            document.getElementById(
+                "direcaoAuditoria"
+            );
+
+        if (direcaoAuditoria) {
+            direcaoAuditoria.addEventListener(
+                "change",
+                async () => {
+                    await aplicarFiltrosAuditoria();
+                }
+            );
+        }
+
+        const tamanhoPaginaAuditoria =
+            document.getElementById(
+                "tamanhoPaginaAuditoria"
+            );
+
+        if (tamanhoPaginaAuditoria) {
+            tamanhoPaginaAuditoria.addEventListener(
+                "change",
+                async () => {
+                    paginaAtualAuditoria = 0;
+
+                    await carregarAuditorias(
+                        0
+                    );
+                }
+            );
+        }
+
         const inputImagem =
             document.getElementById(
                 "imagemProduto"
@@ -4382,9 +5809,17 @@ document.addEventListener(
             await carregarHistorico();
 
             if (ehAdmin()) {
+                await carregarDashboard();
+
                 paginaAtualUsuarios = 0;
 
                 await carregarUsuariosAdmin(
+                    0
+                );
+
+                paginaAtualAuditoria = 0;
+
+                await carregarAuditorias(
                     0
                 );
             }

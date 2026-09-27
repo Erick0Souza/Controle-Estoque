@@ -1,5 +1,7 @@
 package com.erick.estoque.produto;
 
+import com.erick.estoque.auditoria.AuditoriaService;
+import com.erick.estoque.auditoria.TipoAcaoAuditoria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -12,16 +14,19 @@ public class ProdutoExclusaoService {
 
     private final ProdutoRepository produtoRepository;
     private final ProdutoImagemService produtoImagemService;
+    private final AuditoriaService auditoriaService;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     public ProdutoExclusaoService(
             ProdutoRepository produtoRepository,
-            ProdutoImagemService produtoImagemService
+            ProdutoImagemService produtoImagemService,
+            AuditoriaService auditoriaService
     ) {
         this.produtoRepository = produtoRepository;
         this.produtoImagemService = produtoImagemService;
+        this.auditoriaService = auditoriaService;
     }
 
     @Transactional
@@ -43,6 +48,9 @@ public class ProdutoExclusaoService {
         String imagemUrl =
                 produto.getImagemUrl();
 
+        String nomeProduto =
+                produto.getNome();
+
         entityManager
                 .createQuery(
                         """
@@ -61,6 +69,15 @@ public class ProdutoExclusaoService {
         );
 
         produtoRepository.flush();
+
+        auditoriaService.registrar(
+                TipoAcaoAuditoria.PRODUTO_EXCLUIDO,
+                "PRODUTO",
+                produtoId,
+                "Produto \"" +
+                        nomeProduto +
+                        "\" excluído"
+        );
 
         if (
                 imagemUrl != null &&
