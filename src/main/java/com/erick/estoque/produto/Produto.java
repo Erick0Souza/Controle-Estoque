@@ -13,6 +13,9 @@ public class Produto {
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
+ @Column(unique = true, length = 50)
+ private String sku;
+
  @Column(nullable = false)
  private String nome;
 
@@ -38,6 +41,10 @@ public class Produto {
   return id;
  }
 
+ public String getSku() {
+  return sku;
+ }
+
  public String getNome() {
   return nome;
  }
@@ -60,6 +67,10 @@ public class Produto {
 
  public String getImagemUrl() {
   return imagemUrl;
+ }
+
+ public void setSku(String sku) {
+  this.sku = sku;
  }
 
  public void setNome(String nome) {

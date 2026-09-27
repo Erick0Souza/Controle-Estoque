@@ -30,7 +30,6 @@
 
 </header>
 
-
 <main>
 
     <section
@@ -90,7 +89,6 @@
             </div>
 
         </div>
-
 
         <div
                 id="form-cadastro"
@@ -161,7 +159,6 @@
 
     </section>
 
-
     <section
             id="sistema"
             class="hidden"
@@ -191,7 +188,6 @@
 
         </div>
 
-
         <section class="card">
 
             <h2 id="titulo-formulario">
@@ -208,6 +204,22 @@
                     id="imagemUrlAtual"
             >
 
+            <label for="sku">
+                SKU
+            </label>
+
+            <input
+                    type="text"
+                    id="sku"
+                    maxlength="50"
+                    placeholder="Ex: TEC-001"
+                    autocomplete="off"
+            >
+
+            <small>
+                Código único do produto. Exemplo: TEC-001, MOU-002 ou MON-003.
+            </small>
+
             <label for="nome">
                 Nome
             </label>
@@ -215,6 +227,7 @@
             <input
                     type="text"
                     id="nome"
+                    maxlength="150"
                     placeholder="Nome do produto"
             >
 
@@ -328,7 +341,6 @@
 
         </section>
 
-
         <section class="card">
 
             <div class="topo">
@@ -355,7 +367,6 @@
             </div>
 
         </section>
-
 
         <section class="card">
 
@@ -427,7 +438,6 @@
 
         </section>
 
-
         <section class="card">
 
             <div class="topo">
@@ -448,7 +458,7 @@
             <div id="historico-movimentacoes">
 
                 <p>
-                    Nenhuma movimentação carregada.
+                    Nenhuma movimentação registrada.
                 </p>
 
             </div>
@@ -458,7 +468,6 @@
     </section>
 
 </main>
-
 
 <script src="/app.js"></script>
 

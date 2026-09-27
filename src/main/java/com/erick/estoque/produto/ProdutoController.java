@@ -4,6 +4,7 @@ import com.erick.estoque.categoria.Categoria;
 import com.erick.estoque.categoria.CategoriaRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/produtos")
@@ -38,15 +40,25 @@ public class ProdutoController {
 
   List<Produto> produtos;
 
-  if (nome != null && !nome.isBlank()) {
+  if (
+          nome != null &&
+                  !nome.isBlank()
+  ) {
+
    produtos =
-           produtoRepository.findByNomeContainingIgnoreCase(nome);
+           produtoRepository
+                   .findByNomeContainingIgnoreCase(
+                           nome.trim()
+                   );
+
   } else {
+
    produtos =
            produtoRepository.findAll();
   }
 
-  return produtos.stream()
+  return produtos
+          .stream()
           .map(this::toResponse)
           .toList();
  }
@@ -59,7 +71,9 @@ public class ProdutoController {
   Produto produto =
           buscarProduto(id);
 
-  return toResponse(produto);
+  return toResponse(
+          produto
+  );
  }
 
  @PostMapping
@@ -70,6 +84,24 @@ public class ProdutoController {
          ProdutoRequest request
  ) {
 
+  String sku =
+          normalizarSku(
+                  request.sku()
+          );
+
+  if (
+          produtoRepository
+                  .existsBySkuIgnoreCase(
+                          sku
+                  )
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.CONFLICT,
+           "Já existe um produto com este SKU"
+   );
+  }
+
   Categoria categoria =
           buscarCategoria(
                   request.categoriaId()
@@ -78,8 +110,12 @@ public class ProdutoController {
   Produto produto =
           new Produto();
 
+  produto.setSku(
+          sku
+  );
+
   produto.setNome(
-          request.nome()
+          request.nome().trim()
   );
 
   produto.setPreco(
@@ -95,7 +131,9 @@ public class ProdutoController {
   );
 
   produto.setDescricao(
-          request.descricao()
+          normalizarDescricao(
+                  request.descricao()
+          )
   );
 
   Produto produtoSalvo =
@@ -119,13 +157,36 @@ public class ProdutoController {
   Produto produto =
           buscarProduto(id);
 
+  String sku =
+          normalizarSku(
+                  request.sku()
+          );
+
+  if (
+          produtoRepository
+                  .existsBySkuIgnoreCaseAndIdNot(
+                          sku,
+                          id
+                  )
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.CONFLICT,
+           "Já existe outro produto com este SKU"
+   );
+  }
+
   Categoria categoria =
           buscarCategoria(
                   request.categoriaId()
           );
 
+  produto.setSku(
+          sku
+  );
+
   produto.setNome(
-          request.nome()
+          request.nome().trim()
   );
 
   produto.setPreco(
@@ -141,7 +202,9 @@ public class ProdutoController {
   );
 
   produto.setDescricao(
-          request.descricao()
+          normalizarDescricao(
+                  request.descricao()
+          )
   );
 
   Produto produtoSalvo =
@@ -172,7 +235,9 @@ public class ProdutoController {
 
   String novaImagemUrl =
           produtoImagemService
-                  .salvarImagem(imagem);
+                  .salvarImagem(
+                          imagem
+                  );
 
   produto.setImagemUrl(
           novaImagemUrl
@@ -195,11 +260,11 @@ public class ProdutoController {
   }
 
   if (
-          imagemAnterior != null
-                  && !imagemAnterior.isBlank()
-                  && !imagemAnterior.equals(
-                  novaImagemUrl
-          )
+          imagemAnterior != null &&
+                  !imagemAnterior.isBlank() &&
+                  !imagemAnterior.equals(
+                          novaImagemUrl
+                  )
   ) {
 
    produtoImagemService
@@ -228,8 +293,8 @@ public class ProdutoController {
           produto.getImagemUrl();
 
   if (
-          imagemUrl == null
-                  || imagemUrl.isBlank()
+          imagemUrl == null ||
+                  imagemUrl.isBlank()
   ) {
 
    throw new ResponseStatusException(
@@ -264,13 +329,27 @@ public class ProdutoController {
   String imagemUrl =
           produto.getImagemUrl();
 
-  produtoRepository.delete(
-          produto
-  );
+  try {
+
+   produtoRepository.delete(
+           produto
+   );
+
+   produtoRepository.flush();
+
+  } catch (
+          DataIntegrityViolationException exception
+  ) {
+
+   throw new ResponseStatusException(
+           HttpStatus.CONFLICT,
+           "Este produto possui movimentações de estoque e não pode ser excluído"
+   );
+  }
 
   if (
-          imagemUrl != null
-                  && !imagemUrl.isBlank()
+          imagemUrl != null &&
+                  !imagemUrl.isBlank()
   ) {
 
    produtoImagemService
@@ -285,7 +364,9 @@ public class ProdutoController {
  ) {
 
   return produtoRepository
-          .findById(id)
+          .findById(
+                  id
+          )
           .orElseThrow(
                   () ->
                           new ResponseStatusException(
@@ -300,7 +381,9 @@ public class ProdutoController {
  ) {
 
   return categoriaRepository
-          .findById(id)
+          .findById(
+                  id
+          )
           .orElseThrow(
                   () ->
                           new ResponseStatusException(
@@ -310,12 +393,46 @@ public class ProdutoController {
           );
  }
 
+ private String normalizarSku(
+         String sku
+ ) {
+
+  return sku
+          .trim()
+          .toUpperCase(
+                  Locale.ROOT
+          );
+ }
+
+ private String normalizarDescricao(
+         String descricao
+ ) {
+
+  if (
+          descricao == null
+  ) {
+   return null;
+  }
+
+  String descricaoTratada =
+          descricao.trim();
+
+  if (
+          descricaoTratada.isBlank()
+  ) {
+   return null;
+  }
+
+  return descricaoTratada;
+ }
+
  private ProdutoResponse toResponse(
          Produto produto
  ) {
 
   return new ProdutoResponse(
           produto.getId(),
+          produto.getSku(),
           produto.getNome(),
           produto.getPreco(),
           produto.getQuantidade(),

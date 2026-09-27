@@ -482,6 +482,16 @@ function mostrarProdutos(produtos) {
             titulo.textContent =
                 produto.nome;
 
+            const sku =
+                document.createElement("p");
+
+            sku.textContent =
+                "SKU: " +
+                (
+                    produto.sku ||
+                    "Não definido"
+                );
+
             const identificador =
                 document.createElement("p");
 
@@ -573,6 +583,10 @@ function mostrarProdutos(produtos) {
             );
 
             card.appendChild(
+                sku
+            );
+
+            card.appendChild(
                 identificador
             );
 
@@ -639,9 +653,11 @@ function preencherProdutosMovimentacao(
                 produto.id;
 
             option.textContent =
-                "#" +
-                produto.id +
-                " - " +
+                (
+                    produto.sku
+                        ? produto.sku + " - "
+                        : ""
+                ) +
                 produto.nome +
                 " - estoque: " +
                 produto.quantidade;
@@ -672,9 +688,56 @@ async function salvarProduto() {
 }
 
 
+function obterSkuFormulario() {
+    return document
+        .getElementById("sku")
+        .value
+        .trim()
+        .toUpperCase();
+}
+
+
+function validarSku(sku) {
+    if (!sku) {
+        return {
+            valida: false,
+            mensagem:
+                "O SKU é obrigatório."
+        };
+    }
+
+    if (sku.length > 50) {
+        return {
+            valida: false,
+            mensagem:
+                "O SKU deve ter no máximo 50 caracteres."
+        };
+    }
+
+    const padrao =
+        /^[A-Za-z0-9_-]+$/;
+
+    if (!padrao.test(sku)) {
+        return {
+            valida: false,
+            mensagem:
+                "O SKU deve conter apenas letras, números, hífen ou underline."
+        };
+    }
+
+    return {
+        valida: true,
+        mensagem: ""
+    };
+}
+
+
 async function criarProduto() {
     const token =
         sessionStorage.getItem("token");
+
+    const sku =
+        obterSkuFormulario();
 
     const nome =
         document
@@ -710,6 +773,18 @@ async function criarProduto() {
         document.getElementById(
             "produto-mensagem"
         );
+
+    const validacaoSku =
+        validarSku(
+            sku
+        );
+
+    if (!validacaoSku.valida) {
+        mensagem.textContent =
+            validacaoSku.mensagem;
+
+        return;
+    }
 
     if (
         !nome ||
@@ -769,6 +844,9 @@ async function criarProduto() {
                 },
 
                 body: JSON.stringify({
+                    sku:
+                    sku,
+
                     nome:
                     nome,
 
@@ -818,6 +896,7 @@ async function criarProduto() {
                     dados.id,
                     imagem
                 );
+
             } catch (erro) {
                 console.error(
                     erro
@@ -860,6 +939,11 @@ function prepararEdicao(produto) {
         )
         .value =
         produto.id;
+
+    document
+        .getElementById("sku")
+        .value =
+        produto.sku || "";
 
     document
         .getElementById("nome")
@@ -931,6 +1015,9 @@ async function editarProduto(id) {
     const token =
         sessionStorage.getItem("token");
 
+    const sku =
+        obterSkuFormulario();
+
     const nome =
         document
             .getElementById("nome")
@@ -965,6 +1052,18 @@ async function editarProduto(id) {
         document.getElementById(
             "produto-mensagem"
         );
+
+    const validacaoSku =
+        validarSku(
+            sku
+        );
+
+    if (!validacaoSku.valida) {
+        mensagem.textContent =
+            validacaoSku.mensagem;
+
+        return;
+    }
 
     if (
         !nome ||
@@ -1024,6 +1123,9 @@ async function editarProduto(id) {
                 },
 
                 body: JSON.stringify({
+                    sku:
+                    sku,
+
                     nome:
                     nome,
 
@@ -1559,6 +1661,10 @@ async function excluirProduto(
 
 function limparFormularioProduto() {
     document
+        .getElementById("sku")
+        .value = "";
+
+    document
         .getElementById("nome")
         .value = "";
 
@@ -1928,6 +2034,22 @@ function mostrarHistorico(
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
+        const inputSku =
+            document.getElementById(
+                "sku"
+            );
+
+        if (inputSku) {
+            inputSku.addEventListener(
+                "input",
+                () => {
+                    inputSku.value =
+                        inputSku.value
+                            .toUpperCase();
+                }
+            );
+        }
+
         const inputImagem =
             document.getElementById(
                 "imagemProduto"

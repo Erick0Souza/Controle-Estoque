@@ -34,7 +34,6 @@ public class SecurityConfig {
     ) throws Exception {
 
         return http
-
                 .csrf(csrf -> csrf.disable())
 
                 .sessionManagement(session ->
@@ -58,23 +57,32 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/index.html",
-                                "/js/**",
-                                "/css/**",
                                 "/app.js",
-                                "/style.css"
+                                "/style.css",
+                                "/css/**",
+                                "/js/**"
                         ).permitAll()
 
                         .requestMatchers(
                                 "/uploads/**"
                         ).permitAll()
 
-                        .anyRequest().authenticated()
+                        .requestMatchers(
+                                "/error"
+                        ).permitAll()
+
+                        .anyRequest()
+                        .authenticated()
                 )
 
                 .exceptionHandling(exception -> exception
 
                         .authenticationEntryPoint(
-                                (request, response, authException) -> {
+                                (
+                                        request,
+                                        response,
+                                        authException
+                                ) -> {
 
                                     response.setStatus(
                                             HttpServletResponse.SC_UNAUTHORIZED
@@ -96,7 +104,11 @@ public class SecurityConfig {
                         )
 
                         .accessDeniedHandler(
-                                (request, response, accessDeniedException) -> {
+                                (
+                                        request,
+                                        response,
+                                        accessDeniedException
+                                ) -> {
 
                                     response.setStatus(
                                             HttpServletResponse.SC_FORBIDDEN
