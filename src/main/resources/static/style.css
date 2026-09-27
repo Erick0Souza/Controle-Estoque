@@ -211,13 +211,21 @@ button:active {
     display: grid;
 
     grid-template-columns:
-            repeat(auto-fit, minmax(260px, 1fr));
+            repeat(
+                    auto-fill,
+                    minmax(260px, 320px)
+            );
 
     gap: 16px;
     margin-top: 20px;
+    justify-content: start;
+    align-items: start;
 }
 
 .produto {
+    width: 100%;
+    max-width: 320px;
+
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 18px;
@@ -368,6 +376,7 @@ select {
 }
 
 @media (max-width: 700px) {
+
     header h1 {
         font-size: 26px;
     }
@@ -407,6 +416,12 @@ select {
 
     #produtos {
         grid-template-columns: 1fr;
+        justify-content: stretch;
+    }
+
+    .produto {
+        width: 100%;
+        max-width: none;
     }
 
     .produto-imagem,

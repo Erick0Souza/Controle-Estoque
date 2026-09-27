@@ -6,7 +6,8 @@ const TIPOS_IMAGEM_PERMITIDOS = [
     "image/webp"
 ];
 
-const TAMANHO_MAXIMO_IMAGEM = 5 * 1024 * 1024;
+const TAMANHO_MAXIMO_IMAGEM =
+    5 * 1024 * 1024;
 
 
 function mostrarCadastro() {
@@ -61,9 +62,15 @@ async function cadastrarUsuario() {
             .value;
 
     const mensagem =
-        document.getElementById("cadastro-mensagem");
+        document.getElementById(
+            "cadastro-mensagem"
+        );
 
-    if (!email || !senha || !confirmarSenha) {
+    if (
+        !email ||
+        !senha ||
+        !confirmarSenha
+    ) {
         mensagem.textContent =
             "Preencha todos os campos.";
 
@@ -88,21 +95,23 @@ async function cadastrarUsuario() {
         "Criando conta...";
 
     try {
-        const resposta = await fetch(
-            "/auth/register",
-            {
-                method: "POST",
+        const resposta =
+            await fetch(
+                "/auth/register",
+                {
+                    method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                body: JSON.stringify({
-                    email: email,
-                    senha: senha
-                })
-            }
-        );
+                    body: JSON.stringify({
+                        email: email,
+                        senha: senha
+                    })
+                }
+            );
 
         let dados = {};
 
@@ -116,6 +125,7 @@ async function cadastrarUsuario() {
         if (!resposta.ok) {
             mensagem.textContent =
                 dados.mensagem ||
+                dados.message ||
                 "Não foi possível criar a conta.";
 
             return;
@@ -125,15 +135,21 @@ async function cadastrarUsuario() {
             "Conta criada com sucesso!";
 
         document
-            .getElementById("cadastro-email")
+            .getElementById(
+                "cadastro-email"
+            )
             .value = "";
 
         document
-            .getElementById("cadastro-senha")
+            .getElementById(
+                "cadastro-senha"
+            )
             .value = "";
 
         document
-            .getElementById("cadastro-confirmar-senha")
+            .getElementById(
+                "cadastro-confirmar-senha"
+            )
             .value = "";
 
         document
@@ -146,7 +162,9 @@ async function cadastrarUsuario() {
                 mostrarLogin();
 
                 document
-                    .getElementById("login-mensagem")
+                    .getElementById(
+                        "login-mensagem"
+                    )
                     .textContent =
                     "Conta criada. Faça login.";
             },
@@ -178,9 +196,14 @@ async function login() {
             .value;
 
     const mensagem =
-        document.getElementById("login-mensagem");
+        document.getElementById(
+            "login-mensagem"
+        );
 
-    if (!email || !senha) {
+    if (
+        !email ||
+        !senha
+    ) {
         mensagem.textContent =
             "Preencha email e senha.";
 
@@ -191,21 +214,23 @@ async function login() {
         "Entrando...";
 
     try {
-        const resposta = await fetch(
-            "/auth/login",
-            {
-                method: "POST",
+        const resposta =
+            await fetch(
+                "/auth/login",
+                {
+                    method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                body: JSON.stringify({
-                    email: email,
-                    senha: senha
-                })
-            }
-        );
+                    body: JSON.stringify({
+                        email: email,
+                        senha: senha
+                    })
+                }
+            );
 
         let dados = {};
 
@@ -219,6 +244,7 @@ async function login() {
         if (!resposta.ok) {
             mensagem.textContent =
                 dados.mensagem ||
+                dados.message ||
                 "Email ou senha inválidos.";
 
             return;
@@ -291,7 +317,9 @@ function logout() {
         .innerHTML = "";
 
     document
-        .getElementById("historico-movimentacoes")
+        .getElementById(
+            "historico-movimentacoes"
+        )
         .innerHTML = "";
 
     limparFormularioProduto();
@@ -305,18 +333,21 @@ async function carregarCategorias() {
         sessionStorage.getItem("token");
 
     const select =
-        document.getElementById("categoriaId");
+        document.getElementById(
+            "categoriaId"
+        );
 
     try {
-        const resposta = await fetch(
-            "/categorias",
-            {
-                headers: {
-                    "Authorization":
-                        "Bearer " + token
+        const resposta =
+            await fetch(
+                "/categorias",
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
                 }
-            }
-        );
+            );
 
         if (resposta.status === 401) {
             logout();
@@ -336,7 +367,9 @@ async function carregarCategorias() {
         categorias.forEach(
             categoria => {
                 const option =
-                    document.createElement("option");
+                    document.createElement(
+                        "option"
+                    );
 
                 option.value =
                     categoria.id;
@@ -344,7 +377,9 @@ async function carregarCategorias() {
                 option.textContent =
                     categoria.nome;
 
-                select.appendChild(option);
+                select.appendChild(
+                    option
+                );
             }
         );
 
@@ -362,21 +397,24 @@ async function carregarProdutos() {
         sessionStorage.getItem("token");
 
     const lista =
-        document.getElementById("produtos");
+        document.getElementById(
+            "produtos"
+        );
 
     lista.innerHTML =
         "<p>Carregando produtos...</p>";
 
     try {
-        const resposta = await fetch(
-            "/produtos",
-            {
-                headers: {
-                    "Authorization":
-                        "Bearer " + token
+        const resposta =
+            await fetch(
+                "/produtos",
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
                 }
-            }
-        );
+            );
 
         if (resposta.status === 401) {
             logout();
@@ -393,7 +431,9 @@ async function carregarProdutos() {
         const produtos =
             await resposta.json();
 
-        mostrarProdutos(produtos);
+        mostrarProdutos(
+            produtos
+        );
 
         preencherProdutosMovimentacao(
             produtos
@@ -413,7 +453,9 @@ async function carregarProdutos() {
 
 function mostrarProdutos(produtos) {
     const lista =
-        document.getElementById("produtos");
+        document.getElementById(
+            "produtos"
+        );
 
     lista.innerHTML = "";
 
@@ -430,13 +472,19 @@ function mostrarProdutos(produtos) {
     produtos.forEach(
         produto => {
             const card =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            card.classList.add("produto");
+            card.classList.add(
+                "produto"
+            );
 
             if (produto.imagemUrl) {
                 const imagem =
-                    document.createElement("img");
+                    document.createElement(
+                        "img"
+                    );
 
                 imagem.src =
                     produto.imagemUrl;
@@ -477,13 +525,17 @@ function mostrarProdutos(produtos) {
             }
 
             const titulo =
-                document.createElement("h3");
+                document.createElement(
+                    "h3"
+                );
 
             titulo.textContent =
                 produto.nome;
 
             const sku =
-                document.createElement("p");
+                document.createElement(
+                    "p"
+                );
 
             sku.textContent =
                 "SKU: " +
@@ -493,29 +545,38 @@ function mostrarProdutos(produtos) {
                 );
 
             const identificador =
-                document.createElement("p");
+                document.createElement(
+                    "p"
+                );
 
             identificador.textContent =
                 "ID: " +
                 produto.id;
 
             const preco =
-                document.createElement("p");
+                document.createElement(
+                    "p"
+                );
 
             preco.textContent =
                 "Preço: R$ " +
-                Number(produto.preco)
-                    .toFixed(2);
+                Number(
+                    produto.preco
+                ).toFixed(2);
 
             const quantidade =
-                document.createElement("p");
+                document.createElement(
+                    "p"
+                );
 
             quantidade.textContent =
                 "Quantidade: " +
                 produto.quantidade;
 
             const categoria =
-                document.createElement("p");
+                document.createElement(
+                    "p"
+                );
 
             categoria.textContent =
                 "Categoria: " +
@@ -525,7 +586,9 @@ function mostrarProdutos(produtos) {
                 );
 
             const descricao =
-                document.createElement("p");
+                document.createElement(
+                    "p"
+                );
 
             descricao.textContent =
                 "Descrição: " +
@@ -535,12 +598,18 @@ function mostrarProdutos(produtos) {
                 );
 
             const acoes =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            acoes.classList.add("acoes");
+            acoes.classList.add(
+                "acoes"
+            );
 
             const botaoEditar =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
             botaoEditar.type =
                 "button";
@@ -555,7 +624,9 @@ function mostrarProdutos(produtos) {
                     );
 
             const botaoExcluir =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
             botaoExcluir.type =
                 "button";
@@ -620,7 +691,9 @@ function mostrarProdutos(produtos) {
 
 function criarPlaceholderImagem() {
     const semImagem =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     semImagem.classList.add(
         "produto-sem-imagem"
@@ -647,7 +720,9 @@ function preencherProdutosMovimentacao(
     produtos.forEach(
         produto => {
             const option =
-                document.createElement("option");
+                document.createElement(
+                    "option"
+                );
 
             option.value =
                 produto.id;
@@ -757,12 +832,16 @@ async function criarProduto() {
 
     const categoriaId =
         document
-            .getElementById("categoriaId")
+            .getElementById(
+                "categoriaId"
+            )
             .value;
 
     const descricao =
         document
-            .getElementById("descricao")
+            .getElementById(
+                "descricao"
+            )
             .value
             .trim();
 
@@ -798,14 +877,18 @@ async function criarProduto() {
         return;
     }
 
-    if (Number(preco) < 0) {
+    if (
+        Number(preco) < 0
+    ) {
         mensagem.textContent =
             "O preço não pode ser negativo.";
 
         return;
     }
 
-    if (Number(quantidade) < 0) {
+    if (
+        Number(quantidade) < 0
+    ) {
         mensagem.textContent =
             "A quantidade não pode ser negativa.";
 
@@ -830,42 +913,49 @@ async function criarProduto() {
         "Cadastrando produto...";
 
     try {
-        const resposta = await fetch(
-            "/produtos",
-            {
-                method: "POST",
+        const resposta =
+            await fetch(
+                "/produtos",
+                {
+                    method: "POST",
 
-                headers: {
-                    "Content-Type":
-                        "application/json",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
 
-                    "Authorization":
-                        "Bearer " + token
-                },
+                        "Authorization":
+                            "Bearer " + token
+                    },
 
-                body: JSON.stringify({
-                    sku:
-                    sku,
+                    body: JSON.stringify({
+                        sku:
+                        sku,
 
-                    nome:
-                    nome,
+                        nome:
+                        nome,
 
-                    preco:
-                        Number(preco),
+                        preco:
+                            Number(preco),
 
-                    quantidade:
-                        Number(quantidade),
+                        quantidade:
+                            Number(
+                                quantidade
+                            ),
 
-                    categoriaId:
-                        Number(categoriaId),
+                        categoriaId:
+                            Number(
+                                categoriaId
+                            ),
 
-                    descricao:
-                    descricao
-                })
-            }
-        );
+                        descricao:
+                        descricao
+                    })
+                }
+            );
 
-        if (resposta.status === 401) {
+        if (
+            resposta.status === 401
+        ) {
             logout();
             return;
         }
@@ -882,6 +972,8 @@ async function criarProduto() {
         if (!resposta.ok) {
             mensagem.textContent =
                 dados.mensagem ||
+                dados.message ||
+                dados.detail ||
                 "Erro ao cadastrar produto.";
 
             return;
@@ -956,46 +1048,64 @@ function prepararEdicao(produto) {
         produto.preco;
 
     document
-        .getElementById("quantidade")
+        .getElementById(
+            "quantidade"
+        )
         .value =
         produto.quantidade;
 
     document
-        .getElementById("categoriaId")
+        .getElementById(
+            "categoriaId"
+        )
         .value =
         produto.categoriaId;
 
     document
-        .getElementById("descricao")
+        .getElementById(
+            "descricao"
+        )
         .value =
         produto.descricao || "";
 
     document
-        .getElementById("imagemUrlAtual")
+        .getElementById(
+            "imagemUrlAtual"
+        )
         .value =
         produto.imagemUrl || "";
 
     document
-        .getElementById("imagemProduto")
+        .getElementById(
+            "imagemProduto"
+        )
         .value = "";
 
     document
-        .getElementById("botaoSalvar")
+        .getElementById(
+            "botaoSalvar"
+        )
         .textContent =
         "Salvar alterações";
 
     document
-        .getElementById("botaoCancelar")
+        .getElementById(
+            "botaoCancelar"
+        )
         .classList
         .remove("hidden");
 
     document
-        .getElementById("titulo-formulario")
+        .getElementById(
+            "titulo-formulario"
+        )
         .textContent =
         "Editar Produto";
 
     document
-        .getElementById("produto-mensagem")
+        .getElementById(
+            "produto-mensagem"
+        )
         .textContent = "";
 
     if (produto.imagemUrl) {
@@ -1031,17 +1141,23 @@ async function editarProduto(id) {
 
     const quantidade =
         document
-            .getElementById("quantidade")
+            .getElementById(
+                "quantidade"
+            )
             .value;
 
     const categoriaId =
         document
-            .getElementById("categoriaId")
+            .getElementById(
+                "categoriaId"
+            )
             .value;
 
     const descricao =
         document
-            .getElementById("descricao")
+            .getElementById(
+                "descricao"
+            )
             .value
             .trim();
 
@@ -1077,14 +1193,18 @@ async function editarProduto(id) {
         return;
     }
 
-    if (Number(preco) < 0) {
+    if (
+        Number(preco) < 0
+    ) {
         mensagem.textContent =
             "O preço não pode ser negativo.";
 
         return;
     }
 
-    if (Number(quantidade) < 0) {
+    if (
+        Number(quantidade) < 0
+    ) {
         mensagem.textContent =
             "A quantidade não pode ser negativa.";
 
@@ -1109,42 +1229,49 @@ async function editarProduto(id) {
         "Salvando alterações...";
 
     try {
-        const resposta = await fetch(
-            "/produtos/" + id,
-            {
-                method: "PUT",
+        const resposta =
+            await fetch(
+                "/produtos/" + id,
+                {
+                    method: "PUT",
 
-                headers: {
-                    "Content-Type":
-                        "application/json",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
 
-                    "Authorization":
-                        "Bearer " + token
-                },
+                        "Authorization":
+                            "Bearer " + token
+                    },
 
-                body: JSON.stringify({
-                    sku:
-                    sku,
+                    body: JSON.stringify({
+                        sku:
+                        sku,
 
-                    nome:
-                    nome,
+                        nome:
+                        nome,
 
-                    preco:
-                        Number(preco),
+                        preco:
+                            Number(preco),
 
-                    quantidade:
-                        Number(quantidade),
+                        quantidade:
+                            Number(
+                                quantidade
+                            ),
 
-                    categoriaId:
-                        Number(categoriaId),
+                        categoriaId:
+                            Number(
+                                categoriaId
+                            ),
 
-                    descricao:
-                    descricao
-                })
-            }
-        );
+                        descricao:
+                        descricao
+                    })
+                }
+            );
 
-        if (resposta.status === 401) {
+        if (
+            resposta.status === 401
+        ) {
             logout();
             return;
         }
@@ -1161,6 +1288,8 @@ async function editarProduto(id) {
         if (!resposta.ok) {
             mensagem.textContent =
                 dados.mensagem ||
+                dados.message ||
+                dados.detail ||
                 "Erro ao editar produto.";
 
             return;
@@ -1224,24 +1353,27 @@ async function enviarImagemProduto(
         arquivo
     );
 
-    const resposta = await fetch(
-        "/produtos/" +
-        produtoId +
-        "/imagem",
-        {
-            method: "POST",
+    const resposta =
+        await fetch(
+            "/produtos/" +
+            produtoId +
+            "/imagem",
+            {
+                method: "POST",
 
-            headers: {
-                "Authorization":
-                    "Bearer " + token
-            },
+                headers: {
+                    "Authorization":
+                        "Bearer " + token
+                },
 
-            body:
-            formData
-        }
-    );
+                body:
+                formData
+            }
+        );
 
-    if (resposta.status === 401) {
+    if (
+        resposta.status === 401
+    ) {
         logout();
 
         throw new Error(
@@ -1261,6 +1393,8 @@ async function enviarImagemProduto(
     if (!resposta.ok) {
         throw new Error(
             dados.mensagem ||
+            dados.message ||
+            dados.detail ||
             "Erro ao enviar imagem"
         );
     }
@@ -1339,21 +1473,24 @@ async function removerImagemProduto() {
         sessionStorage.getItem("token");
 
     try {
-        const resposta = await fetch(
-            "/produtos/" +
-            produtoId +
-            "/imagem",
-            {
-                method: "DELETE",
+        const resposta =
+            await fetch(
+                "/produtos/" +
+                produtoId +
+                "/imagem",
+                {
+                    method: "DELETE",
 
-                headers: {
-                    "Authorization":
-                        "Bearer " + token
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
                 }
-            }
-        );
+            );
 
-        if (resposta.status === 401) {
+        if (
+            resposta.status === 401
+        ) {
             logout();
             return;
         }
@@ -1370,6 +1507,8 @@ async function removerImagemProduto() {
 
             mensagem.textContent =
                 dados.mensagem ||
+                dados.message ||
+                dados.detail ||
                 "Não foi possível remover a imagem.";
 
             return;
@@ -1572,17 +1711,23 @@ function cancelarEdicao() {
         .value = "";
 
     document
-        .getElementById("botaoSalvar")
+        .getElementById(
+            "botaoSalvar"
+        )
         .textContent =
         "Cadastrar";
 
     document
-        .getElementById("botaoCancelar")
+        .getElementById(
+            "botaoCancelar"
+        )
         .classList
         .add("hidden");
 
     document
-        .getElementById("titulo-formulario")
+        .getElementById(
+            "titulo-formulario"
+        )
         .textContent =
         "Novo Produto";
 }
@@ -1602,28 +1747,86 @@ async function excluirProduto(
     }
 
     const token =
-        sessionStorage.getItem("token");
-
-    try {
-        const resposta = await fetch(
-            "/produtos/" + id,
-            {
-                method: "DELETE",
-
-                headers: {
-                    "Authorization":
-                        "Bearer " + token
-                }
-            }
+        sessionStorage.getItem(
+            "token"
         );
 
-        if (resposta.status === 401) {
+    try {
+        const resposta =
+            await fetch(
+                "/produtos/" + id,
+                {
+                    method: "DELETE",
+
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
             logout();
             return;
         }
 
         if (!resposta.ok) {
+            let dados = {};
+
+            try {
+                dados =
+                    await resposta.json();
+            } catch (erro) {
+                dados = {};
+            }
+
+            if (
+                resposta.status === 409
+            ) {
+                alert(
+                    dados.mensagem ||
+                    dados.message ||
+                    dados.detail ||
+                    "Este produto possui movimentações de estoque e não pode ser excluído."
+                );
+
+                return;
+            }
+
+            if (
+                resposta.status === 404
+            ) {
+                alert(
+                    dados.mensagem ||
+                    dados.message ||
+                    dados.detail ||
+                    "Produto não encontrado."
+                );
+
+                await carregarProdutos();
+
+                return;
+            }
+
+            if (
+                resposta.status === 403
+            ) {
+                alert(
+                    dados.mensagem ||
+                    dados.message ||
+                    dados.detail ||
+                    "Você não possui permissão para excluir este produto."
+                );
+
+                return;
+            }
+
             alert(
+                dados.mensagem ||
+                dados.message ||
+                dados.detail ||
                 "Não foi possível excluir o produto."
             );
 
@@ -1645,6 +1848,10 @@ async function excluirProduto(
         }
 
         await carregarProdutos();
+
+        alert(
+            "Produto excluído com sucesso."
+        );
 
     } catch (erro) {
         console.error(
@@ -1673,27 +1880,39 @@ function limparFormularioProduto() {
         .value = "";
 
     document
-        .getElementById("quantidade")
+        .getElementById(
+            "quantidade"
+        )
         .value = "";
 
     document
-        .getElementById("categoriaId")
+        .getElementById(
+            "categoriaId"
+        )
         .value = "";
 
     document
-        .getElementById("descricao")
+        .getElementById(
+            "descricao"
+        )
         .value = "";
 
     document
-        .getElementById("produtoIdEdicao")
+        .getElementById(
+            "produtoIdEdicao"
+        )
         .value = "";
 
     document
-        .getElementById("imagemUrlAtual")
+        .getElementById(
+            "imagemUrlAtual"
+        )
         .value = "";
 
     document
-        .getElementById("imagemProduto")
+        .getElementById(
+            "imagemProduto"
+        )
         .value = "";
 
     limparPreviewImagem();
@@ -1702,7 +1921,9 @@ function limparFormularioProduto() {
 
 async function registrarMovimentacao() {
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
 
     const produtoId =
         document
@@ -1749,7 +1970,9 @@ async function registrarMovimentacao() {
         return;
     }
 
-    if (Number(quantidade) <= 0) {
+    if (
+        Number(quantidade) <= 0
+    ) {
         mensagem.textContent =
             "A quantidade deve ser maior que zero.";
 
@@ -1760,36 +1983,43 @@ async function registrarMovimentacao() {
         "Registrando movimentação...";
 
     try {
-        const resposta = await fetch(
-            "/movimentacoes",
-            {
-                method: "POST",
+        const resposta =
+            await fetch(
+                "/movimentacoes",
+                {
+                    method: "POST",
 
-                headers: {
-                    "Content-Type":
-                        "application/json",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
 
-                    "Authorization":
-                        "Bearer " + token
-                },
+                        "Authorization":
+                            "Bearer " + token
+                    },
 
-                body: JSON.stringify({
-                    produtoId:
-                        Number(produtoId),
+                    body: JSON.stringify({
+                        produtoId:
+                            Number(
+                                produtoId
+                            ),
 
-                    tipo:
-                    tipo,
+                        tipo:
+                        tipo,
 
-                    quantidade:
-                        Number(quantidade),
+                        quantidade:
+                            Number(
+                                quantidade
+                            ),
 
-                    observacao:
-                    observacao
-                })
-            }
-        );
+                        observacao:
+                        observacao
+                    })
+                }
+            );
 
-        if (resposta.status === 401) {
+        if (
+            resposta.status === 401
+        ) {
             logout();
             return;
         }
@@ -1806,6 +2036,8 @@ async function registrarMovimentacao() {
         if (!resposta.ok) {
             mensagem.textContent =
                 dados.mensagem ||
+                dados.message ||
+                dados.detail ||
                 "Erro ao registrar movimentação.";
 
             return;
@@ -1860,7 +2092,9 @@ function limparFormularioMovimentacao() {
 
 async function carregarHistorico() {
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
 
     const historico =
         document.getElementById(
@@ -1871,17 +2105,20 @@ async function carregarHistorico() {
         "<p>Carregando histórico...</p>";
 
     try {
-        const resposta = await fetch(
-            "/movimentacoes",
-            {
-                headers: {
-                    "Authorization":
-                        "Bearer " + token
+        const resposta =
+            await fetch(
+                "/movimentacoes",
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
                 }
-            }
-        );
+            );
 
-        if (resposta.status === 401) {
+        if (
+            resposta.status === 401
+        ) {
             logout();
             return;
         }
@@ -1938,41 +2175,53 @@ function mostrarHistorico(
         .forEach(
             movimentacao => {
                 const item =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 item.classList.add(
                     "movimentacao"
                 );
 
                 const titulo =
-                    document.createElement("h3");
+                    document.createElement(
+                        "h3"
+                    );
 
                 titulo.textContent =
                     movimentacao.produtoNome;
 
                 const tipo =
-                    document.createElement("p");
+                    document.createElement(
+                        "p"
+                    );
 
                 tipo.textContent =
                     "Tipo: " +
                     movimentacao.tipo;
 
                 const quantidade =
-                    document.createElement("p");
+                    document.createElement(
+                        "p"
+                    );
 
                 quantidade.textContent =
                     "Quantidade: " +
                     movimentacao.quantidade;
 
                 const estoqueAtual =
-                    document.createElement("p");
+                    document.createElement(
+                        "p"
+                    );
 
                 estoqueAtual.textContent =
                     "Estoque atual: " +
                     movimentacao.estoqueAtual;
 
                 const observacao =
-                    document.createElement("p");
+                    document.createElement(
+                        "p"
+                    );
 
                 observacao.textContent =
                     "Observação: " +
@@ -1982,7 +2231,9 @@ function mostrarHistorico(
                     );
 
                 const data =
-                    document.createElement("p");
+                    document.createElement(
+                        "p"
+                    );
 
                 if (
                     movimentacao.dataHora
@@ -1994,6 +2245,7 @@ function mostrarHistorico(
                         ).toLocaleString(
                             "pt-BR"
                         );
+
                 } else {
                     data.textContent =
                         "Data não informada";
@@ -2079,6 +2331,7 @@ document.addEventListener(
                             mostrarImagemAtual(
                                 imagemAtual
                             );
+
                         } else {
                             limparPreviewImagem();
                         }
@@ -2091,7 +2344,9 @@ document.addEventListener(
                             arquivo
                         );
 
-                    if (!validacao.valida) {
+                    if (
+                        !validacao.valida
+                    ) {
                         inputImagem.value =
                             "";
 
@@ -2109,6 +2364,7 @@ document.addEventListener(
                             mostrarImagemAtual(
                                 imagemAtual
                             );
+
                         } else {
                             limparPreviewImagem();
                         }

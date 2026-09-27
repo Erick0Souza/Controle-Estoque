@@ -4,7 +4,6 @@ import com.erick.estoque.categoria.Categoria;
 import com.erick.estoque.categoria.CategoriaRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -22,15 +21,18 @@ public class ProdutoController {
  private final ProdutoRepository produtoRepository;
  private final CategoriaRepository categoriaRepository;
  private final ProdutoImagemService produtoImagemService;
+ private final ProdutoExclusaoService produtoExclusaoService;
 
  public ProdutoController(
          ProdutoRepository produtoRepository,
          CategoriaRepository categoriaRepository,
-         ProdutoImagemService produtoImagemService
+         ProdutoImagemService produtoImagemService,
+         ProdutoExclusaoService produtoExclusaoService
  ) {
   this.produtoRepository = produtoRepository;
   this.categoriaRepository = categoriaRepository;
   this.produtoImagemService = produtoImagemService;
+  this.produtoExclusaoService = produtoExclusaoService;
  }
 
  @GetMapping
@@ -69,7 +71,9 @@ public class ProdutoController {
  ) {
 
   Produto produto =
-          buscarProduto(id);
+          buscarProduto(
+                  id
+          );
 
   return toResponse(
           produto
@@ -115,7 +119,8 @@ public class ProdutoController {
   );
 
   produto.setNome(
-          request.nome().trim()
+          request.nome()
+                  .trim()
   );
 
   produto.setPreco(
@@ -155,7 +160,9 @@ public class ProdutoController {
  ) {
 
   Produto produto =
-          buscarProduto(id);
+          buscarProduto(
+                  id
+          );
 
   String sku =
           normalizarSku(
@@ -186,7 +193,8 @@ public class ProdutoController {
   );
 
   produto.setNome(
-          request.nome().trim()
+          request.nome()
+                  .trim()
   );
 
   produto.setPreco(
@@ -228,7 +236,9 @@ public class ProdutoController {
  ) {
 
   Produto produto =
-          buscarProduto(id);
+          buscarProduto(
+                  id
+          );
 
   String imagemAnterior =
           produto.getImagemUrl();
@@ -287,7 +297,9 @@ public class ProdutoController {
  ) {
 
   Produto produto =
-          buscarProduto(id);
+          buscarProduto(
+                  id
+          );
 
   String imagemUrl =
           produto.getImagemUrl();
@@ -323,40 +335,10 @@ public class ProdutoController {
          @PathVariable Long id
  ) {
 
-  Produto produto =
-          buscarProduto(id);
-
-  String imagemUrl =
-          produto.getImagemUrl();
-
-  try {
-
-   produtoRepository.delete(
-           produto
-   );
-
-   produtoRepository.flush();
-
-  } catch (
-          DataIntegrityViolationException exception
-  ) {
-
-   throw new ResponseStatusException(
-           HttpStatus.CONFLICT,
-           "Este produto possui movimentações de estoque e não pode ser excluído"
-   );
-  }
-
-  if (
-          imagemUrl != null &&
-                  !imagemUrl.isBlank()
-  ) {
-
-   produtoImagemService
-           .excluirImagem(
-                   imagemUrl
-           );
-  }
+  produtoExclusaoService
+          .excluirProduto(
+                  id
+          );
  }
 
  private Produto buscarProduto(
