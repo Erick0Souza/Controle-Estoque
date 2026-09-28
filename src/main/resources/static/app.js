@@ -155,6 +155,11 @@ function aplicarPermissoesInterface() {
             "admin-dashboard-section"
         );
 
+    const adminRelatoriosSection =
+        document.getElementById(
+            "admin-relatorios-section"
+        );
+
     if (usuarioLogado) {
         usuarioLogado.textContent =
             nomeUsuario;
@@ -235,6 +240,20 @@ function aplicarPermissoesInterface() {
                 .remove("hidden");
         } else {
             adminDashboardSection
+                .classList
+                .add("hidden");
+        }
+    }
+
+
+    if (adminRelatoriosSection) {
+
+        if (ehAdmin()) {
+            adminRelatoriosSection
+                .classList
+                .remove("hidden");
+        } else {
+            adminRelatoriosSection
                 .classList
                 .add("hidden");
         }
@@ -561,6 +580,7 @@ async function login() {
 
         if (ehAdmin()) {
             await carregarDashboard();
+            await carregarRelatorios();
 
             paginaAtualUsuarios = 0;
 
@@ -674,6 +694,7 @@ function logout() {
     }
 
     limparDashboard();
+    limparRelatorios();
 
     limparFormularioProduto();
     limparFormularioMovimentacao();
@@ -1895,6 +1916,1159 @@ function limparDashboard() {
         mensagem.textContent = "";
     }
 }
+
+async function carregarRelatorios() {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    await carregarRelatorioEstoque();
+    await carregarRelatorioMovimentacoes();
+}
+
+
+async function exportarRelatorioEstoque(
+    formato
+) {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const filtro =
+        document.getElementById(
+            "relatorioSomenteEstoqueBaixo"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "relatorio-estoque-mensagem"
+        );
+
+    const somenteEstoqueBaixo =
+        filtro
+            ? filtro.value === "true"
+            : false;
+
+    const formatoNormalizado =
+        normalizarFormatoExportacao(
+            formato
+        );
+
+    if (!formatoNormalizado) {
+        if (mensagem) {
+            mensagem.textContent =
+                "Formato de exportação inválido.";
+        }
+
+        return;
+    }
+
+    const url =
+        "/admin/exportacoes/estoque/"
+        + formatoNormalizado
+        + "?somenteEstoqueBaixo="
+        + somenteEstoqueBaixo;
+
+    const nomePadrao =
+        "relatorio-estoque."
+        + formatoNormalizado;
+
+    await baixarArquivoExportacao(
+        url,
+        nomePadrao,
+        mensagem,
+        "relatório de estoque"
+    );
+}
+
+
+async function exportarRelatorioMovimentacoes(
+    formato
+) {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const dataInicioElemento =
+        document.getElementById(
+            "relatorioMovimentacaoDataInicio"
+        );
+
+    const dataFimElemento =
+        document.getElementById(
+            "relatorioMovimentacaoDataFim"
+        );
+
+    const tipoElemento =
+        document.getElementById(
+            "relatorioMovimentacaoTipo"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "relatorio-movimentacoes-mensagem"
+        );
+
+    const dataInicio =
+        dataInicioElemento
+            ? dataInicioElemento.value
+            : "";
+
+    const dataFim =
+        dataFimElemento
+            ? dataFimElemento.value
+            : "";
+
+    const tipo =
+        tipoElemento
+            ? tipoElemento.value
+            : "";
+
+    if (
+        dataInicio &&
+        dataFim &&
+        new Date(dataInicio) >
+        new Date(dataFim)
+    ) {
+        if (mensagem) {
+            mensagem.textContent =
+                "A data inicial não pode ser posterior à data final.";
+        }
+
+        return;
+    }
+
+    const formatoNormalizado =
+        normalizarFormatoExportacao(
+            formato
+        );
+
+    if (!formatoNormalizado) {
+        if (mensagem) {
+            mensagem.textContent =
+                "Formato de exportação inválido.";
+        }
+
+        return;
+    }
+
+    const params =
+        new URLSearchParams();
+
+    if (dataInicio) {
+        params.set(
+            "dataInicio",
+            dataInicio
+        );
+    }
+
+    if (dataFim) {
+        params.set(
+            "dataFim",
+            dataFim
+        );
+    }
+
+    if (tipo) {
+        params.set(
+            "tipo",
+            tipo
+        );
+    }
+
+    const query =
+        params.toString();
+
+    const urlBase =
+        "/admin/exportacoes/movimentacoes/"
+        + formatoNormalizado;
+
+    const url =
+        query
+            ? urlBase + "?" + query
+            : urlBase;
+
+    const nomePadrao =
+        "relatorio-movimentacoes."
+        + formatoNormalizado;
+
+    await baixarArquivoExportacao(
+        url,
+        nomePadrao,
+        mensagem,
+        "relatório de movimentações"
+    );
+}
+
+
+function normalizarFormatoExportacao(
+    formato
+) {
+    const valor =
+        String(
+            formato || ""
+        )
+            .trim()
+            .toLowerCase();
+
+    if (
+        valor === "csv" ||
+        valor === "xlsx" ||
+        valor === "pdf"
+    ) {
+        return valor;
+    }
+
+    return "";
+}
+
+
+async function baixarArquivoExportacao(
+    url,
+    nomePadrao,
+    mensagem,
+    descricao
+) {
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    if (!token) {
+        logout();
+        return;
+    }
+
+    if (mensagem) {
+        mensagem.textContent =
+            "Gerando "
+            + descricao
+            + "...";
+    }
+
+    try {
+        const resposta =
+            await fetch(
+                url,
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer "
+                            + token
+                    }
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
+            logout();
+            return;
+        }
+
+        if (!resposta.ok) {
+            let mensagemErro =
+                "Não foi possível exportar o arquivo.";
+
+            const contentType =
+                resposta.headers.get(
+                    "content-type"
+                ) || "";
+
+            if (
+                contentType.includes(
+                    "application/json"
+                )
+            ) {
+                try {
+                    const dados =
+                        await resposta.json();
+
+                    mensagemErro =
+                        dados.mensagem ||
+                        dados.message ||
+                        dados.detail ||
+                        mensagemErro;
+
+                } catch (erro) {
+                    console.error(
+                        "Erro ao interpretar resposta de exportação:",
+                        erro
+                    );
+                }
+            } else {
+                try {
+                    const texto =
+                        await resposta.text();
+
+                    if (texto.trim()) {
+                        mensagemErro =
+                            texto.trim();
+                    }
+
+                } catch (erro) {
+                    console.error(
+                        "Erro ao ler resposta de exportação:",
+                        erro
+                    );
+                }
+            }
+
+            if (mensagem) {
+                mensagem.textContent =
+                    mensagemErro;
+            }
+
+            return;
+        }
+
+        const arquivo =
+            await resposta.blob();
+
+        const nomeArquivo =
+            obterNomeArquivoExportacao(
+                resposta,
+                nomePadrao
+            );
+
+        const urlArquivo =
+            URL.createObjectURL(
+                arquivo
+            );
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        link.href =
+            urlArquivo;
+
+        link.download =
+            nomeArquivo;
+
+        document.body.appendChild(
+            link
+        );
+
+        link.click();
+
+        link.remove();
+
+        URL.revokeObjectURL(
+            urlArquivo
+        );
+
+        if (mensagem) {
+            mensagem.textContent =
+                "Arquivo gerado com sucesso: "
+                + nomeArquivo;
+        }
+
+    } catch (erro) {
+        console.error(
+            "Erro ao exportar arquivo:",
+            erro
+        );
+
+        if (mensagem) {
+            mensagem.textContent =
+                "Erro ao conectar com o servidor durante a exportação.";
+        }
+    }
+}
+
+
+function obterNomeArquivoExportacao(
+    resposta,
+    nomePadrao
+) {
+    const contentDisposition =
+        resposta.headers.get(
+            "content-disposition"
+        );
+
+    if (!contentDisposition) {
+        return nomePadrao;
+    }
+
+    const filenameUtf8 =
+        contentDisposition.match(
+            /filename\*=UTF-8''([^;]+)/i
+        );
+
+    if (
+        filenameUtf8 &&
+        filenameUtf8[1]
+    ) {
+        try {
+            return decodeURIComponent(
+                filenameUtf8[1]
+                    .replace(
+                        /["']/g,
+                        ""
+                    )
+                    .trim()
+            );
+        } catch (erro) {
+            console.error(
+                "Erro ao interpretar nome UTF-8 do arquivo:",
+                erro
+            );
+        }
+    }
+
+    const filename =
+        contentDisposition.match(
+            /filename="?([^";]+)"?/i
+        );
+
+    if (
+        filename &&
+        filename[1]
+    ) {
+        return filename[1].trim();
+    }
+
+    return nomePadrao;
+}
+
+
+async function carregarRelatorioEstoque() {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    const filtro =
+        document.getElementById(
+            "relatorioSomenteEstoqueBaixo"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "relatorio-estoque-mensagem"
+        );
+
+    const somenteEstoqueBaixo =
+        filtro
+            ? filtro.value === "true"
+            : false;
+
+    if (mensagem) {
+        mensagem.textContent =
+            "Carregando relatório de estoque...";
+    }
+
+    try {
+        const resposta =
+            await fetch(
+                "/admin/relatorios/estoque?somenteEstoqueBaixo="
+                + somenteEstoqueBaixo,
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer "
+                            + token
+                    }
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    "Você não possui permissão para acessar os relatórios.";
+            }
+
+            return;
+        }
+
+        if (!resposta.ok) {
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    dados.message ||
+                    dados.detail ||
+                    "Não foi possível carregar o relatório de estoque.";
+            }
+
+            return;
+        }
+
+        mostrarRelatorioEstoque(
+            dados
+        );
+
+        if (mensagem) {
+            mensagem.textContent = "";
+        }
+
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar relatório de estoque:",
+            erro
+        );
+
+        if (mensagem) {
+            mensagem.textContent =
+                "Erro ao conectar com o servidor.";
+        }
+    }
+}
+
+
+function mostrarRelatorioEstoque(
+    dados
+) {
+    definirValorRelatorio(
+        "relatorio-estoque-total-produtos",
+        dados.totalProdutos ?? 0
+    );
+
+    definirValorRelatorio(
+        "relatorio-estoque-total-unidades",
+        dados.totalUnidades ?? 0
+    );
+
+    definirValorRelatorio(
+        "relatorio-estoque-baixo",
+        dados.produtosEstoqueBaixo ?? 0
+    );
+
+    definirValorRelatorio(
+        "relatorio-estoque-valor-total",
+        formatarValorMonetarioDashboard(
+            dados.valorTotalEstoque
+        )
+    );
+
+    const lista =
+        document.getElementById(
+            "relatorio-estoque-lista"
+        );
+
+    if (!lista) {
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    const produtos =
+        dados.produtos || [];
+
+    if (produtos.length === 0) {
+        const linha =
+            document.createElement(
+                "tr"
+            );
+
+        const coluna =
+            document.createElement(
+                "td"
+            );
+
+        coluna.colSpan = 8;
+        coluna.textContent =
+            "Nenhum produto encontrado para este relatório.";
+
+        linha.appendChild(
+            coluna
+        );
+
+        lista.appendChild(
+            linha
+        );
+
+        return;
+    }
+
+    produtos.forEach(
+        produto => {
+            const linha =
+                document.createElement(
+                    "tr"
+                );
+
+            adicionarCelulaRelatorio(
+                linha,
+                produto.sku || "Não definido"
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                produto.nome || "Produto"
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                produto.categoria || "Sem categoria"
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                formatarValorMonetarioDashboard(
+                    produto.preco
+                )
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                produto.quantidade ?? 0
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                produto.estoqueMinimo ?? 0
+            );
+
+            const status =
+                document.createElement(
+                    "td"
+                );
+
+            const badge =
+                document.createElement(
+                    "span"
+                );
+
+            badge.classList.add(
+                "relatorio-status"
+            );
+
+            if (produto.estoqueBaixo) {
+                badge.classList.add(
+                    "relatorio-status-baixo"
+                );
+
+                badge.textContent =
+                    "Estoque baixo";
+            } else {
+                badge.classList.add(
+                    "relatorio-status-ok"
+                );
+
+                badge.textContent =
+                    "Normal";
+            }
+
+            status.appendChild(
+                badge
+            );
+
+            linha.appendChild(
+                status
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                formatarValorMonetarioDashboard(
+                    produto.valorEmEstoque
+                )
+            );
+
+            lista.appendChild(
+                linha
+            );
+        }
+    );
+}
+
+
+async function carregarRelatorioMovimentacoes() {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    const dataInicioElemento =
+        document.getElementById(
+            "relatorioMovimentacaoDataInicio"
+        );
+
+    const dataFimElemento =
+        document.getElementById(
+            "relatorioMovimentacaoDataFim"
+        );
+
+    const tipoElemento =
+        document.getElementById(
+            "relatorioMovimentacaoTipo"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "relatorio-movimentacoes-mensagem"
+        );
+
+    const dataInicio =
+        dataInicioElemento
+            ? dataInicioElemento.value
+            : "";
+
+    const dataFim =
+        dataFimElemento
+            ? dataFimElemento.value
+            : "";
+
+    const tipo =
+        tipoElemento
+            ? tipoElemento.value
+            : "";
+
+    if (
+        dataInicio &&
+        dataFim &&
+        new Date(dataInicio) >
+        new Date(dataFim)
+    ) {
+        if (mensagem) {
+            mensagem.textContent =
+                "A data inicial não pode ser posterior à data final.";
+        }
+
+        return;
+    }
+
+    const params =
+        new URLSearchParams();
+
+    if (dataInicio) {
+        params.set(
+            "dataInicio",
+            dataInicio
+        );
+    }
+
+    if (dataFim) {
+        params.set(
+            "dataFim",
+            dataFim
+        );
+    }
+
+    if (tipo) {
+        params.set(
+            "tipo",
+            tipo
+        );
+    }
+
+    if (mensagem) {
+        mensagem.textContent =
+            "Carregando relatório de movimentações...";
+    }
+
+    const query =
+        params.toString();
+
+    const url =
+        query
+            ? "/admin/relatorios/movimentacoes?" + query
+            : "/admin/relatorios/movimentacoes";
+
+    try {
+        const resposta =
+            await fetch(
+                url,
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer "
+                            + token
+                    }
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    "Você não possui permissão para acessar os relatórios.";
+            }
+
+            return;
+        }
+
+        if (!resposta.ok) {
+            if (mensagem) {
+                mensagem.textContent =
+                    dados.mensagem ||
+                    dados.message ||
+                    dados.detail ||
+                    "Não foi possível carregar o relatório de movimentações.";
+            }
+
+            return;
+        }
+
+        mostrarRelatorioMovimentacoes(
+            dados
+        );
+
+        if (mensagem) {
+            mensagem.textContent = "";
+        }
+
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar relatório de movimentações:",
+            erro
+        );
+
+        if (mensagem) {
+            mensagem.textContent =
+                "Erro ao conectar com o servidor.";
+        }
+    }
+}
+
+
+function mostrarRelatorioMovimentacoes(
+    dados
+) {
+    definirValorRelatorio(
+        "relatorio-total-movimentacoes",
+        dados.totalMovimentacoes ?? 0
+    );
+
+    definirValorRelatorio(
+        "relatorio-total-entradas",
+        dados.totalEntradas ?? 0
+    );
+
+    definirValorRelatorio(
+        "relatorio-total-saidas",
+        dados.totalSaidas ?? 0
+    );
+
+    definirValorRelatorio(
+        "relatorio-unidades-entrada",
+        dados.unidadesEntrada ?? 0
+    );
+
+    definirValorRelatorio(
+        "relatorio-unidades-saida",
+        dados.unidadesSaida ?? 0
+    );
+
+    const lista =
+        document.getElementById(
+            "relatorio-movimentacoes-lista"
+        );
+
+    if (!lista) {
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    const movimentacoes =
+        dados.movimentacoes || [];
+
+    if (movimentacoes.length === 0) {
+        const linha =
+            document.createElement(
+                "tr"
+            );
+
+        const coluna =
+            document.createElement(
+                "td"
+            );
+
+        coluna.colSpan = 7;
+        coluna.textContent =
+            "Nenhuma movimentação encontrada para os filtros informados.";
+
+        linha.appendChild(
+            coluna
+        );
+
+        lista.appendChild(
+            linha
+        );
+
+        return;
+    }
+
+    movimentacoes.forEach(
+        movimentacao => {
+            const linha =
+                document.createElement(
+                    "tr"
+                );
+
+            adicionarCelulaRelatorio(
+                linha,
+                movimentacao.dataHora
+                    ? new Date(
+                        movimentacao.dataHora
+                    ).toLocaleString(
+                        "pt-BR"
+                    )
+                    : "Data não informada"
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                movimentacao.produtoNome ||
+                "Produto"
+            );
+
+            const tipoCelula =
+                document.createElement(
+                    "td"
+                );
+
+            const tipoBadge =
+                document.createElement(
+                    "span"
+                );
+
+            tipoBadge.classList.add(
+                "relatorio-status"
+            );
+
+            if (
+                movimentacao.tipo ===
+                "ENTRADA"
+            ) {
+                tipoBadge.classList.add(
+                    "relatorio-status-entrada"
+                );
+            } else {
+                tipoBadge.classList.add(
+                    "relatorio-status-saida"
+                );
+            }
+
+            tipoBadge.textContent =
+                movimentacao.tipo ||
+                "Não informado";
+
+            tipoCelula.appendChild(
+                tipoBadge
+            );
+
+            linha.appendChild(
+                tipoCelula
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                movimentacao.quantidade ?? 0
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                movimentacao.responsavelNome ||
+                movimentacao.responsavelEmail ||
+                "Não registrado"
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                movimentacao.responsavelPerfil ||
+                "Não registrado"
+            );
+
+            adicionarCelulaRelatorio(
+                linha,
+                movimentacao.observacao ||
+                "Sem observação"
+            );
+
+            lista.appendChild(
+                linha
+            );
+        }
+    );
+}
+
+
+function adicionarCelulaRelatorio(
+    linha,
+    valor
+) {
+    const celula =
+        document.createElement(
+            "td"
+        );
+
+    celula.textContent =
+        valor;
+
+    linha.appendChild(
+        celula
+    );
+}
+
+
+function definirValorRelatorio(
+    id,
+    valor
+) {
+    const elemento =
+        document.getElementById(
+            id
+        );
+
+    if (elemento) {
+        elemento.textContent =
+            valor;
+    }
+}
+
+
+async function limparFiltrosRelatorioMovimentacoes() {
+    const dataInicio =
+        document.getElementById(
+            "relatorioMovimentacaoDataInicio"
+        );
+
+    const dataFim =
+        document.getElementById(
+            "relatorioMovimentacaoDataFim"
+        );
+
+    const tipo =
+        document.getElementById(
+            "relatorioMovimentacaoTipo"
+        );
+
+    if (dataInicio) {
+        dataInicio.value = "";
+    }
+
+    if (dataFim) {
+        dataFim.value = "";
+    }
+
+    if (tipo) {
+        tipo.value = "";
+    }
+
+    const mensagem =
+        document.getElementById(
+            "relatorio-movimentacoes-mensagem"
+        );
+
+    if (mensagem) {
+        mensagem.textContent = "";
+    }
+
+    await carregarRelatorioMovimentacoes();
+}
+
+
+function limparRelatorios() {
+    const ids = [
+        "relatorio-estoque-total-produtos",
+        "relatorio-estoque-total-unidades",
+        "relatorio-estoque-baixo",
+        "relatorio-total-movimentacoes",
+        "relatorio-total-entradas",
+        "relatorio-total-saidas",
+        "relatorio-unidades-entrada",
+        "relatorio-unidades-saida"
+    ];
+
+    ids.forEach(
+        id => {
+            definirValorRelatorio(
+                id,
+                0
+            );
+        }
+    );
+
+    definirValorRelatorio(
+        "relatorio-estoque-valor-total",
+        "R$ 0,00"
+    );
+
+    const estoqueLista =
+        document.getElementById(
+            "relatorio-estoque-lista"
+        );
+
+    if (estoqueLista) {
+        estoqueLista.innerHTML = "";
+    }
+
+    const movimentacoesLista =
+        document.getElementById(
+            "relatorio-movimentacoes-lista"
+        );
+
+    if (movimentacoesLista) {
+        movimentacoesLista.innerHTML = "";
+    }
+
+    const mensagemEstoque =
+        document.getElementById(
+            "relatorio-estoque-mensagem"
+        );
+
+    if (mensagemEstoque) {
+        mensagemEstoque.textContent = "";
+    }
+
+    const mensagemMovimentacoes =
+        document.getElementById(
+            "relatorio-movimentacoes-mensagem"
+        );
+
+    if (mensagemMovimentacoes) {
+        mensagemMovimentacoes.textContent = "";
+    }
+}
+
 
 function montarParametrosAuditoria(
     pagina
@@ -5810,6 +6984,7 @@ document.addEventListener(
 
             if (ehAdmin()) {
                 await carregarDashboard();
+                await carregarRelatorios();
 
                 paginaAtualUsuarios = 0;
 

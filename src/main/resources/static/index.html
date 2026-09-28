@@ -384,6 +384,343 @@
             </div>
 
         </section>
+
+        <section
+                id="admin-relatorios-section"
+                class="card hidden"
+        >
+
+            <div class="topo">
+
+                <div>
+                    <h2>
+                        Relatórios
+                    </h2>
+
+                    <p class="subtitulo">
+                        Consulte indicadores detalhados do estoque e das movimentações.
+                    </p>
+                </div>
+
+                <button
+                        type="button"
+                        onclick="carregarRelatorios()"
+                >
+                    Atualizar relatórios
+                </button>
+
+            </div>
+
+            <div class="relatorio-bloco">
+
+                <div class="relatorio-cabecalho">
+
+                    <div>
+                        <h3>
+                            Relatório de estoque
+                        </h3>
+
+                        <p class="subtitulo">
+                            Visão consolidada dos produtos, quantidades e valores em estoque.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="filtros-relatorios">
+
+                    <div class="campo-filtro">
+
+                        <label for="relatorioSomenteEstoqueBaixo">
+                            Exibir
+                        </label>
+
+                        <select id="relatorioSomenteEstoqueBaixo">
+
+                            <option value="false">
+                                Todos os produtos
+                            </option>
+
+                            <option value="true">
+                                Somente estoque baixo
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="acoes-filtros">
+
+                    <button
+                            type="button"
+                            onclick="carregarRelatorioEstoque()"
+                    >
+                        Gerar relatório de estoque
+                    </button>
+
+                    <button
+                            type="button"
+                            class="botao-secundario"
+                            onclick="exportarRelatorioEstoque('csv')"
+                    >
+                        Exportar CSV
+                    </button>
+
+                    <button
+                            type="button"
+                            class="botao-secundario"
+                            onclick="exportarRelatorioEstoque('xlsx')"
+                    >
+                        Exportar Excel
+                    </button>
+
+                    <button
+                            type="button"
+                            class="botao-secundario"
+                            onclick="exportarRelatorioEstoque('pdf')"
+                    >
+                        Exportar PDF
+                    </button>
+
+                </div>
+
+                <p id="relatorio-estoque-mensagem"></p>
+
+                <div class="relatorio-resumo-grid">
+
+                    <div class="relatorio-resumo-card">
+                        <span>Produtos</span>
+                        <strong id="relatorio-estoque-total-produtos">0</strong>
+                    </div>
+
+                    <div class="relatorio-resumo-card">
+                        <span>Unidades</span>
+                        <strong id="relatorio-estoque-total-unidades">0</strong>
+                    </div>
+
+                    <div class="relatorio-resumo-card relatorio-resumo-alerta">
+                        <span>Estoque baixo</span>
+                        <strong id="relatorio-estoque-baixo">0</strong>
+                    </div>
+
+                    <div class="relatorio-resumo-card">
+                        <span>Valor total</span>
+                        <strong
+                                id="relatorio-estoque-valor-total"
+                                class="relatorio-valor-menor"
+                        >R$ 0,00</strong>
+                    </div>
+
+                </div>
+
+                <div class="relatorio-tabela-container">
+
+                    <table class="relatorio-tabela">
+
+                        <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Produto</th>
+                            <th>Categoria</th>
+                            <th>Preço</th>
+                            <th>Quantidade</th>
+                            <th>Mínimo</th>
+                            <th>Status</th>
+                            <th>Valor em estoque</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="relatorio-estoque-lista">
+                        <tr>
+                            <td colspan="8">
+                                Carregando relatório...
+                            </td>
+                        </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <div class="relatorio-bloco relatorio-bloco-separado">
+
+                <div class="relatorio-cabecalho">
+
+                    <div>
+                        <h3>
+                            Relatório de movimentações
+                        </h3>
+
+                        <p class="subtitulo">
+                            Consulte entradas e saídas por período e tipo de movimentação.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="filtros-relatorios">
+
+                    <div class="campo-filtro">
+
+                        <label for="relatorioMovimentacaoDataInicio">
+                            Data inicial
+                        </label>
+
+                        <input
+                                type="datetime-local"
+                                id="relatorioMovimentacaoDataInicio"
+                        >
+
+                    </div>
+
+                    <div class="campo-filtro">
+
+                        <label for="relatorioMovimentacaoDataFim">
+                            Data final
+                        </label>
+
+                        <input
+                                type="datetime-local"
+                                id="relatorioMovimentacaoDataFim"
+                        >
+
+                    </div>
+
+                    <div class="campo-filtro">
+
+                        <label for="relatorioMovimentacaoTipo">
+                            Tipo
+                        </label>
+
+                        <select id="relatorioMovimentacaoTipo">
+
+                            <option value="">
+                                Todas
+                            </option>
+
+                            <option value="ENTRADA">
+                                ENTRADA
+                            </option>
+
+                            <option value="SAIDA">
+                                SAÍDA
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="acoes-filtros">
+
+                    <button
+                            type="button"
+                            onclick="carregarRelatorioMovimentacoes()"
+                    >
+                        Buscar movimentações
+                    </button>
+
+                    <button
+                            type="button"
+                            class="botao-limpar"
+                            onclick="limparFiltrosRelatorioMovimentacoes()"
+                    >
+                        Limpar filtros
+                    </button>
+
+                    <button
+                            type="button"
+                            class="botao-secundario"
+                            onclick="exportarRelatorioMovimentacoes('csv')"
+                    >
+                        Exportar CSV
+                    </button>
+
+                    <button
+                            type="button"
+                            class="botao-secundario"
+                            onclick="exportarRelatorioMovimentacoes('xlsx')"
+                    >
+                        Exportar Excel
+                    </button>
+
+                    <button
+                            type="button"
+                            class="botao-secundario"
+                            onclick="exportarRelatorioMovimentacoes('pdf')"
+                    >
+                        Exportar PDF
+                    </button>
+
+                </div>
+
+                <p id="relatorio-movimentacoes-mensagem"></p>
+
+                <div class="relatorio-resumo-grid relatorio-resumo-grid-movimentacoes">
+
+                    <div class="relatorio-resumo-card">
+                        <span>Movimentações</span>
+                        <strong id="relatorio-total-movimentacoes">0</strong>
+                    </div>
+
+                    <div class="relatorio-resumo-card relatorio-resumo-entrada">
+                        <span>Entradas</span>
+                        <strong id="relatorio-total-entradas">0</strong>
+                    </div>
+
+                    <div class="relatorio-resumo-card relatorio-resumo-saida">
+                        <span>Saídas</span>
+                        <strong id="relatorio-total-saidas">0</strong>
+                    </div>
+
+                    <div class="relatorio-resumo-card relatorio-resumo-entrada">
+                        <span>Unidades de entrada</span>
+                        <strong id="relatorio-unidades-entrada">0</strong>
+                    </div>
+
+                    <div class="relatorio-resumo-card relatorio-resumo-saida">
+                        <span>Unidades de saída</span>
+                        <strong id="relatorio-unidades-saida">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="relatorio-tabela-container">
+
+                    <table class="relatorio-tabela">
+
+                        <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Produto</th>
+                            <th>Tipo</th>
+                            <th>Quantidade</th>
+                            <th>Responsável</th>
+                            <th>Perfil</th>
+                            <th>Observação</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="relatorio-movimentacoes-lista">
+                        <tr>
+                            <td colspan="7">
+                                Carregando relatório...
+                            </td>
+                        </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
         <section
                 id="admin-usuarios-section"
                 class="card hidden"
