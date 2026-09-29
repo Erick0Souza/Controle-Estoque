@@ -1,0 +1,41 @@
+spring:
+
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+    properties:
+      hibernate:
+        format_sql: false
+
+springdoc:
+
+  api-docs:
+    enabled: false
+
+  swagger-ui:
+    enabled: false
+
+server:
+
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+    whitelabel:
+      enabled: false
+
+app:
+
+  security:
+    public-registration: false

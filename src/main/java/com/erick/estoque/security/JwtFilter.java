@@ -24,8 +24,11 @@ public class JwtFilter extends OncePerRequestFilter {
             JwtService jwtService,
             UserRepository userRepository
     ) {
-        this.jwtService = jwtService;
-        this.userRepository = userRepository;
+        this.jwtService =
+                jwtService;
+
+        this.userRepository =
+                userRepository;
     }
 
     @Override
@@ -62,10 +65,10 @@ public class JwtFilter extends OncePerRequestFilter {
                 );
 
         if (
-                authorization == null
-                        || !authorization.startsWith(
-                        "Bearer "
-                )
+                authorization == null ||
+                        !authorization.startsWith(
+                                "Bearer "
+                        )
         ) {
 
             filterChain.doFilter(
@@ -79,17 +82,18 @@ public class JwtFilter extends OncePerRequestFilter {
         String token =
                 authorization.substring(
                         7
-                );
+                ).trim();
 
         if (
-                !jwtService.tokenValido(
-                        token
-                )
+                token.isBlank() ||
+                        token.length() > 4096 ||
+                        !jwtService.tokenValido(
+                                token
+                        )
         ) {
 
             respostaNaoAutorizada(
-                    response,
-                    "Token inválido ou expirado"
+                    response
             );
 
             return;
@@ -102,10 +106,25 @@ public class JwtFilter extends OncePerRequestFilter {
                         == null
         ) {
 
-            String email =
-                    jwtService.extrairEmail(
-                            token
-                    );
+            String email;
+
+            try {
+
+                email =
+                        jwtService.extrairEmail(
+                                token
+                        );
+
+            } catch (
+                    Exception exception
+            ) {
+
+                respostaNaoAutorizada(
+                        response
+                );
+
+                return;
+            }
 
             var usuarioOptional =
                     userRepository
@@ -118,8 +137,7 @@ public class JwtFilter extends OncePerRequestFilter {
             ) {
 
                 respostaNaoAutorizada(
-                        response,
-                        "Usuário do token não encontrado"
+                        response
                 );
 
                 return;
@@ -129,10 +147,10 @@ public class JwtFilter extends OncePerRequestFilter {
                     usuarioOptional.get();
 
             String role =
-                    "ROLE_"
-                            + usuario
-                            .getPerfil()
-                            .name();
+                    "ROLE_" +
+                            usuario
+                                    .getPerfil()
+                                    .name();
 
             SimpleGrantedAuthority autoridade =
                     new SimpleGrantedAuthority(
@@ -169,8 +187,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private void respostaNaoAutorizada(
-            HttpServletResponse response,
-            String mensagem
+            HttpServletResponse response
     ) throws IOException {
 
         response.setStatus(
@@ -187,11 +204,9 @@ public class JwtFilter extends OncePerRequestFilter {
                         """
                         {
                           "status": 401,
-                          "mensagem": "%s"
+                          "mensagem": "Token inválido ou expirado"
                         }
-                        """.formatted(
-                                mensagem
-                        )
+                        """
                 );
     }
 }

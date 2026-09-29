@@ -1,19 +1,37 @@
 spring:
 
   datasource:
-    url: jdbc:h2:mem:estoquetest;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:estoquetest;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+
     hibernate:
       ddl-auto: create-drop
 
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
+
+  h2:
+    console:
+      enabled: false
+
+springdoc:
+
+  api-docs:
+    enabled: false
+
+  swagger-ui:
+    enabled: false
 
 app:
+
   jwt:
-    secret: chave-super-segura-utilizada-apenas-nos-testes-automatizados-estoque-api-2026
+    secret: chave-de-testes-estoque-api-12345678901234567890
+
+  security:
+    public-registration: true

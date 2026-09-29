@@ -19,64 +19,134 @@ public class JwtService {
             1000L * 60 * 60 * 8; // 8 horas
 
     public JwtService(
-            @Value("${app.jwt.secret}") String secret
+            @Value("${app.jwt.secret}")
+            String secret
     ) {
 
-        this.key = Keys.hmacShaKeyFor(
-                secret.getBytes(StandardCharsets.UTF_8)
-        );
+        if (
+                secret == null ||
+                        secret.isBlank()
+        ) {
+
+            throw new IllegalStateException(
+                    "APP_JWT_SECRET não foi configurada"
+            );
+        }
+
+        byte[] secretBytes =
+                secret.getBytes(
+                        StandardCharsets.UTF_8
+                );
+
+        if (
+                secretBytes.length < 32
+        ) {
+
+            throw new IllegalStateException(
+                    "APP_JWT_SECRET deve possuir pelo menos 32 bytes"
+            );
+        }
+
+        this.key =
+                Keys.hmacShaKeyFor(
+                        secretBytes
+                );
     }
 
-    public String gerar(String email) {
+    public String gerar(
+            String email
+    ) {
 
-        Date agora = new Date();
+        Date agora =
+                new Date();
 
-        Date expiracao = new Date(
-                agora.getTime() + TEMPO_EXPIRACAO
-        );
+        Date expiracao =
+                new Date(
+                        agora.getTime() +
+                                TEMPO_EXPIRACAO
+                );
 
         return Jwts.builder()
-                .subject(email)
-                .issuedAt(agora)
-                .expiration(expiracao)
-                .signWith(key)
+                .subject(
+                        email
+                )
+                .issuedAt(
+                        agora
+                )
+                .expiration(
+                        expiracao
+                )
+                .signWith(
+                        key
+                )
                 .compact();
     }
 
-    public String extrairEmail(String token) {
+    public String extrairEmail(
+            String token
+    ) {
 
-        return extrairClaims(token)
-                .getSubject();
+        return extrairClaims(
+                token
+        ).getSubject();
     }
 
-    public Date extrairExpiracao(String token) {
+    public Date extrairExpiracao(
+            String token
+    ) {
 
-        return extrairClaims(token)
-                .getExpiration();
+        return extrairClaims(
+                token
+        ).getExpiration();
     }
 
-    public boolean tokenValido(String token) {
+    public boolean tokenValido(
+            String token
+    ) {
 
         try {
 
-            Claims claims = extrairClaims(token);
+            if (
+                    token == null ||
+                            token.isBlank()
+            ) {
+                return false;
+            }
+
+            Claims claims =
+                    extrairClaims(
+                            token
+                    );
 
             return claims.getSubject() != null
+                    && !claims.getSubject()
+                    .isBlank()
+                    && claims.getExpiration() != null
                     && claims.getExpiration()
-                    .after(new Date());
+                    .after(
+                            new Date()
+                    );
 
-        } catch (Exception exception) {
+        } catch (
+                Exception exception
+        ) {
 
             return false;
         }
     }
 
-    private Claims extrairClaims(String token) {
+    private Claims extrairClaims(
+            String token
+    ) {
 
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(
+                        key
+                )
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(
+                        token
+                )
                 .getPayload();
     }
 }

@@ -1,16 +1,21 @@
 package com.erick.estoque.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -19,15 +24,42 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LoginAttemptService loginAttemptService;
+
+    private final String senhaFicticiaHash;
+
+    private final boolean cadastroPublicoAtivo;
 
     public AuthController(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService
+            JwtService jwtService,
+            LoginAttemptService loginAttemptService,
+            @Value(
+                    "${app.security.public-registration:true}"
+            )
+            boolean cadastroPublicoAtivo
     ) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
+        this.userRepository =
+                userRepository;
+
+        this.passwordEncoder =
+                passwordEncoder;
+
+        this.jwtService =
+                jwtService;
+
+        this.loginAttemptService =
+                loginAttemptService;
+
+        this.cadastroPublicoAtivo =
+                cadastroPublicoAtivo;
+
+        this.senhaFicticiaHash =
+                passwordEncoder.encode(
+                        UUID.randomUUID()
+                                .toString()
+                );
     }
 
     @PostMapping("/register")
@@ -37,6 +69,16 @@ public class AuthController {
             @RequestBody
             CadastroRequest request
     ) {
+
+        if (
+                !cadastroPublicoAtivo
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Cadastro público de usuários está desabilitado"
+            );
+        }
 
         String nomeUsuario =
                 request.nomeUsuario()
@@ -48,6 +90,10 @@ public class AuthController {
                         .toLowerCase(
                                 Locale.ROOT
                         );
+
+        validarSenhaBCrypt(
+                request.senha()
+        );
 
         if (
                 userRepository
@@ -113,7 +159,8 @@ public class AuthController {
     public LoginResponse login(
             @Valid
             @RequestBody
-            LoginRequest request
+            LoginRequest request,
+            HttpServletRequest httpRequest
     ) {
 
         String email =
@@ -123,32 +170,74 @@ public class AuthController {
                                 Locale.ROOT
                         );
 
-        UserEntity usuario =
+        String ip =
+                httpRequest.getRemoteAddr();
+
+        if (
+                loginAttemptService
+                        .estaBloqueado(
+                                email,
+                                ip
+                        )
+        ) {
+
+            throw muitasTentativas();
+        }
+
+        Optional<UserEntity> usuarioOptional =
                 userRepository
                         .findByEmail(
                                 email
+                        );
+
+        String hashParaComparacao =
+                usuarioOptional
+                        .map(
+                                UserEntity::getSenha
                         )
-                        .orElseThrow(
-                                () ->
-                                        new ResponseStatusException(
-                                                HttpStatus.UNAUTHORIZED,
-                                                "Email ou senha inválidos"
-                                        )
+                        .orElse(
+                                senhaFicticiaHash
                         );
 
         boolean senhaCorreta =
                 passwordEncoder.matches(
                         request.senha(),
-                        usuario.getSenha()
+                        hashParaComparacao
                 );
 
-        if (!senhaCorreta) {
+        if (
+                usuarioOptional.isEmpty() ||
+                        !senhaCorreta
+        ) {
 
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Email ou senha inválidos"
-            );
+            loginAttemptService
+                    .registrarFalha(
+                            email,
+                            ip
+                    );
+
+            if (
+                    loginAttemptService
+                            .estaBloqueado(
+                                    email,
+                                    ip
+                            )
+            ) {
+
+                throw muitasTentativas();
+            }
+
+            throw credenciaisInvalidas();
         }
+
+        UserEntity usuario =
+                usuarioOptional.get();
+
+        loginAttemptService
+                .registrarSucesso(
+                        email,
+                        ip
+                );
 
         String token =
                 jwtService.gerar(
@@ -160,6 +249,52 @@ public class AuthController {
                 usuario.getNomeUsuario(),
                 usuario.getEmail(),
                 usuario.getPerfil()
+        );
+    }
+
+    private void validarSenhaBCrypt(
+            String senha
+    ) {
+
+        int tamanhoSenhaBytes =
+                senha.getBytes(
+                        StandardCharsets.UTF_8
+                ).length;
+
+        if (
+                tamanhoSenhaBytes < 8
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A senha deve possuir pelo menos 8 caracteres"
+            );
+        }
+
+        if (
+                tamanhoSenhaBytes > 72
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A senha informada é muito longa"
+            );
+        }
+    }
+
+    private ResponseStatusException credenciaisInvalidas() {
+
+        return new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Email ou senha inválidos"
+        );
+    }
+
+    private ResponseStatusException muitasTentativas() {
+
+        return new ResponseStatusException(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "Muitas tentativas de login. Tente novamente em alguns minutos"
         );
     }
 
@@ -191,9 +326,9 @@ public class AuthController {
                     message = "Senha é obrigatória"
             )
             @Size(
-                    min = 6,
-                    max = 100,
-                    message = "A senha deve ter entre 6 e 100 caracteres"
+                    min = 8,
+                    max = 72,
+                    message = "A senha deve ter entre 8 e 72 caracteres"
             )
             String senha
 
