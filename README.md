@@ -1086,32 +1086,88 @@ No ambiente de produção, informações internas e stack traces não são expos
 
 # Imagens do projeto
 
+As telas abaixo apresentam algumas das principais funcionalidades disponíveis na aplicação.
+
 ## Login e criação de conta
 
 ![Tela de Login](img/login.png)
 
-## Sistema de controle de estoque
+Autenticação de usuários e acesso ao sistema através de JWT.
+
+---
+
+## Dashboard administrativo
+
+![Dashboard](img/dashboard.png)
+
+Visão geral do estoque com indicadores de produtos, unidades, estoque baixo, valor total, usuários, movimentações e atividades recentes.
+
+---
+
+## Gerenciamento de produtos
+
+![Produtos](img/produtos.png)
+
+Listagem de produtos com SKU, categoria, preço, quantidade, estoque mínimo, filtros, paginação e gerenciamento de imagens.
+
+---
+
+## Movimentações de estoque
+
+![Movimentações](img/movimentacoes.png)
+
+Registro de entradas e saídas e acompanhamento do histórico de movimentações.
+
+---
+
+## Gerenciamento de usuários
+
+![Usuários](img/usuarios.png)
+
+Área administrativa para consulta de usuários, alteração de perfis e gerenciamento de contas.
+
+---
+
+## Auditoria
+
+![Auditoria](img/auditoria.png)
+
+Histórico das principais ações realizadas no sistema, com filtros, usuários responsáveis e data das operações.
+
+---
+
+## Relatórios e exportações
+
+![Relatórios](img/relatorios.png)
+
+![Relatórios](img/relatoriosmov.png)
+
+Relatórios de estoque e movimentações com filtros e opções de exportação em CSV, XLSX e PDF.
+
+---
+
+## Interface geral
 
 ![Sistema](img/sistema.png)
 
-## Swagger
+Interface web integrada diretamente com a API Spring Boot.
+
+---
+
+## Swagger / OpenAPI
 
 ![Swagger](img/swagger.png)
 
-## GitHub Actions
+Documentação interativa utilizada para consulta e teste dos endpoints durante o desenvolvimento.
+
+---
+
+## Integração contínua
 
 ![GitHub Actions](img/actions.png)
 
-Podem ser adicionadas posteriormente capturas de:
-
-```text
-Dashboard
-Relatórios
-Gerenciamento de usuários
-Auditoria
-Exportações
+Pipeline automatizada responsável pela execução dos testes e validação da imagem Docker.
 ```
-
 ---
 
 # Objetivo do projeto
@@ -1169,7 +1225,6 @@ Docker                       ✅
 GitHub Actions               ✅
 Perfis dev/test/prod         ✅
 Segurança de produção        ✅
-Deploy em nuvem              ⏳
 ```
 
 ---
