@@ -13,7 +13,6 @@ services:
     ports:
       - "5432:5432"
 
-
     volumes:
       - estoque_postgres_data:/var/lib/postgresql/data
 
@@ -45,20 +44,6 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
 
       APP_JWT_SECRET: ${APP_JWT_SECRET:-chave-local-docker-estoque-api-2026-segura}
-
-      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM: ${MAIL_FROM:-}
-
-      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
-      MAIL_STARTTLS_ENABLE: ${MAIL_STARTTLS_ENABLE:-true}
-      MAIL_STARTTLS_REQUIRED: ${MAIL_STARTTLS_REQUIRED:-true}
-
-      APP_URL: ${APP_URL:-http://localhost:8081}
-
-      PASSWORD_RESET_EXPIRATION_MINUTES: ${PASSWORD_RESET_EXPIRATION_MINUTES:-30}
 
       PORT: ${PORT:-8081}
 

@@ -6,6 +6,9 @@ let totalPaginasProdutos = 0;
 let paginaAtualUsuarios = 0;
 let totalPaginasUsuarios = 0;
 
+let usuarioSenhaSelecionadoId = null;
+let usuarioSenhaSelecionadoNome = "";
+
 let paginaAtualAuditoria = 0;
 let totalPaginasAuditoria = 0;
 
@@ -623,6 +626,8 @@ function mostrarSistema() {
 
 
 function logout() {
+    fecharModalRedefinirSenhaUsuario();
+
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("email");
     sessionStorage.removeItem("nomeUsuario");
@@ -1349,6 +1354,34 @@ function mostrarUsuariosAdmin(
                 );
             }
 
+            const botaoRedefinirSenha =
+                document.createElement(
+                    "button"
+                );
+
+            botaoRedefinirSenha.type =
+                "button";
+
+            botaoRedefinirSenha.classList.add(
+                "botao-secundario",
+                "botao-redefinir-senha"
+            );
+
+            botaoRedefinirSenha.textContent =
+                "Redefinir senha";
+
+            botaoRedefinirSenha.onclick =
+                () =>
+                    abrirModalRedefinirSenhaUsuario(
+                        usuario.id,
+                        usuario.nomeUsuario ||
+                        usuario.email
+                    );
+
+            card.appendChild(
+                botaoRedefinirSenha
+            );
+
             lista.appendChild(
                 card
             );
@@ -1495,6 +1528,331 @@ async function alterarPerfilUsuario(
 
         mensagem.textContent =
             "Erro ao conectar com o servidor.";
+    }
+}
+
+
+function abrirModalRedefinirSenhaUsuario(
+    usuarioId,
+    nomeUsuario
+) {
+    if (!ehAdmin()) {
+        return;
+    }
+
+    const modal =
+        document.getElementById(
+            "modal-redefinir-senha"
+        );
+
+    const usuarioElemento =
+        document.getElementById(
+            "modal-redefinir-senha-usuario"
+        );
+
+    const novaSenha =
+        document.getElementById(
+            "admin-nova-senha"
+        );
+
+    const confirmarSenha =
+        document.getElementById(
+            "admin-confirmar-nova-senha"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "admin-redefinir-senha-mensagem"
+        );
+
+    if (
+        !modal ||
+        !novaSenha ||
+        !confirmarSenha
+    ) {
+        return;
+    }
+
+    usuarioSenhaSelecionadoId =
+        usuarioId;
+
+    usuarioSenhaSelecionadoNome =
+        nomeUsuario;
+
+    if (usuarioElemento) {
+        usuarioElemento.textContent =
+            "Usuário: "
+            + nomeUsuario;
+    }
+
+    novaSenha.value = "";
+    confirmarSenha.value = "";
+
+    if (mensagem) {
+        mensagem.textContent = "";
+    }
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+    novaSenha.focus();
+}
+
+
+function fecharModalRedefinirSenhaUsuario() {
+    const modal =
+        document.getElementById(
+            "modal-redefinir-senha"
+        );
+
+    const novaSenha =
+        document.getElementById(
+            "admin-nova-senha"
+        );
+
+    const confirmarSenha =
+        document.getElementById(
+            "admin-confirmar-nova-senha"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "admin-redefinir-senha-mensagem"
+        );
+
+    if (modal) {
+        modal.classList.add(
+            "hidden"
+        );
+    }
+
+    if (novaSenha) {
+        novaSenha.value = "";
+    }
+
+    if (confirmarSenha) {
+        confirmarSenha.value = "";
+    }
+
+    if (mensagem) {
+        mensagem.textContent = "";
+    }
+
+    usuarioSenhaSelecionadoId =
+        null;
+
+    usuarioSenhaSelecionadoNome =
+        "";
+}
+
+
+async function redefinirSenhaUsuarioAdmin() {
+    if (
+        !ehAdmin() ||
+        usuarioSenhaSelecionadoId === null
+    ) {
+        return;
+    }
+
+    const novaSenhaElemento =
+        document.getElementById(
+            "admin-nova-senha"
+        );
+
+    const confirmarSenhaElemento =
+        document.getElementById(
+            "admin-confirmar-nova-senha"
+        );
+
+    const mensagem =
+        document.getElementById(
+            "admin-redefinir-senha-mensagem"
+        );
+
+    const botaoSalvar =
+        document.getElementById(
+            "admin-redefinir-senha-salvar"
+        );
+
+    if (
+        !novaSenhaElemento ||
+        !confirmarSenhaElemento ||
+        !mensagem
+    ) {
+        return;
+    }
+
+    const novaSenha =
+        novaSenhaElemento.value;
+
+    const confirmarSenha =
+        confirmarSenhaElemento.value;
+
+    if (
+        !novaSenha ||
+        !confirmarSenha
+    ) {
+        mensagem.textContent =
+            "Preencha a nova senha e a confirmação.";
+
+        return;
+    }
+
+    if (
+        novaSenha.length < 8 ||
+        novaSenha.length > 72
+    ) {
+        mensagem.textContent =
+            "A senha deve possuir entre 8 e 72 caracteres.";
+
+        return;
+    }
+
+    const tamanhoSenhaBytes =
+        new TextEncoder()
+            .encode(
+                novaSenha
+            )
+            .length;
+
+    if (tamanhoSenhaBytes > 72) {
+        mensagem.textContent =
+            "A senha informada é muito longa.";
+
+        return;
+    }
+
+    if (
+        novaSenha !==
+        confirmarSenha
+    ) {
+        mensagem.textContent =
+            "A nova senha e a confirmação não são iguais.";
+
+        return;
+    }
+
+    const confirmar =
+        confirm(
+            `Deseja redefinir a senha de "${usuarioSenhaSelecionadoNome}"?`
+        );
+
+    if (!confirmar) {
+        return;
+    }
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    mensagem.textContent =
+        "Redefinindo senha...";
+
+    if (botaoSalvar) {
+        botaoSalvar.disabled =
+            true;
+    }
+
+    try {
+        const resposta =
+            await fetch(
+                "/admin/usuarios/"
+                + usuarioSenhaSelecionadoId
+                + "/senha",
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            "Bearer "
+                            + token
+                    },
+
+                    body: JSON.stringify({
+                        novaSenha:
+                        novaSenha,
+
+                        confirmarSenha:
+                        confirmarSenha
+                    })
+                }
+            );
+
+        if (
+            resposta.status === 401
+        ) {
+            fecharModalRedefinirSenhaUsuario();
+            logout();
+            return;
+        }
+
+        let dados = {};
+
+        try {
+            dados =
+                await resposta.json();
+        } catch (erro) {
+            dados = {};
+        }
+
+        if (
+            resposta.status === 403
+        ) {
+            mensagem.textContent =
+                dados.mensagem ||
+                dados.message ||
+                dados.detail ||
+                "Você não possui permissão para redefinir senhas.";
+
+            return;
+        }
+
+        if (!resposta.ok) {
+            mensagem.textContent =
+                dados.mensagem ||
+                dados.message ||
+                dados.detail ||
+                "Não foi possível redefinir a senha.";
+
+            return;
+        }
+
+        const nomeUsuario =
+            usuarioSenhaSelecionadoNome;
+
+        fecharModalRedefinirSenhaUsuario();
+
+        const mensagemAdmin =
+            document.getElementById(
+                "admin-usuarios-mensagem"
+            );
+
+        if (mensagemAdmin) {
+            mensagemAdmin.textContent =
+                "Senha de \""
+                + nomeUsuario
+                + "\" redefinida com sucesso.";
+        }
+
+    } catch (erro) {
+        console.error(
+            "Erro ao redefinir senha:",
+            erro
+        );
+
+        mensagem.textContent =
+            "Erro ao conectar com o servidor.";
+
+    } finally {
+        if (botaoSalvar) {
+            botaoSalvar.disabled =
+                false;
+        }
     }
 }
 

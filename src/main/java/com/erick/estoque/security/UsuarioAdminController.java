@@ -2,35 +2,46 @@ package com.erick.estoque.security;
 
 import com.erick.estoque.auditoria.AuditoriaService;
 import com.erick.estoque.auditoria.TipoAcaoAuditoria;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 @RestController
 @RequestMapping("/admin/usuarios")
+@SecurityRequirement(name = "bearerAuth")
 public class UsuarioAdminController {
 
     private final UserRepository userRepository;
     private final AuditoriaService auditoriaService;
+    private final PasswordEncoder passwordEncoder;
 
     public UsuarioAdminController(
             UserRepository userRepository,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            PasswordEncoder passwordEncoder
     ) {
         this.userRepository =
                 userRepository;
 
         this.auditoriaService =
                 auditoriaService;
+
+        this.passwordEncoder =
+                passwordEncoder;
     }
 
     @GetMapping
@@ -204,6 +215,87 @@ public class UsuarioAdminController {
         );
     }
 
+    @PutMapping("/{id}/senha")
+    public MensagemResponse redefinirSenha(
+            @PathVariable Long id,
+            @Valid
+            @RequestBody
+            RedefinirSenhaRequest request
+    ) {
+
+        UserEntity usuario =
+                buscarUsuario(
+                        id
+                );
+
+        if (
+                !request.novaSenha()
+                        .equals(
+                                request.confirmarSenha()
+                        )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A nova senha e a confirmação não são iguais"
+            );
+        }
+
+        int tamanhoSenhaBytes =
+                request.novaSenha()
+                        .getBytes(
+                                StandardCharsets.UTF_8
+                        )
+                        .length;
+
+        if (
+                tamanhoSenhaBytes < 8
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A senha deve possuir pelo menos 8 caracteres"
+            );
+        }
+
+        if (
+                tamanhoSenhaBytes > 72
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A senha informada é muito longa"
+            );
+        }
+
+        String senhaCriptografada =
+                passwordEncoder.encode(
+                        request.novaSenha()
+                );
+
+        usuario.setSenha(
+                senhaCriptografada
+        );
+
+        UserEntity usuarioSalvo =
+                userRepository.save(
+                        usuario
+                );
+
+        auditoriaService.registrar(
+                TipoAcaoAuditoria.SENHA_USUARIO_REDEFINIDA,
+                "USUARIO",
+                usuarioSalvo.getId(),
+                "Senha do usuário \"" +
+                        usuarioSalvo.getNomeUsuario() +
+                        "\" redefinida por administrador"
+        );
+
+        return new MensagemResponse(
+                "Senha redefinida com sucesso."
+        );
+    }
+
     private UserEntity buscarUsuario(
             Long id
     ) {
@@ -343,6 +435,26 @@ public class UsuarioAdminController {
     ) {
     }
 
+    public record RedefinirSenhaRequest(
+
+            @NotBlank(
+                    message = "A nova senha é obrigatória"
+            )
+            @Size(
+                    min = 8,
+                    max = 72,
+                    message = "A senha deve possuir entre 8 e 72 caracteres"
+            )
+            String novaSenha,
+
+            @NotBlank(
+                    message = "A confirmação da senha é obrigatória"
+            )
+            String confirmarSenha
+
+    ) {
+    }
+
     public record UsuarioResponse(
 
             Long id,
@@ -352,6 +464,13 @@ public class UsuarioAdminController {
             String email,
 
             PerfilUsuario perfil
+
+    ) {
+    }
+
+    public record MensagemResponse(
+
+            String mensagem
 
     ) {
     }

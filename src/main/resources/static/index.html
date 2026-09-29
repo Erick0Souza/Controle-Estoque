@@ -1760,6 +1760,96 @@
 
 </main>
 
+<div
+        id="modal-redefinir-senha"
+        class="modal-overlay hidden"
+>
+    <div
+            class="modal-conteudo"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-redefinir-senha-titulo"
+    >
+
+        <div class="modal-cabecalho">
+
+            <div>
+                <h3 id="modal-redefinir-senha-titulo">
+                    Redefinir senha
+                </h3>
+
+                <p
+                        id="modal-redefinir-senha-usuario"
+                        class="modal-usuario"
+                ></p>
+            </div>
+
+            <button
+                    type="button"
+                    class="modal-fechar"
+                    onclick="fecharModalRedefinirSenhaUsuario()"
+                    aria-label="Fechar"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <label for="admin-nova-senha">
+            Nova senha
+        </label>
+
+        <input
+                type="password"
+                id="admin-nova-senha"
+                minlength="8"
+                maxlength="72"
+                autocomplete="new-password"
+                placeholder="Digite a nova senha"
+        >
+
+        <label for="admin-confirmar-nova-senha">
+            Confirmar nova senha
+        </label>
+
+        <input
+                type="password"
+                id="admin-confirmar-nova-senha"
+                minlength="8"
+                maxlength="72"
+                autocomplete="new-password"
+                placeholder="Digite novamente a nova senha"
+        >
+
+        <small class="campo-ajuda">
+            A senha deve possuir entre 8 e 72 caracteres.
+        </small>
+
+        <p id="admin-redefinir-senha-mensagem"></p>
+
+        <div class="modal-acoes">
+
+            <button
+                    type="button"
+                    class="botao-secundario"
+                    onclick="fecharModalRedefinirSenhaUsuario()"
+            >
+                Cancelar
+            </button>
+
+            <button
+                    type="button"
+                    id="admin-redefinir-senha-salvar"
+                    onclick="redefinirSenhaUsuarioAdmin()"
+            >
+                Redefinir senha
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
 <script src="/app.js"></script>
 
 </body>
