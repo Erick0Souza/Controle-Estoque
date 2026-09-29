@@ -2,35 +2,59 @@
 
 [![CI - Testes e Docker](https://github.com/Erick0Souza/Controle-Estoque/actions/workflows/ci.yml/badge.svg)](https://github.com/Erick0Souza/Controle-Estoque/actions/workflows/ci.yml)
 
-Sistema web para gerenciamento de estoque desenvolvido com Java e Spring Boot.
+Sistema web Full Stack para gerenciamento de estoque desenvolvido com **Java 17, Spring Boot, PostgreSQL, HTML, CSS e JavaScript**.
 
-O projeto permite cadastrar usuários, realizar autenticação com JWT, gerenciar produtos e categorias, registrar entradas e saídas de estoque e consultar o histórico de movimentações.
+O sistema permite gerenciar produtos, categorias, usuários e movimentações de estoque, além de possuir autenticação JWT, controle de acesso por perfis, auditoria, dashboard administrativo, relatórios, exportações e testes automatizados.
 
-O projeto também possui testes automatizados, documentação da API com Swagger, PostgreSQL, Docker e integração contínua com GitHub Actions.
+O projeto foi desenvolvido com foco em organização, segurança, regras de negócio e práticas utilizadas em aplicações reais.
 
 ---
 
 ## Funcionalidades
 
-- Cadastro de usuários
-- Login com JWT
-- Senhas protegidas com BCrypt
+- Cadastro e autenticação de usuários
+- Login utilizando JWT
+- Proteção de senhas com BCrypt
+- Perfis de acesso `ADMIN`, `OPERADOR` e `CONSULTA`
+- Controle de permissões por perfil
+- Proteção contra excesso de tentativas de login
 - Cadastro de produtos
 - Edição de produtos
 - Exclusão de produtos
-- Listagem de produtos
-- Associação de produtos a categorias
-- Controle de quantidade em estoque
+- SKU único
+- Imagem de produtos
+- Estoque mínimo
+- Alerta de estoque baixo
+- Busca e filtros de produtos
+- Ordenação
+- Paginação
+- Gerenciamento de categorias
 - Entrada de produtos
 - Saída de produtos
 - Validação de estoque insuficiente
 - Histórico de movimentações
+- Registro do usuário responsável pelas movimentações
+- Gerenciamento administrativo de usuários
+- Alteração de perfil de usuário
+- Redefinição de senha por administrador
+- Auditoria de ações
+- Dashboard administrativo
+- Relatórios de estoque
+- Relatórios de movimentações
+- Exportação CSV
+- Exportação XLSX
+- Exportação PDF
+- Backup do PostgreSQL
+- Backup de uploads
+- Recuperação de backups
 - Interface web integrada com a API
-- Documentação da API com Swagger
+- Swagger / OpenAPI
 - Testes automatizados
-- Banco PostgreSQL
-- Execução com Docker Compose
-- Pipeline de CI com GitHub Actions
+- PostgreSQL
+- H2 para testes
+- Docker
+- Docker Compose
+- GitHub Actions
 
 ---
 
@@ -39,9 +63,10 @@ O projeto também possui testes automatizados, documentação da API com Swagger
 ### Back-end
 
 - Java 17
-- Spring Boot
+- Spring Boot 3
 - Spring Web
 - Spring Data JPA
+- Hibernate
 - Spring Security
 - JWT
 - BCrypt
@@ -55,22 +80,31 @@ O projeto também possui testes automatizados, documentação da API com Swagger
 
 ### Front-end
 
-- HTML
-- CSS
+- HTML5
+- CSS3
 - JavaScript
 - Fetch API
 
+### Relatórios
+
+- CSV
+- Apache POI para arquivos XLSX
+- Apache PDFBox para arquivos PDF
+
 ### Testes
 
-- JUnit
+- JUnit 5
 - Mockito
 - MockMvc
 - Spring Boot Test
+- H2
 
 ### DevOps
 
 - Docker
 - Docker Compose
+- Git
+- GitHub
 - GitHub Actions
 
 ### Documentação
@@ -87,11 +121,15 @@ src
 ├── main
 │   ├── java
 │   │   └── com.erick.estoque
+│   │       ├── auditoria
 │   │       ├── categoria
 │   │       ├── config
+│   │       ├── dashboard
 │   │       ├── exception
+│   │       ├── exportacao
 │   │       ├── movimentacao
 │   │       ├── produto
+│   │       ├── relatorio
 │   │       ├── security
 │   │       └── Application.java
 │   │
@@ -101,34 +139,272 @@ src
 │       │   ├── app.js
 │       │   └── style.css
 │       │
-│       └── application.yml
+│       ├── application.yml
+│       ├── application-dev.yml
+│       └── application-prod.yml
 │
 └── test
     ├── java
     └── resources
+        └── application-test.yml
 ```
+
+A aplicação é dividida por domínio, facilitando manutenção e evolução do código.
 
 ---
 
-## Segurança
+# Segurança
 
-A aplicação utiliza autenticação baseada em JWT.
+A aplicação utiliza autenticação baseada em **JWT**.
 
-Após realizar o login, a API gera um token que deve ser enviado nas requisições protegidas através do cabeçalho:
+Após o login, o token deve ser enviado através do cabeçalho:
 
 ```text
 Authorization: Bearer SEU_TOKEN
 ```
 
-As senhas dos usuários não são armazenadas diretamente no banco de dados.
+O JWT possui expiração de aproximadamente:
 
-Antes de serem salvas, elas são processadas utilizando BCrypt.
+```text
+8 horas
+```
+
+A chave JWT não possui valor padrão no projeto.
+
+Ela deve obrigatoriamente ser informada através da variável:
+
+```text
+APP_JWT_SECRET
+```
+
+A chave deve possuir pelo menos:
+
+```text
+32 bytes
+```
 
 ---
 
-## Cadastro de usuário
+## Proteção de senhas
 
-É possível criar uma nova conta diretamente pela interface web ou através da API.
+As senhas nunca são armazenadas em texto puro.
+
+Elas são processadas utilizando:
+
+```text
+BCrypt
+```
+
+Por limitação e segurança do BCrypt, as senhas aceitas pelo sistema devem possuir entre:
+
+```text
+8 e 72 bytes
+```
+
+---
+
+## Proteção contra tentativas de login
+
+O sistema possui proteção contra tentativas repetidas de autenticação.
+
+Atualmente são utilizados limites para:
+
+```text
+Usuário + IP
+IP
+```
+
+Após várias tentativas inválidas, o login pode retornar:
+
+```http
+429 Too Many Requests
+```
+
+Mensagem:
+
+```text
+Muitas tentativas de login. Tente novamente em alguns minutos
+```
+
+A implementação atual utiliza uma janela de aproximadamente 5 minutos.
+
+---
+
+## Proteção contra descoberta de usuários
+
+Mesmo quando o email informado não existe, a aplicação realiza uma comparação BCrypt utilizando um hash fictício.
+
+Isso reduz diferenças de tempo de resposta entre:
+
+```text
+usuário existente
+usuário inexistente
+```
+
+O objetivo é dificultar técnicas de enumeração de usuários.
+
+---
+
+## Perfis de acesso
+
+A aplicação possui três perfis.
+
+### ADMIN
+
+Possui acesso completo ao sistema.
+
+Pode:
+
+- gerenciar produtos;
+- excluir produtos;
+- gerenciar categorias;
+- realizar movimentações;
+- gerenciar usuários;
+- alterar perfis;
+- redefinir senhas;
+- consultar auditoria;
+- visualizar dashboard;
+- utilizar relatórios;
+- realizar exportações.
+
+### OPERADOR
+
+Pode realizar operações do dia a dia do estoque.
+
+Pode:
+
+- consultar produtos;
+- cadastrar produtos;
+- editar produtos;
+- alterar imagens;
+- consultar categorias;
+- realizar entradas;
+- realizar saídas;
+- consultar movimentações.
+
+Não possui acesso às rotas administrativas.
+
+### CONSULTA
+
+Perfil destinado à consulta.
+
+Pode:
+
+- visualizar produtos;
+- visualizar categorias;
+- consultar movimentações.
+
+Não pode alterar dados do estoque.
+
+---
+
+# Ambientes da aplicação
+
+O projeto possui perfis separados.
+
+```text
+dev
+test
+prod
+```
+
+O perfil ativo pode ser configurado através da variável:
+
+```env
+SPRING_PROFILES_ACTIVE=dev
+```
+
+---
+
+## Ambiente DEV
+
+No perfil:
+
+```text
+dev
+```
+
+o projeto utiliza:
+
+- PostgreSQL;
+- atualização automática do schema com Hibernate;
+- Swagger habilitado;
+- cadastro público de usuários habilitado.
+
+---
+
+## Ambiente TEST
+
+Os testes utilizam:
+
+```text
+H2
+```
+
+Dessa forma, os testes automatizados não dependem do PostgreSQL instalado ou em execução.
+
+---
+
+## Ambiente PROD
+
+O perfil:
+
+```text
+prod
+```
+
+possui configurações mais restritivas.
+
+Entre elas:
+
+- `ddl-auto=validate`;
+- Swagger desabilitado;
+- OpenAPI desabilitado;
+- cadastro público desabilitado;
+- mensagens internas de erro ocultadas;
+- stack traces não retornados ao cliente;
+- credenciais obrigatórias através de variáveis de ambiente.
+
+---
+
+# Cabeçalhos de segurança
+
+A configuração do Spring Security inclui cabeçalhos adicionais de proteção.
+
+Entre eles:
+
+```text
+X-Content-Type-Options
+X-Frame-Options
+Referrer-Policy
+Content-Security-Policy
+Permissions-Policy
+Cache-Control
+```
+
+A aplicação também utiliza política de segurança de conteúdo para limitar recursos carregados pelo navegador.
+
+---
+
+# CORS
+
+As origens permitidas são configuradas através de:
+
+```env
+CORS_ALLOWED_ORIGINS
+```
+
+Exemplo local:
+
+```env
+CORS_ALLOWED_ORIGINS=http://localhost:8081,http://127.0.0.1:8081
+```
+
+Assim, as origens podem ser alteradas sem modificar o código da aplicação.
+
+---
+
+# Cadastro de usuário
 
 Endpoint:
 
@@ -140,14 +416,23 @@ Exemplo:
 
 ```json
 {
+  "nomeUsuario": "Erick",
   "email": "usuario@teste.com",
-  "senha": "123456"
+  "senha": "Senha123"
 }
 ```
 
+Novos usuários recebem inicialmente o perfil:
+
+```text
+CONSULTA
+```
+
+No ambiente `prod`, o cadastro público é desabilitado por padrão.
+
 ---
 
-## Login
+# Login
 
 Endpoint:
 
@@ -160,43 +445,40 @@ Exemplo:
 ```json
 {
   "email": "usuario@teste.com",
-  "senha": "123456"
+  "senha": "Senha123"
 }
 ```
 
-Resposta:
+Exemplo de resposta:
 
 ```json
 {
-  "token": "JWT_GERADO_PELA_API"
+  "token": "JWT_GERADO_PELA_API",
+  "nomeUsuario": "Erick",
+  "email": "usuario@teste.com",
+  "perfil": "CONSULTA"
 }
 ```
 
 ---
 
-## Usuário de demonstração
+# Usuário e dados de demonstração
 
-Para facilitar os testes do projeto, a aplicação cria um usuário de demonstração.
+O projeto atualmente possui um `DataInitializer` que cria dados iniciais para facilitar testes locais.
 
-```text
-Email: avaliador@teste.com
-Senha: 123456
-```
+Ele pode criar:
 
-Estas credenciais são destinadas apenas ao ambiente de demonstração.
+- usuário administrador de demonstração;
+- categorias;
+- produtos iniciais.
+
+> Antes de utilizar a aplicação em produção, o `DataInitializer` deve ser removido, desabilitado ou limitado somente ao perfil de desenvolvimento.
 
 ---
 
-## Principais endpoints
+# Produtos
 
-### Autenticação
-
-```text
-POST /auth/register
-POST /auth/login
-```
-
-### Produtos
+Principais endpoints:
 
 ```text
 GET    /produtos
@@ -206,18 +488,293 @@ PUT    /produtos/{id}
 DELETE /produtos/{id}
 ```
 
-### Categorias
+Também existem endpoints para imagens:
 
 ```text
-GET /categorias
+POST   /produtos/{id}/imagem
+DELETE /produtos/{id}/imagem
 ```
 
-### Movimentações
+Cada produto pode possuir:
+
+```text
+SKU
+Nome
+Preço
+Quantidade
+Estoque mínimo
+Categoria
+Descrição
+Imagem
+```
+
+---
+
+## Filtros de produtos
+
+A listagem suporta filtros como:
+
+```text
+nome
+sku
+categoriaId
+precoMin
+precoMax
+quantidadeMin
+quantidadeMax
+```
+
+Também são suportados:
+
+```text
+page
+size
+sort
+direction
+```
+
+---
+
+## Estoque baixo
+
+Um produto é considerado com estoque baixo quando:
+
+```text
+quantidade <= estoque mínimo
+```
+
+---
+
+# Categorias
+
+Principais endpoints:
+
+```text
+GET    /categorias
+POST   /categorias
+PUT    /categorias/{id}
+DELETE /categorias/{id}
+```
+
+Alterações de categorias são restritas ao perfil:
+
+```text
+ADMIN
+```
+
+---
+
+# Movimentações
+
+Endpoints:
 
 ```text
 POST /movimentacoes
 GET  /movimentacoes
 GET  /movimentacoes/produto/{produtoId}
+```
+
+Existem dois tipos:
+
+```text
+ENTRADA
+SAIDA
+```
+
+Uma entrada aumenta o estoque.
+
+Uma saída reduz o estoque.
+
+Caso seja solicitada uma quantidade maior do que a disponível, a operação é bloqueada.
+
+---
+
+# Administração de usuários
+
+Endpoints administrativos:
+
+```text
+GET /admin/usuarios
+GET /admin/usuarios/{id}
+
+PUT /admin/usuarios/{id}/perfil
+PUT /admin/usuarios/{id}/senha
+```
+
+O sistema possui regras adicionais, como:
+
+- impedir que o sistema fique sem administrador;
+- impedir que um administrador remova o próprio perfil administrativo;
+- criptografar novas senhas utilizando BCrypt;
+- registrar alterações na auditoria.
+
+---
+
+# Auditoria
+
+Endpoints:
+
+```text
+GET /admin/auditorias
+GET /admin/auditorias/{id}
+```
+
+Algumas ações registradas:
+
+```text
+PRODUTO_CRIADO
+PRODUTO_EDITADO
+PRODUTO_EXCLUIDO
+
+IMAGEM_PRODUTO_ADICIONADA
+IMAGEM_PRODUTO_REMOVIDA
+
+MOVIMENTACAO_ENTRADA
+MOVIMENTACAO_SAIDA
+
+PERFIL_USUARIO_ALTERADO
+SENHA_USUARIO_REDEFINIDA
+```
+
+Os registros podem armazenar:
+
+```text
+Data e hora
+Usuário
+Email
+Perfil
+Ação
+Entidade
+ID da entidade
+Descrição
+```
+
+A auditoria suporta filtros, paginação e ordenação.
+
+---
+
+# Dashboard
+
+Endpoint:
+
+```text
+GET /admin/dashboard
+```
+
+O dashboard apresenta indicadores como:
+
+- total de produtos;
+- total de categorias;
+- total de usuários;
+- total de movimentações;
+- total de entradas;
+- total de saídas;
+- produtos com estoque baixo;
+- quantidade total de unidades;
+- valor total do estoque;
+- atividades recentes.
+
+---
+
+# Relatórios
+
+## Relatório de estoque
+
+```text
+GET /admin/relatorios/estoque
+```
+
+É possível filtrar somente produtos com estoque baixo:
+
+```text
+GET /admin/relatorios/estoque?somenteEstoqueBaixo=true
+```
+
+O relatório apresenta informações como:
+
+```text
+SKU
+Produto
+Categoria
+Preço
+Quantidade
+Estoque mínimo
+Status
+Valor em estoque
+```
+
+---
+
+## Relatório de movimentações
+
+```text
+GET /admin/relatorios/movimentacoes
+```
+
+Filtros disponíveis:
+
+```text
+dataInicio
+dataFim
+tipo
+```
+
+Exemplo:
+
+```text
+GET /admin/relatorios/movimentacoes?tipo=ENTRADA
+```
+
+---
+
+# Exportações
+
+## CSV
+
+```text
+GET /admin/exportacoes/estoque/csv
+GET /admin/exportacoes/movimentacoes/csv
+```
+
+## Excel
+
+```text
+GET /admin/exportacoes/estoque/xlsx
+GET /admin/exportacoes/movimentacoes/xlsx
+```
+
+## PDF
+
+```text
+GET /admin/exportacoes/estoque/pdf
+GET /admin/exportacoes/movimentacoes/pdf
+```
+
+As exportações de movimentações aceitam filtros por período e tipo.
+
+---
+
+# Backup e recuperação
+
+O projeto possui scripts para backup e restauração.
+
+Entre eles:
+
+```text
+scripts/
+├── backup-database.ps1
+├── backup-uploads.ps1
+├── backup-completo.ps1
+├── restore-database.ps1
+├── restore-uploads.ps1
+└── restore-completo.ps1
+```
+
+Os backups podem incluir:
+
+```text
+PostgreSQL
+Uploads de imagens
 ```
 
 ---
@@ -226,7 +783,7 @@ GET  /movimentacoes/produto/{produtoId}
 
 ## Requisitos
 
-Para executar utilizando Docker, é necessário possuir:
+Para executar com Docker:
 
 - Git
 - Docker
@@ -250,29 +807,35 @@ cd Controle-Estoque
 
 ## 2. Configure as variáveis de ambiente
 
-O projeto possui o arquivo:
+O projeto possui:
 
 ```text
 .env.example
 ```
 
-Você pode utilizá-lo como referência para criar:
+Crie:
 
 ```text
 .env
 ```
 
-Exemplo:
+Exemplo atualizado:
 
 ```env
+SPRING_PROFILES_ACTIVE=dev
+
 POSTGRES_DB=estoque
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=troque_a_senha
-APP_JWT_SECRET=coloque_aqui_uma_chave_jwt_com_pelo_menos_32_caracteres
+POSTGRES_PASSWORD=troque-esta-senha
+
+APP_JWT_SECRET=gere-uma-chave-segura-com-pelo-menos-32-bytes
+
+CORS_ALLOWED_ORIGINS=http://localhost:8081,http://127.0.0.1:8081
+
 PORT=8081
 ```
 
-Não utilize senhas ou chaves reais no repositório.
+> Nunca envie o arquivo `.env`, senhas reais ou chaves JWT reais para o GitHub.
 
 ---
 
@@ -288,15 +851,21 @@ Confira os containers:
 docker compose ps
 ```
 
-A API ficará disponível em:
+A aplicação ficará disponível em:
 
 ```text
 http://localhost:8081
 ```
 
+Para finalizar:
+
+```bash
+docker compose down
+```
+
 ---
 
-## Interface web
+# Interface web
 
 Após iniciar o projeto, abra:
 
@@ -304,98 +873,170 @@ Após iniciar o projeto, abra:
 http://localhost:8081
 ```
 
-Pela interface é possível:
+A interface web permite utilizar as principais funcionalidades sem depender do Swagger.
 
-- criar uma conta;
-- realizar login;
-- visualizar produtos;
-- cadastrar produtos;
-- editar produtos;
-- excluir produtos;
-- registrar entradas;
-- registrar saídas;
-- acompanhar o histórico do estoque.
+Entre elas:
+
+- login;
+- cadastro;
+- produtos;
+- categorias;
+- imagens;
+- movimentações;
+- histórico;
+- usuários;
+- auditoria;
+- dashboard;
+- relatórios;
+- exportações.
+
+As funcionalidades disponíveis mudam de acordo com o perfil autenticado.
 
 ---
 
-## Swagger
+# Swagger
 
-A documentação interativa da API pode ser acessada em:
+No ambiente de desenvolvimento:
 
 ```text
 http://localhost:8081/swagger-ui/index.html
 ```
 
-Após realizar o login e obter o JWT:
+Após realizar o login:
 
-1. Clique em **Authorize**.
-2. Informe o token.
-3. Execute os endpoints protegidos.
+1. copie o JWT;
+2. clique em **Authorize**;
+3. informe o token;
+4. execute os endpoints protegidos.
+
+No perfil:
+
+```text
+prod
+```
+
+o Swagger e a documentação OpenAPI ficam desabilitados.
 
 ---
 
-## Executando os testes
+# Upload de arquivos
 
-Com Maven instalado:
+A aplicação possui limite de upload configurado.
+
+```text
+Arquivo máximo: 5 MB
+Requisição máxima: 6 MB
+```
+
+---
+
+# Testes automatizados
+
+Execute:
 
 ```bash
 mvn clean test
 ```
 
-Também é possível executar utilizando Docker:
+A suíte atual possui:
 
-```powershell
-docker run --rm -v "${PWD}:/app" -v maven-cache:/root/.m2 -w /app maven:3.9-eclipse-temurin-17 mvn test
+```text
+113 testes
+Failures: 0
+Errors: 0
 ```
 
-Os testes utilizam H2, evitando a necessidade de utilizar o PostgreSQL durante a execução dos testes automatizados.
+Os testes cobrem módulos como:
+
+- autenticação;
+- segurança;
+- permissões;
+- categorias;
+- produtos;
+- filtros;
+- paginação;
+- movimentações;
+- usuários;
+- auditoria;
+- dashboard;
+- relatórios;
+- exportações;
+- regras de negócio;
+- integração.
+
+Os testes utilizam o banco em memória:
+
+```text
+H2
+```
 
 ---
 
-## Integração contínua
+# Build
 
-O projeto utiliza GitHub Actions.
+Para gerar o `.jar`:
 
-A pipeline é executada automaticamente em pushes e pull requests para a branch `main`.
+```bash
+mvn clean package
+```
 
-O processo executa:
+O arquivo será criado dentro de:
+
+```text
+target/
+```
+
+A versão atual foi validada com:
+
+```text
+BUILD SUCCESS
+```
+
+---
+
+# Integração contínua
+
+O projeto utiliza:
+
+```text
+GitHub Actions
+```
+
+A pipeline é executada automaticamente em:
+
+```text
+push na main
+pull request para main
+execução manual
+```
+
+O fluxo atual é:
 
 ```text
 Push / Pull Request
+        ↓
+Configuração Java 17
+        ↓
+mvn clean test
         ↓
 Testes automatizados
         ↓
 Build da imagem Docker
         ↓
-Pipeline concluída
+Validação concluída
 ```
 
-Dessa forma, alterações que quebrem os testes ou impeçam a construção da imagem Docker podem ser identificadas automaticamente.
+O job de Docker utiliza:
+
+```text
+Docker Buildx
+```
+
+e valida se a imagem da aplicação consegue ser construída corretamente.
 
 ---
 
-## Imagens do projeto
-
-### Login e criação de conta
-
-![Tela de Login](img/login.png)
-
-### Sistema de controle de estoque
-
-![Sistema](img/sistema.png)
-
-### Swagger
-
-![Swagger](img/swagger.png)
-
-### GitHub Actions
-
-![GitHub Actions](img/actions.png)
----
-
-## Estrutura Docker
-
-O ambiente utiliza dois serviços principais:
+# Estrutura Docker
 
 ```text
 Docker Compose
@@ -407,45 +1048,158 @@ Docker Compose
     └── PostgreSQL
 ```
 
-A API aguarda o PostgreSQL ficar saudável antes da inicialização através do `healthcheck` configurado no Docker Compose.
+A API recebe informações do banco e configurações através de variáveis de ambiente.
+
+A variável JWT é obrigatória também na execução por Docker.
 
 ---
 
-## Tratamento de estoque
+# Tratamento de erros
 
-As movimentações são divididas em dois tipos:
+A aplicação possui tratamento global de exceções.
+
+Entre os casos tratados estão:
 
 ```text
-ENTRADA
-SAIDA
+Validação de dados
+JSON inválido
+Parâmetros ausentes
+Tipos inválidos
+Upload acima do limite
+Conflito de dados
+Erros internos
 ```
 
-Uma entrada aumenta a quantidade disponível do produto.
+As respostas seguem um formato padronizado contendo informações como:
 
-Uma saída reduz a quantidade disponível.
+```json
+{
+  "status": 400,
+  "mensagem": "Descrição do erro",
+  "timestamp": "..."
+}
+```
 
-Caso a quantidade solicitada seja superior ao estoque disponível, a operação é rejeitada.
+No ambiente de produção, informações internas e stack traces não são expostos ao usuário.
 
 ---
 
-## Objetivo do projeto
+# Imagens do projeto
 
-Este projeto foi desenvolvido com o objetivo de praticar e demonstrar conhecimentos em desenvolvimento Full Stack, incluindo:
+## Login e criação de conta
 
-- criação de APIs REST;
-- arquitetura em camadas;
-- persistência de dados;
-- autenticação;
+![Tela de Login](img/login.png)
+
+## Sistema de controle de estoque
+
+![Sistema](img/sistema.png)
+
+## Swagger
+
+![Swagger](img/swagger.png)
+
+## GitHub Actions
+
+![GitHub Actions](img/actions.png)
+
+Podem ser adicionadas posteriormente capturas de:
+
+```text
+Dashboard
+Relatórios
+Gerenciamento de usuários
+Auditoria
+Exportações
+```
+
+---
+
+# Objetivo do projeto
+
+Este projeto foi desenvolvido para praticar e demonstrar conhecimentos em desenvolvimento Full Stack, incluindo:
+
+- desenvolvimento de APIs REST;
+- Java;
+- Spring Boot;
+- Spring Security;
+- autenticação JWT;
+- controle de acesso;
 - segurança;
-- integração entre front-end e back-end;
-- banco de dados relacional;
+- persistência com JPA/Hibernate;
+- PostgreSQL;
+- validação de dados;
+- tratamento de erros;
+- integração front-end e back-end;
+- regras de negócio;
 - testes automatizados;
+- geração de relatórios;
+- exportação de arquivos;
 - containers;
 - integração contínua;
+- backup e recuperação;
+- organização de ambientes;
 - documentação de APIs.
 
 ---
 
-## Autor
+# Status do projeto
+
+```text
+Back-end                     ✅
+Front-end                    ✅
+PostgreSQL                   ✅
+Autenticação JWT             ✅
+Proteção BCrypt              ✅
+Proteção de login            ✅
+Perfis e permissões          ✅
+Produtos                     ✅
+Categorias                   ✅
+Movimentações                ✅
+Imagens                      ✅
+Estoque mínimo               ✅
+Filtros e paginação          ✅
+Usuários administrativos     ✅
+Auditoria                    ✅
+Dashboard                    ✅
+Relatórios                   ✅
+CSV / XLSX / PDF             ✅
+Backup e recuperação         ✅
+Testes automatizados         ✅
+Docker                       ✅
+GitHub Actions               ✅
+Perfis dev/test/prod         ✅
+Segurança de produção        ✅
+Deploy em nuvem              ⏳
+```
+
+---
+
+# Observação sobre produção
+
+A aplicação já possui configurações específicas para produção, porém o deploy em nuvem ainda não foi realizado.
+
+Antes de publicar em produção, é recomendado:
+
+```text
+Desabilitar dados de demonstração
+Utilizar credenciais próprias
+Gerar uma nova APP_JWT_SECRET forte
+Configurar CORS_ALLOWED_ORIGINS
+Configurar PostgreSQL de produção
+Ativar SPRING_PROFILES_ACTIVE=prod
+Executar backup inicial
+```
+
+---
+
+# Repositório
+
+```text
+https://github.com/Erick0Souza/Controle-Estoque
+```
+
+---
+
+# Autor
 
 **Erick Souza**
