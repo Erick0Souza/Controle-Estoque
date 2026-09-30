@@ -1245,6 +1245,17 @@ Ativar SPRING_PROFILES_ACTIVE=prod
 Executar backup inicial
 ```
 
+# Documentação
+
+Documentação complementar do projeto:
+
+- [Guia de instalação](docs/INSTALACAO.md)
+- [Funcionalidades](docs/FUNCIONALIDADES.md)
+- [Perfis e permissões](docs/PERFIS-E-PERMISSOES.md)
+- [Guia de testes](docs/TESTES.md)
+- [Demonstração do sistema](docs/DEMONSTRACAO.md)
+
+
 ---
 
 # Repositório
