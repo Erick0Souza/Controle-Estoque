@@ -22,6 +22,16 @@ const TAMANHO_MAXIMO_IMAGEM =
     5 * 1024 * 1024;
 
 
+const ABAS_SISTEMA = [
+    "dashboard",
+    "produtos",
+    "movimentacoes",
+    "relatorios",
+    "usuarios",
+    "auditoria"
+];
+
+
 function obterPerfilUsuario() {
     return (
         sessionStorage.getItem("perfil") ||
@@ -72,6 +82,173 @@ function podeMovimentarEstoque() {
 
     return perfil === "ADMIN"
         || perfil === "OPERADOR";
+}
+
+
+function podeAcessarAbaSistema(aba) {
+    if (
+        aba === "produtos" ||
+        aba === "movimentacoes"
+    ) {
+        return true;
+    }
+
+    return ehAdmin();
+}
+
+
+function configurarMenuSistema() {
+    ABAS_SISTEMA.forEach(
+        aba => {
+            const botao =
+                document.getElementById(
+                    "menu-" + aba
+                );
+
+            if (!botao) {
+                return;
+            }
+
+            if (
+                podeAcessarAbaSistema(
+                    aba
+                )
+            ) {
+                botao.classList.remove(
+                    "hidden"
+                );
+            } else {
+                botao.classList.add(
+                    "hidden"
+                );
+
+                botao.classList.remove(
+                    "menu-item-ativo"
+                );
+
+                botao.setAttribute(
+                    "aria-selected",
+                    "false"
+                );
+            }
+        }
+    );
+}
+
+
+function obterAbaInicialSistema() {
+    const abaSalva =
+        sessionStorage.getItem(
+            "abaSistema"
+        );
+
+    if (
+        abaSalva &&
+        ABAS_SISTEMA.includes(
+            abaSalva
+        ) &&
+        podeAcessarAbaSistema(
+            abaSalva
+        )
+    ) {
+        return abaSalva;
+    }
+
+    if (ehAdmin()) {
+        return "dashboard";
+    }
+
+    return "produtos";
+}
+
+
+function abrirAbaSistema(aba) {
+    let abaSelecionada =
+        aba;
+
+    if (
+        !ABAS_SISTEMA.includes(
+            abaSelecionada
+        ) ||
+        !podeAcessarAbaSistema(
+            abaSelecionada
+        )
+    ) {
+        abaSelecionada =
+            obterAbaInicialSistema();
+    }
+
+    document
+        .querySelectorAll(
+            ".aba-sistema"
+        )
+        .forEach(
+            painel => {
+                painel.classList.add(
+                    "hidden"
+                );
+            }
+        );
+
+    document
+        .querySelectorAll(
+            ".menu-item"
+        )
+        .forEach(
+            botao => {
+                botao.classList.remove(
+                    "menu-item-ativo"
+                );
+
+                botao.setAttribute(
+                    "aria-selected",
+                    "false"
+                );
+            }
+        );
+
+    const painelSelecionado =
+        document.getElementById(
+            "aba-" +
+            abaSelecionada
+        );
+
+    const botaoSelecionado =
+        document.getElementById(
+            "menu-" +
+            abaSelecionada
+        );
+
+    if (painelSelecionado) {
+        painelSelecionado
+            .classList
+            .remove("hidden");
+    }
+
+    if (botaoSelecionado) {
+        botaoSelecionado
+            .classList
+            .add(
+                "menu-item-ativo"
+            );
+
+        botaoSelecionado.setAttribute(
+            "aria-selected",
+            "true"
+        );
+    }
+
+    sessionStorage.setItem(
+        "abaSistema",
+        abaSelecionada
+    );
+}
+
+
+function abrirAbaInicialSistema() {
+    abrirAbaSistema(
+        obterAbaInicialSistema()
+    );
 }
 
 
@@ -261,6 +438,8 @@ function aplicarPermissoesInterface() {
                 .add("hidden");
         }
     }
+
+    configurarMenuSistema();
 }
 
 
@@ -622,6 +801,7 @@ function mostrarSistema() {
         .remove("hidden");
 
     aplicarPermissoesInterface();
+    abrirAbaInicialSistema();
 }
 
 
@@ -632,6 +812,7 @@ function logout() {
     sessionStorage.removeItem("email");
     sessionStorage.removeItem("nomeUsuario");
     sessionStorage.removeItem("perfil");
+    sessionStorage.removeItem("abaSistema");
 
     paginaAtualProdutos = 0;
     totalPaginasProdutos = 0;

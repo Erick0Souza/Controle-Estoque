@@ -234,1527 +234,1669 @@
 
         </div>
 
-        <section
-                id="admin-dashboard-section"
-                class="card hidden"
-        >
+        <div class="sistema-layout">
 
-            <div class="topo">
+            <aside
+                    class="menu-lateral"
+                    aria-label="Navegação principal do sistema"
+            >
 
-                <div>
-                    <h2>
-                        Dashboard
-                    </h2>
+                <div class="menu-lateral-cabecalho">
+                    <span class="menu-lateral-titulo">
+                        Navegação
+                    </span>
 
-                    <p class="subtitulo">
-                        Visão geral dos principais indicadores do estoque.
-                    </p>
+                    <small>
+                        Selecione uma área
+                    </small>
                 </div>
 
-                <button
-                        type="button"
-                        onclick="carregarDashboard()"
+                <nav
+                        class="menu-lateral-itens"
+                        aria-label="Áreas do sistema"
                 >
-                    Atualizar dashboard
-                </button>
 
-            </div>
+                    <button
+                            type="button"
+                            id="menu-dashboard"
+                            class="menu-item hidden"
+                            data-aba="dashboard"
+                            aria-controls="aba-dashboard"
+                            aria-selected="false"
+                            onclick="abrirAbaSistema('dashboard')"
+                    >
+                        Dashboard
+                    </button>
 
-            <p id="dashboard-mensagem"></p>
+                    <button
+                            type="button"
+                            id="menu-produtos"
+                            class="menu-item hidden"
+                            data-aba="produtos"
+                            aria-controls="aba-produtos"
+                            aria-selected="false"
+                            onclick="abrirAbaSistema('produtos')"
+                    >
+                        Produtos
+                    </button>
 
-            <div class="dashboard-grid">
+                    <button
+                            type="button"
+                            id="menu-movimentacoes"
+                            class="menu-item hidden"
+                            data-aba="movimentacoes"
+                            aria-controls="aba-movimentacoes"
+                            aria-selected="false"
+                            onclick="abrirAbaSistema('movimentacoes')"
+                    >
+                        Movimentações
+                    </button>
 
-                <div class="dashboard-card">
+                    <button
+                            type="button"
+                            id="menu-relatorios"
+                            class="menu-item hidden"
+                            data-aba="relatorios"
+                            aria-controls="aba-relatorios"
+                            aria-selected="false"
+                            onclick="abrirAbaSistema('relatorios')"
+                    >
+                        Relatórios
+                    </button>
+
+                    <button
+                            type="button"
+                            id="menu-usuarios"
+                            class="menu-item hidden"
+                            data-aba="usuarios"
+                            aria-controls="aba-usuarios"
+                            aria-selected="false"
+                            onclick="abrirAbaSistema('usuarios')"
+                    >
+                        Usuários
+                    </button>
+
+                    <button
+                            type="button"
+                            id="menu-auditoria"
+                            class="menu-item hidden"
+                            data-aba="auditoria"
+                            aria-controls="aba-auditoria"
+                            aria-selected="false"
+                            onclick="abrirAbaSistema('auditoria')"
+                    >
+                        Auditoria
+                    </button>
+
+                </nav>
+
+            </aside>
+
+            <div class="sistema-conteudo">
+
+                <div
+                        id="aba-dashboard"
+                        class="aba-sistema hidden"
+                        data-aba="dashboard"
+                >
+                    <section
+                            id="admin-dashboard-section"
+                            class="card hidden"
+                    >
+
+                        <div class="topo">
+
+                            <div>
+                                <h2>
+                                    Dashboard
+                                </h2>
+
+                                <p class="subtitulo">
+                                    Visão geral dos principais indicadores do estoque.
+                                </p>
+                            </div>
+
+                            <button
+                                    type="button"
+                                    onclick="carregarDashboard()"
+                            >
+                                Atualizar dashboard
+                            </button>
+
+                        </div>
+
+                        <p id="dashboard-mensagem"></p>
+
+                        <div class="dashboard-grid">
+
+                            <div class="dashboard-card">
                     <span class="dashboard-card-titulo">
                         Produtos
                     </span>
 
-                    <strong
-                            id="dashboard-total-produtos"
-                            class="dashboard-card-valor"
-                    >0</strong>
-                </div>
+                                <strong
+                                        id="dashboard-total-produtos"
+                                        class="dashboard-card-valor"
+                                >0</strong>
+                            </div>
 
-                <div class="dashboard-card">
+                            <div class="dashboard-card">
                     <span class="dashboard-card-titulo">
                         Unidades em estoque
                     </span>
 
-                    <strong
-                            id="dashboard-total-unidades"
-                            class="dashboard-card-valor"
-                    >0</strong>
-                </div>
+                                <strong
+                                        id="dashboard-total-unidades"
+                                        class="dashboard-card-valor"
+                                >0</strong>
+                            </div>
 
-                <div class="dashboard-card dashboard-card-alerta">
+                            <div class="dashboard-card dashboard-card-alerta">
                     <span class="dashboard-card-titulo">
                         Produtos com estoque baixo
                     </span>
 
-                    <strong
-                            id="dashboard-estoque-baixo"
-                            class="dashboard-card-valor"
-                    >0</strong>
-                </div>
+                                <strong
+                                        id="dashboard-estoque-baixo"
+                                        class="dashboard-card-valor"
+                                >0</strong>
+                            </div>
 
-                <div class="dashboard-card">
+                            <div class="dashboard-card">
                     <span class="dashboard-card-titulo">
                         Valor estimado do estoque
                     </span>
 
-                    <strong
-                            id="dashboard-valor-estoque"
-                            class="dashboard-card-valor dashboard-card-valor-menor"
-                    >R$ 0,00</strong>
-                </div>
+                                <strong
+                                        id="dashboard-valor-estoque"
+                                        class="dashboard-card-valor dashboard-card-valor-menor"
+                                >R$ 0,00</strong>
+                            </div>
 
-                <div class="dashboard-card">
+                            <div class="dashboard-card">
                     <span class="dashboard-card-titulo">
                         Categorias
                     </span>
 
-                    <strong
-                            id="dashboard-total-categorias"
-                            class="dashboard-card-valor"
-                    >0</strong>
-                </div>
+                                <strong
+                                        id="dashboard-total-categorias"
+                                        class="dashboard-card-valor"
+                                >0</strong>
+                            </div>
 
-                <div class="dashboard-card">
+                            <div class="dashboard-card">
                     <span class="dashboard-card-titulo">
                         Usuários
                     </span>
 
-                    <strong
-                            id="dashboard-total-usuarios"
-                            class="dashboard-card-valor"
-                    >0</strong>
-                </div>
+                                <strong
+                                        id="dashboard-total-usuarios"
+                                        class="dashboard-card-valor"
+                                >0</strong>
+                            </div>
 
-                <div class="dashboard-card">
+                            <div class="dashboard-card">
                     <span class="dashboard-card-titulo">
                         Movimentações
                     </span>
 
-                    <strong
-                            id="dashboard-total-movimentacoes"
-                            class="dashboard-card-valor"
-                    >0</strong>
-                </div>
+                                <strong
+                                        id="dashboard-total-movimentacoes"
+                                        class="dashboard-card-valor"
+                                >0</strong>
+                            </div>
 
-                <div class="dashboard-card dashboard-card-entrada">
+                            <div class="dashboard-card dashboard-card-entrada">
                     <span class="dashboard-card-titulo">
                         Entradas
                     </span>
 
-                    <strong
-                            id="dashboard-total-entradas"
-                            class="dashboard-card-valor"
-                    >0</strong>
-                </div>
+                                <strong
+                                        id="dashboard-total-entradas"
+                                        class="dashboard-card-valor"
+                                >0</strong>
+                            </div>
 
-                <div class="dashboard-card dashboard-card-saida">
+                            <div class="dashboard-card dashboard-card-saida">
                     <span class="dashboard-card-titulo">
                         Saídas
                     </span>
 
-                    <strong
-                            id="dashboard-total-saidas"
-                            class="dashboard-card-valor"
-                    >0</strong>
+                                <strong
+                                        id="dashboard-total-saidas"
+                                        class="dashboard-card-valor"
+                                >0</strong>
+                            </div>
+
+                        </div>
+
+                        <div class="dashboard-atividades">
+
+                            <h3>
+                                Atividades recentes
+                            </h3>
+
+                            <p class="subtitulo">
+                                Últimas ações registradas pela auditoria.
+                            </p>
+
+                            <div id="dashboard-atividades-lista">
+                                <p>
+                                    Carregando atividades...
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </section>
                 </div>
 
-            </div>
-
-            <div class="dashboard-atividades">
-
-                <h3>
-                    Atividades recentes
-                </h3>
-
-                <p class="subtitulo">
-                    Últimas ações registradas pela auditoria.
-                </p>
-
-                <div id="dashboard-atividades-lista">
-                    <p>
-                        Carregando atividades...
-                    </p>
-                </div>
-
-            </div>
-
-        </section>
-
-        <section
-                id="admin-relatorios-section"
-                class="card hidden"
-        >
-
-            <div class="topo">
-
-                <div>
-                    <h2>
-                        Relatórios
-                    </h2>
-
-                    <p class="subtitulo">
-                        Consulte indicadores detalhados do estoque e das movimentações.
-                    </p>
-                </div>
-
-                <button
-                        type="button"
-                        onclick="carregarRelatorios()"
+                <div
+                        id="aba-produtos"
+                        class="aba-sistema hidden"
+                        data-aba="produtos"
                 >
-                    Atualizar relatórios
-                </button>
+                    <section
+                            id="produto-form-section"
+                            class="card"
+                    >
 
-            </div>
+                        <h2 id="titulo-formulario">
+                            Novo Produto
+                        </h2>
 
-            <div class="relatorio-bloco">
+                        <input
+                                type="hidden"
+                                id="produtoIdEdicao"
+                        >
 
-                <div class="relatorio-cabecalho">
+                        <input
+                                type="hidden"
+                                id="imagemUrlAtual"
+                        >
 
-                    <div>
-                        <h3>
-                            Relatório de estoque
-                        </h3>
-
-                        <p class="subtitulo">
-                            Visão consolidada dos produtos, quantidades e valores em estoque.
-                        </p>
-                    </div>
-
-                </div>
-
-                <div class="filtros-relatorios">
-
-                    <div class="campo-filtro">
-
-                        <label for="relatorioSomenteEstoqueBaixo">
-                            Exibir
+                        <label for="sku">
+                            SKU
                         </label>
 
-                        <select id="relatorioSomenteEstoqueBaixo">
+                        <input
+                                type="text"
+                                id="sku"
+                                maxlength="50"
+                                placeholder="Ex: TEC-001"
+                                autocomplete="off"
+                        >
 
-                            <option value="false">
-                                Todos os produtos
+                        <small class="campo-ajuda">
+                            Código único do produto.
+                        </small>
+
+                        <label for="nome">
+                            Nome
+                        </label>
+
+                        <input
+                                type="text"
+                                id="nome"
+                                maxlength="150"
+                                placeholder="Nome do produto"
+                        >
+
+                        <label for="preco">
+                            Preço
+                        </label>
+
+                        <input
+                                type="number"
+                                id="preco"
+                                step="0.01"
+                                min="0"
+                                placeholder="Ex: 199.90"
+                        >
+
+                        <label for="quantidade">
+                            Quantidade atual
+                        </label>
+
+                        <input
+                                type="number"
+                                id="quantidade"
+                                min="0"
+                                placeholder="Ex: 10"
+                        >
+
+                        <label for="estoqueMinimo">
+                            Estoque mínimo
+                        </label>
+
+                        <input
+                                type="number"
+                                id="estoqueMinimo"
+                                min="0"
+                                placeholder="Ex: 5"
+                        >
+
+                        <small class="campo-ajuda">
+                            O sistema exibirá um alerta quando a quantidade estiver abaixo deste valor.
+                        </small>
+
+                        <label for="categoriaId">
+                            Categoria
+                        </label>
+
+                        <select id="categoriaId">
+                            <option value="">
+                                Selecione uma categoria
                             </option>
-
-                            <option value="true">
-                                Somente estoque baixo
-                            </option>
-
                         </select>
 
-                    </div>
+                        <label for="descricao">
+                            Descrição
+                        </label>
 
+                        <textarea
+                                id="descricao"
+                                maxlength="500"
+                                placeholder="Descrição do produto"
+                        ></textarea>
+
+                        <label for="imagemProduto">
+                            Imagem do produto
+                        </label>
+
+                        <input
+                                type="file"
+                                id="imagemProduto"
+                                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                        >
+
+                        <small id="imagem-ajuda">
+                            Formatos permitidos: JPG, PNG e WEBP. Tamanho máximo: 5 MB.
+                        </small>
+
+                        <div
+                                id="previewImagemContainer"
+                                class="hidden"
+                        >
+
+                            <p>
+                                Pré-visualização:
+                            </p>
+
+                            <img
+                                    id="previewImagemProduto"
+                                    src=""
+                                    alt="Pré-visualização"
+                            >
+
+                            <button
+                                    type="button"
+                                    id="botaoRemoverImagem"
+                                    class="hidden"
+                                    onclick="removerImagemProduto()"
+                            >
+                                Remover imagem
+                            </button>
+
+                        </div>
+
+                        <div class="acoes-formulario">
+
+                            <button
+                                    type="button"
+                                    id="botaoSalvar"
+                                    onclick="salvarProduto()"
+                            >
+                                Cadastrar
+                            </button>
+
+                            <button
+                                    type="button"
+                                    id="botaoCancelar"
+                                    class="hidden"
+                                    onclick="cancelarEdicao()"
+                            >
+                                Cancelar edição
+                            </button>
+
+                        </div>
+
+                        <p id="produto-mensagem"></p>
+
+                    </section>
+
+                    <section class="card">
+
+                        <div class="topo">
+
+                            <div>
+                                <h2>
+                                    Produtos cadastrados
+                                </h2>
+
+                                <p class="subtitulo">
+                                    Pesquise, filtre e organize seu estoque.
+                                </p>
+                            </div>
+
+                            <button
+                                    type="button"
+                                    onclick="carregarProdutos()"
+                            >
+                                Atualizar
+                            </button>
+
+                        </div>
+
+                        <div class="filtros-produtos">
+
+                            <div class="campo-filtro">
+                                <label for="filtroNome">
+                                    Nome
+                                </label>
+
+                                <input
+                                        type="text"
+                                        id="filtroNome"
+                                        placeholder="Ex: Teclado"
+                                >
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="filtroSku">
+                                    SKU
+                                </label>
+
+                                <input
+                                        type="text"
+                                        id="filtroSku"
+                                        placeholder="Ex: TEC"
+                                >
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="filtroCategoriaId">
+                                    Categoria
+                                </label>
+
+                                <select id="filtroCategoriaId">
+                                    <option value="">
+                                        Todas
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="filtroPrecoMin">
+                                    Preço mínimo
+                                </label>
+
+                                <input
+                                        type="number"
+                                        id="filtroPrecoMin"
+                                        min="0"
+                                        step="0.01"
+                                >
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="filtroPrecoMax">
+                                    Preço máximo
+                                </label>
+
+                                <input
+                                        type="number"
+                                        id="filtroPrecoMax"
+                                        min="0"
+                                        step="0.01"
+                                >
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="filtroQuantidadeMin">
+                                    Estoque mínimo da busca
+                                </label>
+
+                                <input
+                                        type="number"
+                                        id="filtroQuantidadeMin"
+                                        min="0"
+                                >
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="filtroQuantidadeMax">
+                                    Estoque máximo da busca
+                                </label>
+
+                                <input
+                                        type="number"
+                                        id="filtroQuantidadeMax"
+                                        min="0"
+                                >
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="ordenacaoProduto">
+                                    Ordenar por
+                                </label>
+
+                                <select id="ordenacaoProduto">
+                                    <option value="nome">Nome</option>
+                                    <option value="sku">SKU</option>
+                                    <option value="preco">Preço</option>
+                                    <option value="quantidade">Quantidade</option>
+                                    <option value="estoqueMinimo">Estoque mínimo</option>
+                                    <option value="categoria">Categoria</option>
+                                    <option value="id">ID</option>
+                                </select>
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="direcaoProduto">
+                                    Direção
+                                </label>
+
+                                <select id="direcaoProduto">
+                                    <option value="asc">Crescente</option>
+                                    <option value="desc">Decrescente</option>
+                                </select>
+                            </div>
+
+                            <div class="campo-filtro">
+                                <label for="tamanhoPaginaProduto">
+                                    Por página
+                                </label>
+
+                                <select id="tamanhoPaginaProduto">
+                                    <option value="6">6</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="acoes-filtros">
+
+                            <button
+                                    type="button"
+                                    onclick="aplicarFiltrosProdutos()"
+                            >
+                                Buscar
+                            </button>
+
+                            <button
+                                    type="button"
+                                    class="botao-limpar"
+                                    onclick="limparFiltrosProdutos()"
+                            >
+                                Limpar filtros
+                            </button>
+
+                        </div>
+
+                        <p id="filtro-mensagem"></p>
+
+                        <div id="produtos">
+                            <p>Carregando produtos...</p>
+                        </div>
+
+                        <div class="paginacao">
+
+                            <button
+                                    type="button"
+                                    id="botaoPaginaAnterior"
+                                    onclick="mudarPaginaProdutos(-1)"
+                            >
+                                ← Anterior
+                            </button>
+
+                            <span id="paginaInfo">
+                    Página 1
+                </span>
+
+                            <button
+                                    type="button"
+                                    id="botaoPaginaProxima"
+                                    onclick="mudarPaginaProdutos(1)"
+                            >
+                                Próxima →
+                            </button>
+
+                        </div>
+
+                    </section>
                 </div>
 
-                <div class="acoes-filtros">
-
-                    <button
-                            type="button"
-                            onclick="carregarRelatorioEstoque()"
+                <div
+                        id="aba-movimentacoes"
+                        class="aba-sistema hidden"
+                        data-aba="movimentacoes"
+                >
+                    <section
+                            id="movimentacao-section"
+                            class="card"
                     >
-                        Gerar relatório de estoque
-                    </button>
 
-                    <button
-                            type="button"
-                            class="botao-secundario"
-                            onclick="exportarRelatorioEstoque('csv')"
-                    >
-                        Exportar CSV
-                    </button>
+                        <h2>
+                            Movimentação de Estoque
+                        </h2>
 
-                    <button
-                            type="button"
-                            class="botao-secundario"
-                            onclick="exportarRelatorioEstoque('xlsx')"
-                    >
-                        Exportar Excel
-                    </button>
-
-                    <button
-                            type="button"
-                            class="botao-secundario"
-                            onclick="exportarRelatorioEstoque('pdf')"
-                    >
-                        Exportar PDF
-                    </button>
-
-                </div>
-
-                <p id="relatorio-estoque-mensagem"></p>
-
-                <div class="relatorio-resumo-grid">
-
-                    <div class="relatorio-resumo-card">
-                        <span>Produtos</span>
-                        <strong id="relatorio-estoque-total-produtos">0</strong>
-                    </div>
-
-                    <div class="relatorio-resumo-card">
-                        <span>Unidades</span>
-                        <strong id="relatorio-estoque-total-unidades">0</strong>
-                    </div>
-
-                    <div class="relatorio-resumo-card relatorio-resumo-alerta">
-                        <span>Estoque baixo</span>
-                        <strong id="relatorio-estoque-baixo">0</strong>
-                    </div>
-
-                    <div class="relatorio-resumo-card">
-                        <span>Valor total</span>
-                        <strong
-                                id="relatorio-estoque-valor-total"
-                                class="relatorio-valor-menor"
-                        >R$ 0,00</strong>
-                    </div>
-
-                </div>
-
-                <div class="relatorio-tabela-container">
-
-                    <table class="relatorio-tabela">
-
-                        <thead>
-                        <tr>
-                            <th>SKU</th>
-                            <th>Produto</th>
-                            <th>Categoria</th>
-                            <th>Preço</th>
-                            <th>Quantidade</th>
-                            <th>Mínimo</th>
-                            <th>Status</th>
-                            <th>Valor em estoque</th>
-                        </tr>
-                        </thead>
-
-                        <tbody id="relatorio-estoque-lista">
-                        <tr>
-                            <td colspan="8">
-                                Carregando relatório...
-                            </td>
-                        </tr>
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-            <div class="relatorio-bloco relatorio-bloco-separado">
-
-                <div class="relatorio-cabecalho">
-
-                    <div>
-                        <h3>
-                            Relatório de movimentações
-                        </h3>
-
-                        <p class="subtitulo">
-                            Consulte entradas e saídas por período e tipo de movimentação.
+                        <p class="usuario-movimentacao-info">
+                            A movimentação será registrada em nome de
+                            <strong id="responsavel-movimentacao-atual"></strong>.
                         </p>
-                    </div>
 
-                </div>
-
-                <div class="filtros-relatorios">
-
-                    <div class="campo-filtro">
-
-                        <label for="relatorioMovimentacaoDataInicio">
-                            Data inicial
+                        <label for="movimentacaoProdutoId">
+                            Produto
                         </label>
 
-                        <input
-                                type="datetime-local"
-                                id="relatorioMovimentacaoDataInicio"
-                        >
+                        <select id="movimentacaoProdutoId">
+                            <option value="">
+                                Selecione um produto
+                            </option>
+                        </select>
 
-                    </div>
-
-                    <div class="campo-filtro">
-
-                        <label for="relatorioMovimentacaoDataFim">
-                            Data final
-                        </label>
-
-                        <input
-                                type="datetime-local"
-                                id="relatorioMovimentacaoDataFim"
-                        >
-
-                    </div>
-
-                    <div class="campo-filtro">
-
-                        <label for="relatorioMovimentacaoTipo">
+                        <label for="movimentacaoTipo">
                             Tipo
                         </label>
 
-                        <select id="relatorioMovimentacaoTipo">
-
-                            <option value="">
-                                Todas
-                            </option>
-
-                            <option value="ENTRADA">
-                                ENTRADA
-                            </option>
-
-                            <option value="SAIDA">
-                                SAÍDA
-                            </option>
-
+                        <select id="movimentacaoTipo">
+                            <option value="">Selecione o tipo</option>
+                            <option value="ENTRADA">Entrada</option>
+                            <option value="SAIDA">Saída</option>
                         </select>
 
-                    </div>
+                        <label for="movimentacaoQuantidade">
+                            Quantidade
+                        </label>
 
+                        <input
+                                type="number"
+                                id="movimentacaoQuantidade"
+                                min="1"
+                        >
+
+                        <label for="movimentacaoObservacao">
+                            Observação
+                        </label>
+
+                        <textarea
+                                id="movimentacaoObservacao"
+                                maxlength="500"
+                                placeholder="Ex: Compra, venda, ajuste..."
+                        ></textarea>
+
+                        <button
+                                type="button"
+                                onclick="registrarMovimentacao()"
+                        >
+                            Registrar movimentação
+                        </button>
+
+                        <p id="movimentacao-mensagem"></p>
+
+                    </section>
+
+                    <section class="card">
+
+                        <div class="topo">
+
+                            <div>
+                                <h2>
+                                    Histórico de Movimentações
+                                </h2>
+
+                                <p class="subtitulo">
+                                    Consulte quem realizou cada entrada ou saída.
+                                </p>
+                            </div>
+
+                            <button
+                                    type="button"
+                                    onclick="carregarHistorico()"
+                            >
+                                Atualizar histórico
+                            </button>
+
+                        </div>
+
+                        <div id="historico-movimentacoes">
+                            <p>Nenhuma movimentação registrada.</p>
+                        </div>
+
+                    </section>
                 </div>
 
-                <div class="acoes-filtros">
-
-                    <button
-                            type="button"
-                            onclick="carregarRelatorioMovimentacoes()"
-                    >
-                        Buscar movimentações
-                    </button>
-
-                    <button
-                            type="button"
-                            class="botao-limpar"
-                            onclick="limparFiltrosRelatorioMovimentacoes()"
-                    >
-                        Limpar filtros
-                    </button>
-
-                    <button
-                            type="button"
-                            class="botao-secundario"
-                            onclick="exportarRelatorioMovimentacoes('csv')"
-                    >
-                        Exportar CSV
-                    </button>
-
-                    <button
-                            type="button"
-                            class="botao-secundario"
-                            onclick="exportarRelatorioMovimentacoes('xlsx')"
-                    >
-                        Exportar Excel
-                    </button>
-
-                    <button
-                            type="button"
-                            class="botao-secundario"
-                            onclick="exportarRelatorioMovimentacoes('pdf')"
-                    >
-                        Exportar PDF
-                    </button>
-
-                </div>
-
-                <p id="relatorio-movimentacoes-mensagem"></p>
-
-                <div class="relatorio-resumo-grid relatorio-resumo-grid-movimentacoes">
-
-                    <div class="relatorio-resumo-card">
-                        <span>Movimentações</span>
-                        <strong id="relatorio-total-movimentacoes">0</strong>
-                    </div>
-
-                    <div class="relatorio-resumo-card relatorio-resumo-entrada">
-                        <span>Entradas</span>
-                        <strong id="relatorio-total-entradas">0</strong>
-                    </div>
-
-                    <div class="relatorio-resumo-card relatorio-resumo-saida">
-                        <span>Saídas</span>
-                        <strong id="relatorio-total-saidas">0</strong>
-                    </div>
-
-                    <div class="relatorio-resumo-card relatorio-resumo-entrada">
-                        <span>Unidades de entrada</span>
-                        <strong id="relatorio-unidades-entrada">0</strong>
-                    </div>
-
-                    <div class="relatorio-resumo-card relatorio-resumo-saida">
-                        <span>Unidades de saída</span>
-                        <strong id="relatorio-unidades-saida">0</strong>
-                    </div>
-
-                </div>
-
-                <div class="relatorio-tabela-container">
-
-                    <table class="relatorio-tabela">
-
-                        <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Produto</th>
-                            <th>Tipo</th>
-                            <th>Quantidade</th>
-                            <th>Responsável</th>
-                            <th>Perfil</th>
-                            <th>Observação</th>
-                        </tr>
-                        </thead>
-
-                        <tbody id="relatorio-movimentacoes-lista">
-                        <tr>
-                            <td colspan="7">
-                                Carregando relatório...
-                            </td>
-                        </tr>
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-        </section>
-        <section
-                id="admin-usuarios-section"
-                class="card hidden"
-        >
-
-            <div class="topo">
-
-                <div>
-                    <h2>
-                        Gerenciar Usuários
-                    </h2>
-
-                    <p class="subtitulo">
-                        Área exclusiva para administradores.
-                    </p>
-                </div>
-
-                <button
-                        type="button"
-                        onclick="carregarUsuariosAdmin()"
+                <div
+                        id="aba-relatorios"
+                        class="aba-sistema hidden"
+                        data-aba="relatorios"
                 >
-                    Atualizar usuários
-                </button>
+                    <section
+                            id="admin-relatorios-section"
+                            class="card hidden"
+                    >
 
-            </div>
+                        <div class="topo">
 
-            <div class="admin-legenda">
+                            <div>
+                                <h2>
+                                    Relatórios
+                                </h2>
 
-                <div>
-                    <strong>ADMIN</strong>
+                                <p class="subtitulo">
+                                    Consulte indicadores detalhados do estoque e das movimentações.
+                                </p>
+                            </div>
 
-                    <span>
+                            <button
+                                    type="button"
+                                    onclick="carregarRelatorios()"
+                            >
+                                Atualizar relatórios
+                            </button>
+
+                        </div>
+
+                        <div class="relatorio-bloco">
+
+                            <div class="relatorio-cabecalho">
+
+                                <div>
+                                    <h3>
+                                        Relatório de estoque
+                                    </h3>
+
+                                    <p class="subtitulo">
+                                        Visão consolidada dos produtos, quantidades e valores em estoque.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div class="filtros-relatorios">
+
+                                <div class="campo-filtro">
+
+                                    <label for="relatorioSomenteEstoqueBaixo">
+                                        Exibir
+                                    </label>
+
+                                    <select id="relatorioSomenteEstoqueBaixo">
+
+                                        <option value="false">
+                                            Todos os produtos
+                                        </option>
+
+                                        <option value="true">
+                                            Somente estoque baixo
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                            <div class="acoes-filtros">
+
+                                <button
+                                        type="button"
+                                        onclick="carregarRelatorioEstoque()"
+                                >
+                                    Gerar relatório de estoque
+                                </button>
+
+                                <button
+                                        type="button"
+                                        class="botao-secundario"
+                                        onclick="exportarRelatorioEstoque('csv')"
+                                >
+                                    Exportar CSV
+                                </button>
+
+                                <button
+                                        type="button"
+                                        class="botao-secundario"
+                                        onclick="exportarRelatorioEstoque('xlsx')"
+                                >
+                                    Exportar Excel
+                                </button>
+
+                                <button
+                                        type="button"
+                                        class="botao-secundario"
+                                        onclick="exportarRelatorioEstoque('pdf')"
+                                >
+                                    Exportar PDF
+                                </button>
+
+                            </div>
+
+                            <p id="relatorio-estoque-mensagem"></p>
+
+                            <div class="relatorio-resumo-grid">
+
+                                <div class="relatorio-resumo-card">
+                                    <span>Produtos</span>
+                                    <strong id="relatorio-estoque-total-produtos">0</strong>
+                                </div>
+
+                                <div class="relatorio-resumo-card">
+                                    <span>Unidades</span>
+                                    <strong id="relatorio-estoque-total-unidades">0</strong>
+                                </div>
+
+                                <div class="relatorio-resumo-card relatorio-resumo-alerta">
+                                    <span>Estoque baixo</span>
+                                    <strong id="relatorio-estoque-baixo">0</strong>
+                                </div>
+
+                                <div class="relatorio-resumo-card">
+                                    <span>Valor total</span>
+                                    <strong
+                                            id="relatorio-estoque-valor-total"
+                                            class="relatorio-valor-menor"
+                                    >R$ 0,00</strong>
+                                </div>
+
+                            </div>
+
+                            <div class="relatorio-tabela-container">
+
+                                <table class="relatorio-tabela">
+
+                                    <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Produto</th>
+                                        <th>Categoria</th>
+                                        <th>Preço</th>
+                                        <th>Quantidade</th>
+                                        <th>Mínimo</th>
+                                        <th>Status</th>
+                                        <th>Valor em estoque</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody id="relatorio-estoque-lista">
+                                    <tr>
+                                        <td colspan="8">
+                                            Carregando relatório...
+                                        </td>
+                                    </tr>
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                        <div class="relatorio-bloco relatorio-bloco-separado">
+
+                            <div class="relatorio-cabecalho">
+
+                                <div>
+                                    <h3>
+                                        Relatório de movimentações
+                                    </h3>
+
+                                    <p class="subtitulo">
+                                        Consulte entradas e saídas por período e tipo de movimentação.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div class="filtros-relatorios">
+
+                                <div class="campo-filtro">
+
+                                    <label for="relatorioMovimentacaoDataInicio">
+                                        Data inicial
+                                    </label>
+
+                                    <input
+                                            type="datetime-local"
+                                            id="relatorioMovimentacaoDataInicio"
+                                    >
+
+                                </div>
+
+                                <div class="campo-filtro">
+
+                                    <label for="relatorioMovimentacaoDataFim">
+                                        Data final
+                                    </label>
+
+                                    <input
+                                            type="datetime-local"
+                                            id="relatorioMovimentacaoDataFim"
+                                    >
+
+                                </div>
+
+                                <div class="campo-filtro">
+
+                                    <label for="relatorioMovimentacaoTipo">
+                                        Tipo
+                                    </label>
+
+                                    <select id="relatorioMovimentacaoTipo">
+
+                                        <option value="">
+                                            Todas
+                                        </option>
+
+                                        <option value="ENTRADA">
+                                            ENTRADA
+                                        </option>
+
+                                        <option value="SAIDA">
+                                            SAÍDA
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                            <div class="acoes-filtros">
+
+                                <button
+                                        type="button"
+                                        onclick="carregarRelatorioMovimentacoes()"
+                                >
+                                    Buscar movimentações
+                                </button>
+
+                                <button
+                                        type="button"
+                                        class="botao-limpar"
+                                        onclick="limparFiltrosRelatorioMovimentacoes()"
+                                >
+                                    Limpar filtros
+                                </button>
+
+                                <button
+                                        type="button"
+                                        class="botao-secundario"
+                                        onclick="exportarRelatorioMovimentacoes('csv')"
+                                >
+                                    Exportar CSV
+                                </button>
+
+                                <button
+                                        type="button"
+                                        class="botao-secundario"
+                                        onclick="exportarRelatorioMovimentacoes('xlsx')"
+                                >
+                                    Exportar Excel
+                                </button>
+
+                                <button
+                                        type="button"
+                                        class="botao-secundario"
+                                        onclick="exportarRelatorioMovimentacoes('pdf')"
+                                >
+                                    Exportar PDF
+                                </button>
+
+                            </div>
+
+                            <p id="relatorio-movimentacoes-mensagem"></p>
+
+                            <div class="relatorio-resumo-grid relatorio-resumo-grid-movimentacoes">
+
+                                <div class="relatorio-resumo-card">
+                                    <span>Movimentações</span>
+                                    <strong id="relatorio-total-movimentacoes">0</strong>
+                                </div>
+
+                                <div class="relatorio-resumo-card relatorio-resumo-entrada">
+                                    <span>Entradas</span>
+                                    <strong id="relatorio-total-entradas">0</strong>
+                                </div>
+
+                                <div class="relatorio-resumo-card relatorio-resumo-saida">
+                                    <span>Saídas</span>
+                                    <strong id="relatorio-total-saidas">0</strong>
+                                </div>
+
+                                <div class="relatorio-resumo-card relatorio-resumo-entrada">
+                                    <span>Unidades de entrada</span>
+                                    <strong id="relatorio-unidades-entrada">0</strong>
+                                </div>
+
+                                <div class="relatorio-resumo-card relatorio-resumo-saida">
+                                    <span>Unidades de saída</span>
+                                    <strong id="relatorio-unidades-saida">0</strong>
+                                </div>
+
+                            </div>
+
+                            <div class="relatorio-tabela-container">
+
+                                <table class="relatorio-tabela">
+
+                                    <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Produto</th>
+                                        <th>Tipo</th>
+                                        <th>Quantidade</th>
+                                        <th>Responsável</th>
+                                        <th>Perfil</th>
+                                        <th>Observação</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody id="relatorio-movimentacoes-lista">
+                                    <tr>
+                                        <td colspan="7">
+                                            Carregando relatório...
+                                        </td>
+                                    </tr>
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+                </div>
+
+                <div
+                        id="aba-usuarios"
+                        class="aba-sistema hidden"
+                        data-aba="usuarios"
+                >
+                    <section
+                            id="admin-usuarios-section"
+                            class="card hidden"
+                    >
+
+                        <div class="topo">
+
+                            <div>
+                                <h2>
+                                    Gerenciar Usuários
+                                </h2>
+
+                                <p class="subtitulo">
+                                    Área exclusiva para administradores.
+                                </p>
+                            </div>
+
+                            <button
+                                    type="button"
+                                    onclick="carregarUsuariosAdmin()"
+                            >
+                                Atualizar usuários
+                            </button>
+
+                        </div>
+
+                        <div class="admin-legenda">
+
+                            <div>
+                                <strong>ADMIN</strong>
+
+                                <span>
                         Controle completo do sistema.
                     </span>
-                </div>
+                            </div>
 
-                <div>
-                    <strong>OPERADOR</strong>
+                            <div>
+                                <strong>OPERADOR</strong>
 
-                    <span>
+                                <span>
                         Cadastra, edita e movimenta estoque.
                     </span>
-                </div>
+                            </div>
 
-                <div>
-                    <strong>CONSULTA</strong>
+                            <div>
+                                <strong>CONSULTA</strong>
 
-                    <span>
+                                <span>
                         Apenas visualiza produtos e histórico.
                     </span>
-                </div>
+                            </div>
 
-            </div>
+                        </div>
 
-            <div class="filtros-usuarios">
+                        <div class="filtros-usuarios">
 
-                <div class="campo-filtro">
+                            <div class="campo-filtro">
 
-                    <label for="buscaUsuario">
-                        Pesquisar
-                    </label>
+                                <label for="buscaUsuario">
+                                    Pesquisar
+                                </label>
 
-                    <input
-                            type="text"
-                            id="buscaUsuario"
-                            placeholder="Nome ou email"
-                    >
+                                <input
+                                        type="text"
+                                        id="buscaUsuario"
+                                        placeholder="Nome ou email"
+                                >
 
-                </div>
+                            </div>
 
-                <div class="campo-filtro">
+                            <div class="campo-filtro">
 
-                    <label for="filtroPerfilUsuario">
-                        Perfil
-                    </label>
+                                <label for="filtroPerfilUsuario">
+                                    Perfil
+                                </label>
 
-                    <select id="filtroPerfilUsuario">
+                                <select id="filtroPerfilUsuario">
 
-                        <option value="">
-                            Todos
-                        </option>
+                                    <option value="">
+                                        Todos
+                                    </option>
 
-                        <option value="ADMIN">
-                            ADMIN
-                        </option>
+                                    <option value="ADMIN">
+                                        ADMIN
+                                    </option>
 
-                        <option value="OPERADOR">
-                            OPERADOR
-                        </option>
+                                    <option value="OPERADOR">
+                                        OPERADOR
+                                    </option>
 
-                        <option value="CONSULTA">
-                            CONSULTA
-                        </option>
+                                    <option value="CONSULTA">
+                                        CONSULTA
+                                    </option>
 
-                    </select>
+                                </select>
 
-                </div>
+                            </div>
 
-                <div class="campo-filtro">
+                            <div class="campo-filtro">
 
-                    <label for="ordenacaoUsuario">
-                        Ordenar por
-                    </label>
+                                <label for="ordenacaoUsuario">
+                                    Ordenar por
+                                </label>
 
-                    <select id="ordenacaoUsuario">
+                                <select id="ordenacaoUsuario">
 
-                        <option value="nomeUsuario">
-                            Nome
-                        </option>
+                                    <option value="nomeUsuario">
+                                        Nome
+                                    </option>
 
-                        <option value="email">
-                            Email
-                        </option>
+                                    <option value="email">
+                                        Email
+                                    </option>
 
-                        <option value="perfil">
-                            Perfil
-                        </option>
+                                    <option value="perfil">
+                                        Perfil
+                                    </option>
 
-                        <option value="id">
-                            ID
-                        </option>
+                                    <option value="id">
+                                        ID
+                                    </option>
 
-                    </select>
+                                </select>
 
-                </div>
+                            </div>
 
-                <div class="campo-filtro">
+                            <div class="campo-filtro">
 
-                    <label for="direcaoUsuario">
-                        Direção
-                    </label>
+                                <label for="direcaoUsuario">
+                                    Direção
+                                </label>
 
-                    <select id="direcaoUsuario">
+                                <select id="direcaoUsuario">
 
-                        <option value="asc">
-                            Crescente
-                        </option>
+                                    <option value="asc">
+                                        Crescente
+                                    </option>
 
-                        <option value="desc">
-                            Decrescente
-                        </option>
+                                    <option value="desc">
+                                        Decrescente
+                                    </option>
 
-                    </select>
+                                </select>
 
-                </div>
+                            </div>
 
-                <div class="campo-filtro">
+                            <div class="campo-filtro">
 
-                    <label for="tamanhoPaginaUsuario">
-                        Por página
-                    </label>
+                                <label for="tamanhoPaginaUsuario">
+                                    Por página
+                                </label>
 
-                    <select id="tamanhoPaginaUsuario">
+                                <select id="tamanhoPaginaUsuario">
 
-                        <option value="6">
-                            6
-                        </option>
+                                    <option value="6">
+                                        6
+                                    </option>
 
-                        <option
-                                value="10"
-                                selected
-                        >
-                            10
-                        </option>
+                                    <option
+                                            value="10"
+                                            selected
+                                    >
+                                        10
+                                    </option>
 
-                        <option value="20">
-                            20
-                        </option>
+                                    <option value="20">
+                                        20
+                                    </option>
 
-                        <option value="50">
-                            50
-                        </option>
+                                    <option value="50">
+                                        50
+                                    </option>
 
-                    </select>
+                                </select>
 
-                </div>
+                            </div>
 
-            </div>
+                        </div>
 
-            <div class="acoes-filtros">
+                        <div class="acoes-filtros">
 
-                <button
-                        type="button"
-                        onclick="aplicarFiltrosUsuarios()"
-                >
-                    Buscar
-                </button>
+                            <button
+                                    type="button"
+                                    onclick="aplicarFiltrosUsuarios()"
+                            >
+                                Buscar
+                            </button>
 
-                <button
-                        type="button"
-                        class="botao-limpar"
-                        onclick="limparFiltrosUsuarios()"
-                >
-                    Limpar filtros
-                </button>
+                            <button
+                                    type="button"
+                                    class="botao-limpar"
+                                    onclick="limparFiltrosUsuarios()"
+                            >
+                                Limpar filtros
+                            </button>
 
-            </div>
+                        </div>
 
-            <p id="admin-usuarios-mensagem"></p>
+                        <p id="admin-usuarios-mensagem"></p>
 
-            <div
-                    id="admin-usuarios-contador"
-                    class="admin-contador"
-            ></div>
+                        <div
+                                id="admin-usuarios-contador"
+                                class="admin-contador"
+                        ></div>
 
-            <div id="admin-usuarios-lista">
+                        <div id="admin-usuarios-lista">
 
-                <p>
-                    Carregando usuários...
-                </p>
+                            <p>
+                                Carregando usuários...
+                            </p>
 
-            </div>
+                        </div>
 
-            <div class="paginacao">
+                        <div class="paginacao">
 
-                <button
-                        type="button"
-                        id="admin-pagina-anterior"
-                        onclick="mudarPaginaUsuarios(-1)"
-                >
-                    ← Anterior
-                </button>
+                            <button
+                                    type="button"
+                                    id="admin-pagina-anterior"
+                                    onclick="mudarPaginaUsuarios(-1)"
+                            >
+                                ← Anterior
+                            </button>
 
-                <span id="admin-pagina-info">
+                            <span id="admin-pagina-info">
                     Página 1
                 </span>
 
-                <button
-                        type="button"
-                        id="admin-pagina-proxima"
-                        onclick="mudarPaginaUsuarios(1)"
-                >
-                    Próxima →
-                </button>
+                            <button
+                                    type="button"
+                                    id="admin-pagina-proxima"
+                                    onclick="mudarPaginaUsuarios(1)"
+                            >
+                                Próxima →
+                            </button>
 
-            </div>
+                        </div>
 
-        </section>
-
-        <section
-                id="admin-auditoria-section"
-                class="card hidden"
-        >
-
-            <div class="topo">
-
-                <div>
-                    <h2>
-                        Auditoria do Sistema
-                    </h2>
-
-                    <p class="subtitulo">
-                        Consulte as ações registradas no sistema.
-                    </p>
+                    </section>
                 </div>
 
-                <button
-                        type="button"
-                        onclick="carregarAuditorias()"
+                <div
+                        id="aba-auditoria"
+                        class="aba-sistema hidden"
+                        data-aba="auditoria"
                 >
-                    Atualizar auditoria
-                </button>
-
-            </div>
-
-            <div class="filtros-auditoria">
-
-                <div class="campo-filtro">
-
-                    <label for="auditoriaUsuario">
-                        Usuário
-                    </label>
-
-                    <input
-                            type="text"
-                            id="auditoriaUsuario"
-                            placeholder="Nome ou email"
+                    <section
+                            id="admin-auditoria-section"
+                            class="card hidden"
                     >
 
-                </div>
+                        <div class="topo">
 
-                <div class="campo-filtro">
+                            <div>
+                                <h2>
+                                    Auditoria do Sistema
+                                </h2>
 
-                    <label for="auditoriaPerfil">
-                        Perfil
-                    </label>
+                                <p class="subtitulo">
+                                    Consulte as ações registradas no sistema.
+                                </p>
+                            </div>
 
-                    <select id="auditoriaPerfil">
+                            <button
+                                    type="button"
+                                    onclick="carregarAuditorias()"
+                            >
+                                Atualizar auditoria
+                            </button>
 
-                        <option value="">
-                            Todos
-                        </option>
+                        </div>
 
-                        <option value="ADMIN">
-                            ADMIN
-                        </option>
+                        <div class="filtros-auditoria">
 
-                        <option value="OPERADOR">
-                            OPERADOR
-                        </option>
+                            <div class="campo-filtro">
 
-                        <option value="CONSULTA">
-                            CONSULTA
-                        </option>
+                                <label for="auditoriaUsuario">
+                                    Usuário
+                                </label>
 
-                    </select>
+                                <input
+                                        type="text"
+                                        id="auditoriaUsuario"
+                                        placeholder="Nome ou email"
+                                >
 
-                </div>
+                            </div>
 
-                <div class="campo-filtro">
+                            <div class="campo-filtro">
 
-                    <label for="auditoriaAcao">
-                        Ação
-                    </label>
+                                <label for="auditoriaPerfil">
+                                    Perfil
+                                </label>
 
-                    <select id="auditoriaAcao">
+                                <select id="auditoriaPerfil">
 
-                        <option value="">
-                            Todas
-                        </option>
+                                    <option value="">
+                                        Todos
+                                    </option>
 
-                        <option value="PRODUTO_CRIADO">
-                            Produto criado
-                        </option>
+                                    <option value="ADMIN">
+                                        ADMIN
+                                    </option>
 
-                        <option value="PRODUTO_EDITADO">
-                            Produto editado
-                        </option>
+                                    <option value="OPERADOR">
+                                        OPERADOR
+                                    </option>
 
-                        <option value="PRODUTO_EXCLUIDO">
-                            Produto excluído
-                        </option>
+                                    <option value="CONSULTA">
+                                        CONSULTA
+                                    </option>
 
-                        <option value="IMAGEM_PRODUTO_ADICIONADA">
-                            Imagem de produto adicionada
-                        </option>
+                                </select>
 
-                        <option value="IMAGEM_PRODUTO_REMOVIDA">
-                            Imagem de produto removida
-                        </option>
+                            </div>
 
-                        <option value="MOVIMENTACAO_ENTRADA">
-                            Movimentação de entrada
-                        </option>
+                            <div class="campo-filtro">
 
-                        <option value="MOVIMENTACAO_SAIDA">
-                            Movimentação de saída
-                        </option>
+                                <label for="auditoriaAcao">
+                                    Ação
+                                </label>
 
-                        <option value="PERFIL_USUARIO_ALTERADO">
-                            Perfil de usuário alterado
-                        </option>
+                                <select id="auditoriaAcao">
 
-                    </select>
+                                    <option value="">
+                                        Todas
+                                    </option>
 
-                </div>
+                                    <option value="PRODUTO_CRIADO">
+                                        Produto criado
+                                    </option>
 
-                <div class="campo-filtro">
+                                    <option value="PRODUTO_EDITADO">
+                                        Produto editado
+                                    </option>
 
-                    <label for="auditoriaEntidade">
-                        Entidade
-                    </label>
+                                    <option value="PRODUTO_EXCLUIDO">
+                                        Produto excluído
+                                    </option>
 
-                    <select id="auditoriaEntidade">
+                                    <option value="IMAGEM_PRODUTO_ADICIONADA">
+                                        Imagem de produto adicionada
+                                    </option>
 
-                        <option value="">
-                            Todas
-                        </option>
+                                    <option value="IMAGEM_PRODUTO_REMOVIDA">
+                                        Imagem de produto removida
+                                    </option>
 
-                        <option value="PRODUTO">
-                            PRODUTO
-                        </option>
+                                    <option value="MOVIMENTACAO_ENTRADA">
+                                        Movimentação de entrada
+                                    </option>
 
-                        <option value="MOVIMENTACAO">
-                            MOVIMENTACAO
-                        </option>
+                                    <option value="MOVIMENTACAO_SAIDA">
+                                        Movimentação de saída
+                                    </option>
 
-                        <option value="USUARIO">
-                            USUARIO
-                        </option>
+                                    <option value="PERFIL_USUARIO_ALTERADO">
+                                        Perfil de usuário alterado
+                                    </option>
 
-                    </select>
+                                </select>
 
-                </div>
+                            </div>
 
-                <div class="campo-filtro">
+                            <div class="campo-filtro">
 
-                    <label for="auditoriaDataInicio">
-                        Data inicial
-                    </label>
+                                <label for="auditoriaEntidade">
+                                    Entidade
+                                </label>
 
-                    <input
-                            type="datetime-local"
-                            id="auditoriaDataInicio"
-                    >
+                                <select id="auditoriaEntidade">
 
-                </div>
+                                    <option value="">
+                                        Todas
+                                    </option>
 
-                <div class="campo-filtro">
+                                    <option value="PRODUTO">
+                                        PRODUTO
+                                    </option>
 
-                    <label for="auditoriaDataFim">
-                        Data final
-                    </label>
+                                    <option value="MOVIMENTACAO">
+                                        MOVIMENTACAO
+                                    </option>
 
-                    <input
-                            type="datetime-local"
-                            id="auditoriaDataFim"
-                    >
+                                    <option value="USUARIO">
+                                        USUARIO
+                                    </option>
 
-                </div>
+                                </select>
 
-                <div class="campo-filtro">
+                            </div>
 
-                    <label for="ordenacaoAuditoria">
-                        Ordenar por
-                    </label>
+                            <div class="campo-filtro">
 
-                    <select id="ordenacaoAuditoria">
+                                <label for="auditoriaDataInicio">
+                                    Data inicial
+                                </label>
 
-                        <option value="dataHora">
-                            Data e hora
-                        </option>
+                                <input
+                                        type="datetime-local"
+                                        id="auditoriaDataInicio"
+                                >
 
-                        <option value="usuarioNome">
-                            Usuário
-                        </option>
+                            </div>
 
-                        <option value="usuarioEmail">
-                            Email
-                        </option>
+                            <div class="campo-filtro">
 
-                        <option value="usuarioPerfil">
-                            Perfil
-                        </option>
+                                <label for="auditoriaDataFim">
+                                    Data final
+                                </label>
 
-                        <option value="acao">
-                            Ação
-                        </option>
+                                <input
+                                        type="datetime-local"
+                                        id="auditoriaDataFim"
+                                >
 
-                        <option value="entidade">
-                            Entidade
-                        </option>
+                            </div>
 
-                        <option value="entidadeId">
-                            ID da entidade
-                        </option>
+                            <div class="campo-filtro">
 
-                        <option value="id">
-                            ID da auditoria
-                        </option>
+                                <label for="ordenacaoAuditoria">
+                                    Ordenar por
+                                </label>
 
-                    </select>
+                                <select id="ordenacaoAuditoria">
 
-                </div>
+                                    <option value="dataHora">
+                                        Data e hora
+                                    </option>
 
-                <div class="campo-filtro">
+                                    <option value="usuarioNome">
+                                        Usuário
+                                    </option>
 
-                    <label for="direcaoAuditoria">
-                        Direção
-                    </label>
+                                    <option value="usuarioEmail">
+                                        Email
+                                    </option>
 
-                    <select id="direcaoAuditoria">
+                                    <option value="usuarioPerfil">
+                                        Perfil
+                                    </option>
 
-                        <option value="desc">
-                            Mais recentes
-                        </option>
+                                    <option value="acao">
+                                        Ação
+                                    </option>
 
-                        <option value="asc">
-                            Mais antigos
-                        </option>
+                                    <option value="entidade">
+                                        Entidade
+                                    </option>
 
-                    </select>
+                                    <option value="entidadeId">
+                                        ID da entidade
+                                    </option>
 
-                </div>
+                                    <option value="id">
+                                        ID da auditoria
+                                    </option>
 
-                <div class="campo-filtro">
+                                </select>
 
-                    <label for="tamanhoPaginaAuditoria">
-                        Por página
-                    </label>
+                            </div>
 
-                    <select id="tamanhoPaginaAuditoria">
+                            <div class="campo-filtro">
 
-                        <option value="10">
-                            10
-                        </option>
+                                <label for="direcaoAuditoria">
+                                    Direção
+                                </label>
 
-                        <option
-                                value="20"
-                                selected
-                        >
-                            20
-                        </option>
+                                <select id="direcaoAuditoria">
 
-                        <option value="50">
-                            50
-                        </option>
+                                    <option value="desc">
+                                        Mais recentes
+                                    </option>
 
-                        <option value="100">
-                            100
-                        </option>
+                                    <option value="asc">
+                                        Mais antigos
+                                    </option>
 
-                    </select>
+                                </select>
 
-                </div>
+                            </div>
 
-            </div>
+                            <div class="campo-filtro">
 
-            <div class="acoes-filtros">
+                                <label for="tamanhoPaginaAuditoria">
+                                    Por página
+                                </label>
 
-                <button
-                        type="button"
-                        onclick="aplicarFiltrosAuditoria()"
-                >
-                    Buscar
-                </button>
+                                <select id="tamanhoPaginaAuditoria">
 
-                <button
-                        type="button"
-                        class="botao-limpar"
-                        onclick="limparFiltrosAuditoria()"
-                >
-                    Limpar filtros
-                </button>
+                                    <option value="10">
+                                        10
+                                    </option>
 
-            </div>
+                                    <option
+                                            value="20"
+                                            selected
+                                    >
+                                        20
+                                    </option>
 
-            <p id="auditoria-mensagem"></p>
+                                    <option value="50">
+                                        50
+                                    </option>
 
-            <div
-                    id="auditoria-contador"
-                    class="admin-contador"
-            ></div>
+                                    <option value="100">
+                                        100
+                                    </option>
 
-            <div id="auditoria-lista">
+                                </select>
 
-                <p>
-                    Carregando auditoria...
-                </p>
+                            </div>
 
-            </div>
+                        </div>
 
-            <div class="paginacao">
+                        <div class="acoes-filtros">
 
-                <button
-                        type="button"
-                        id="auditoria-pagina-anterior"
-                        onclick="mudarPaginaAuditoria(-1)"
-                >
-                    ← Anterior
-                </button>
+                            <button
+                                    type="button"
+                                    onclick="aplicarFiltrosAuditoria()"
+                            >
+                                Buscar
+                            </button>
 
-                <span id="auditoria-pagina-info">
+                            <button
+                                    type="button"
+                                    class="botao-limpar"
+                                    onclick="limparFiltrosAuditoria()"
+                            >
+                                Limpar filtros
+                            </button>
+
+                        </div>
+
+                        <p id="auditoria-mensagem"></p>
+
+                        <div
+                                id="auditoria-contador"
+                                class="admin-contador"
+                        ></div>
+
+                        <div id="auditoria-lista">
+
+                            <p>
+                                Carregando auditoria...
+                            </p>
+
+                        </div>
+
+                        <div class="paginacao">
+
+                            <button
+                                    type="button"
+                                    id="auditoria-pagina-anterior"
+                                    onclick="mudarPaginaAuditoria(-1)"
+                            >
+                                ← Anterior
+                            </button>
+
+                            <span id="auditoria-pagina-info">
                     Página 1
                 </span>
 
-                <button
-                        type="button"
-                        id="auditoria-pagina-proxima"
-                        onclick="mudarPaginaAuditoria(1)"
-                >
-                    Próxima →
-                </button>
+                            <button
+                                    type="button"
+                                    id="auditoria-pagina-proxima"
+                                    onclick="mudarPaginaAuditoria(1)"
+                            >
+                                Próxima →
+                            </button>
 
-            </div>
+                        </div>
 
-        </section>
-
-        <section
-                id="produto-form-section"
-                class="card"
-        >
-
-            <h2 id="titulo-formulario">
-                Novo Produto
-            </h2>
-
-            <input
-                    type="hidden"
-                    id="produtoIdEdicao"
-            >
-
-            <input
-                    type="hidden"
-                    id="imagemUrlAtual"
-            >
-
-            <label for="sku">
-                SKU
-            </label>
-
-            <input
-                    type="text"
-                    id="sku"
-                    maxlength="50"
-                    placeholder="Ex: TEC-001"
-                    autocomplete="off"
-            >
-
-            <small class="campo-ajuda">
-                Código único do produto.
-            </small>
-
-            <label for="nome">
-                Nome
-            </label>
-
-            <input
-                    type="text"
-                    id="nome"
-                    maxlength="150"
-                    placeholder="Nome do produto"
-            >
-
-            <label for="preco">
-                Preço
-            </label>
-
-            <input
-                    type="number"
-                    id="preco"
-                    step="0.01"
-                    min="0"
-                    placeholder="Ex: 199.90"
-            >
-
-            <label for="quantidade">
-                Quantidade atual
-            </label>
-
-            <input
-                    type="number"
-                    id="quantidade"
-                    min="0"
-                    placeholder="Ex: 10"
-            >
-
-            <label for="estoqueMinimo">
-                Estoque mínimo
-            </label>
-
-            <input
-                    type="number"
-                    id="estoqueMinimo"
-                    min="0"
-                    placeholder="Ex: 5"
-            >
-
-            <small class="campo-ajuda">
-                O sistema exibirá um alerta quando a quantidade estiver abaixo deste valor.
-            </small>
-
-            <label for="categoriaId">
-                Categoria
-            </label>
-
-            <select id="categoriaId">
-                <option value="">
-                    Selecione uma categoria
-                </option>
-            </select>
-
-            <label for="descricao">
-                Descrição
-            </label>
-
-            <textarea
-                    id="descricao"
-                    maxlength="500"
-                    placeholder="Descrição do produto"
-            ></textarea>
-
-            <label for="imagemProduto">
-                Imagem do produto
-            </label>
-
-            <input
-                    type="file"
-                    id="imagemProduto"
-                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-            >
-
-            <small id="imagem-ajuda">
-                Formatos permitidos: JPG, PNG e WEBP. Tamanho máximo: 5 MB.
-            </small>
-
-            <div
-                    id="previewImagemContainer"
-                    class="hidden"
-            >
-
-                <p>
-                    Pré-visualização:
-                </p>
-
-                <img
-                        id="previewImagemProduto"
-                        src=""
-                        alt="Pré-visualização"
-                >
-
-                <button
-                        type="button"
-                        id="botaoRemoverImagem"
-                        class="hidden"
-                        onclick="removerImagemProduto()"
-                >
-                    Remover imagem
-                </button>
-
-            </div>
-
-            <div class="acoes-formulario">
-
-                <button
-                        type="button"
-                        id="botaoSalvar"
-                        onclick="salvarProduto()"
-                >
-                    Cadastrar
-                </button>
-
-                <button
-                        type="button"
-                        id="botaoCancelar"
-                        class="hidden"
-                        onclick="cancelarEdicao()"
-                >
-                    Cancelar edição
-                </button>
-
-            </div>
-
-            <p id="produto-mensagem"></p>
-
-        </section>
-
-        <section class="card">
-
-            <div class="topo">
-
-                <div>
-                    <h2>
-                        Produtos cadastrados
-                    </h2>
-
-                    <p class="subtitulo">
-                        Pesquise, filtre e organize seu estoque.
-                    </p>
-                </div>
-
-                <button
-                        type="button"
-                        onclick="carregarProdutos()"
-                >
-                    Atualizar
-                </button>
-
-            </div>
-
-            <div class="filtros-produtos">
-
-                <div class="campo-filtro">
-                    <label for="filtroNome">
-                        Nome
-                    </label>
-
-                    <input
-                            type="text"
-                            id="filtroNome"
-                            placeholder="Ex: Teclado"
-                    >
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="filtroSku">
-                        SKU
-                    </label>
-
-                    <input
-                            type="text"
-                            id="filtroSku"
-                            placeholder="Ex: TEC"
-                    >
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="filtroCategoriaId">
-                        Categoria
-                    </label>
-
-                    <select id="filtroCategoriaId">
-                        <option value="">
-                            Todas
-                        </option>
-                    </select>
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="filtroPrecoMin">
-                        Preço mínimo
-                    </label>
-
-                    <input
-                            type="number"
-                            id="filtroPrecoMin"
-                            min="0"
-                            step="0.01"
-                    >
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="filtroPrecoMax">
-                        Preço máximo
-                    </label>
-
-                    <input
-                            type="number"
-                            id="filtroPrecoMax"
-                            min="0"
-                            step="0.01"
-                    >
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="filtroQuantidadeMin">
-                        Estoque mínimo da busca
-                    </label>
-
-                    <input
-                            type="number"
-                            id="filtroQuantidadeMin"
-                            min="0"
-                    >
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="filtroQuantidadeMax">
-                        Estoque máximo da busca
-                    </label>
-
-                    <input
-                            type="number"
-                            id="filtroQuantidadeMax"
-                            min="0"
-                    >
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="ordenacaoProduto">
-                        Ordenar por
-                    </label>
-
-                    <select id="ordenacaoProduto">
-                        <option value="nome">Nome</option>
-                        <option value="sku">SKU</option>
-                        <option value="preco">Preço</option>
-                        <option value="quantidade">Quantidade</option>
-                        <option value="estoqueMinimo">Estoque mínimo</option>
-                        <option value="categoria">Categoria</option>
-                        <option value="id">ID</option>
-                    </select>
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="direcaoProduto">
-                        Direção
-                    </label>
-
-                    <select id="direcaoProduto">
-                        <option value="asc">Crescente</option>
-                        <option value="desc">Decrescente</option>
-                    </select>
-                </div>
-
-                <div class="campo-filtro">
-                    <label for="tamanhoPaginaProduto">
-                        Por página
-                    </label>
-
-                    <select id="tamanhoPaginaProduto">
-                        <option value="6">6</option>
-                        <option value="10" selected>10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                    </select>
+                    </section>
                 </div>
 
             </div>
 
-            <div class="acoes-filtros">
+        </div>
 
-                <button
-                        type="button"
-                        onclick="aplicarFiltrosProdutos()"
-                >
-                    Buscar
-                </button>
-
-                <button
-                        type="button"
-                        class="botao-limpar"
-                        onclick="limparFiltrosProdutos()"
-                >
-                    Limpar filtros
-                </button>
-
-            </div>
-
-            <p id="filtro-mensagem"></p>
-
-            <div id="produtos">
-                <p>Carregando produtos...</p>
-            </div>
-
-            <div class="paginacao">
-
-                <button
-                        type="button"
-                        id="botaoPaginaAnterior"
-                        onclick="mudarPaginaProdutos(-1)"
-                >
-                    ← Anterior
-                </button>
-
-                <span id="paginaInfo">
-                    Página 1
-                </span>
-
-                <button
-                        type="button"
-                        id="botaoPaginaProxima"
-                        onclick="mudarPaginaProdutos(1)"
-                >
-                    Próxima →
-                </button>
-
-            </div>
-
-        </section>
-
-        <section
-                id="movimentacao-section"
-                class="card"
-        >
-
-            <h2>
-                Movimentação de Estoque
-            </h2>
-
-            <p class="usuario-movimentacao-info">
-                A movimentação será registrada em nome de
-                <strong id="responsavel-movimentacao-atual"></strong>.
-            </p>
-
-            <label for="movimentacaoProdutoId">
-                Produto
-            </label>
-
-            <select id="movimentacaoProdutoId">
-                <option value="">
-                    Selecione um produto
-                </option>
-            </select>
-
-            <label for="movimentacaoTipo">
-                Tipo
-            </label>
-
-            <select id="movimentacaoTipo">
-                <option value="">Selecione o tipo</option>
-                <option value="ENTRADA">Entrada</option>
-                <option value="SAIDA">Saída</option>
-            </select>
-
-            <label for="movimentacaoQuantidade">
-                Quantidade
-            </label>
-
-            <input
-                    type="number"
-                    id="movimentacaoQuantidade"
-                    min="1"
-            >
-
-            <label for="movimentacaoObservacao">
-                Observação
-            </label>
-
-            <textarea
-                    id="movimentacaoObservacao"
-                    maxlength="500"
-                    placeholder="Ex: Compra, venda, ajuste..."
-            ></textarea>
-
-            <button
-                    type="button"
-                    onclick="registrarMovimentacao()"
-            >
-                Registrar movimentação
-            </button>
-
-            <p id="movimentacao-mensagem"></p>
-
-        </section>
-
-        <section class="card">
-
-            <div class="topo">
-
-                <div>
-                    <h2>
-                        Histórico de Movimentações
-                    </h2>
-
-                    <p class="subtitulo">
-                        Consulte quem realizou cada entrada ou saída.
-                    </p>
-                </div>
-
-                <button
-                        type="button"
-                        onclick="carregarHistorico()"
-                >
-                    Atualizar histórico
-                </button>
-
-            </div>
-
-            <div id="historico-movimentacoes">
-                <p>Nenhuma movimentação registrada.</p>
-            </div>
-
-        </section>
 
     </section>
 
